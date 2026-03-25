@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [idea, setIdea] = useState("");
   const [story, setStory] = useState("");
   const [loading, setLoading] = useState(false);
+  const [placeholder, setPlaceholder] = useState("Drop a story idea...");
 
-  const randomPlaceholder = useMemo(() => {
+  useEffect(() => {
     const placeholders = [
       "Drop a story idea...",
       "What do you want to experience?",
@@ -19,7 +20,15 @@ export default function Home() {
       "Throw me an idea..."
     ];
 
-    return placeholders[Math.floor(Math.random() * placeholders.length)];
+    const lastPlaceholder = localStorage.getItem("ombu-placeholder");
+    let nextPlaceholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+
+    while (placeholders.length > 1 && nextPlaceholder === lastPlaceholder) {
+      nextPlaceholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+    }
+
+    localStorage.setItem("ombu-placeholder", nextPlaceholder);
+    setPlaceholder(nextPlaceholder);
   }, []);
 
   const generateStory = async () => {
@@ -56,7 +65,7 @@ export default function Home() {
       <h1>0mbu</h1>
 
       <textarea
-        placeholder={randomPlaceholder}
+        placeholder={placeholder}
         value={idea}
         onChange={(e) => setIdea(e.target.value)}
         style={{
