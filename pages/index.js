@@ -1,5 +1,5 @@
 import StoryControls from "../components/StoryControls";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Home() {
   const [messages, setMessages] = useState([]);
@@ -8,14 +8,14 @@ export default function Home() {
 
   const sendMessage = async (customInput) => {
     const text = customInput || input;
-    if (!text.trim()) return;
+    if (!text.trim() || loading) return;
 
-    const newMessages = [
+    const updatedMessages = [
       ...messages,
       { role: "user", content: text }
     ];
 
-    setMessages(newMessages);
+    setMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
@@ -25,19 +25,27 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ idea: text })
+        body: JSON.stringify({
+          messages: updatedMessages
+        })
       });
 
       const data = await res.json();
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.story || "Error." }
+        {
+          role: "assistant",
+          content: data.story || data.error || "Something went wrong."
+        }
       ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Something went wrong." }
+        {
+          role: "assistant",
+          content: "Something went wrong."
+        }
       ]);
     }
 
@@ -45,15 +53,19 @@ export default function Home() {
   };
 
   const handleContinue = () => {
-    if (!messages.length) return;
-    const last = messages[messages.length - 1];
-    sendMessage(last.content + "\n\nContinue the story.");
+    if (!messages.length || loading) return;
+    sendMessage("Continue the story naturally from where we left off.");
   };
 
   const handleDirectionSubmit = (direction) => {
-    if (!messages.length) return;
-    const last = messages[messages.length - 1];
-    sendMessage(last.content + "\n\n" + direction);
+    if (!messages.length || loading || !direction.trim()) return;
+    sendMessage(direction);
+  };
+
+  const handleReset = () => {
+    if (loading) return;
+    setMessages([]);
+    setInput("");
   };
 
   return (
@@ -61,6 +73,12 @@ export default function Home() {
       <div style={styles.title}>OMBU</div>
 
       <div style={styles.chat}>
+        {messages.length === 0 && (
+          <div style={styles.emptyState}>
+            Start a story, ask for a scene, continue one, or redirect it however you want.
+          </div>
+        )}
+
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -69,29 +87,37 @@ export default function Home() {
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               background:
                 msg.role === "user"
-                  ? "rgba(90, 120, 255, 0.15)"
-                  : "rgba(255,255,255,0.05)"
+                  ? "rgba(90, 120, 255, 0.18)"
+                  : "rgba(255,255,255,0.06)"
             }}
           >
             {msg.content}
           </div>
         ))}
 
-        {loading && (
-          <div style={styles.loading}>Ombu is thinking...</div>
-        )}
+        {loading && <div style={styles.loading}>Ombu is thinking...</div>}
       </div>
 
       <div style={styles.controls}>
         <textarea
-          placeholder="Start a story, scene, or idea..."
+          placeholder={
+            messages.length === 0
+              ? "Start a story, scene, or idea..."
+              : "Continue, redirect, revise, or ask a question about the story..."
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           style={styles.input}
         />
 
-        <button onClick={() => sendMessage()} style={styles.send}>
-          Send
+        <button onClick={() => sendMessage()} style={styles.send} disabled={loading}>
+          {loading ? "..." : "Send"}
+        </button>
+      </div>
+
+      <div style={styles.bottomRow}>
+        <button onClick={handleReset} style={styles.reset} disabled={loading}>
+          New Story
         </button>
       </div>
 
@@ -135,11 +161,18 @@ const styles = {
     gap: 12
   },
 
+  emptyState: {
+    opacity: 0.5,
+    textAlign: "center",
+    marginTop: 30,
+    fontSize: 14
+  },
+
   message: {
     maxWidth: "70%",
     padding: "12px 16px",
     borderRadius: 16,
-    lineHeight: 1.5,
+    lineHeight: 1.6,
     whiteSpace: "pre-wrap"
   },
 
@@ -163,7 +196,8 @@ const styles = {
     color: "white",
     border: "none",
     outline: "none",
-    resize: "none"
+    resize: "none",
+    minHeight: 70
   },
 
   send: {
@@ -171,6 +205,21 @@ const styles = {
     borderRadius: 12,
     border: "none",
     background: "rgba(100,120,255,0.2)",
+    color: "white",
+    cursor: "pointer"
+  },
+
+  bottomRow: {
+    display: "flex",
+    justifyContent: "flex-end",
+    padding: "0 16px 12px 16px"
+  },
+
+  reset: {
+    padding: "8px 14px",
+    borderRadius: 10,
+    border: "none",
+    background: "rgba(255,255,255,0.08)",
     color: "white",
     cursor: "pointer"
   },
