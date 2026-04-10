@@ -5,7 +5,7 @@ const client = new OpenAI({
 });
 
 function detectIntent(message) {
-  const lower = message.toLowerCase();
+  const lower = message.toLowerCase().trim();
 
   if (
     lower.includes("redo") ||
@@ -20,11 +20,15 @@ function detectIntent(message) {
 
   if (
     lower.endsWith("?") ||
-    lower.includes("why") ||
-    lower.includes("what if") ||
-    lower.includes("who is") ||
-    lower.includes("can you explain") ||
-    lower.includes("what does")
+    lower.startsWith("would ") ||
+    lower.startsWith("could ") ||
+    lower.startsWith("should ") ||
+    lower.startsWith("is ") ||
+    lower.startsWith("are ") ||
+    lower.startsWith("why ") ||
+    lower.startsWith("what ") ||
+    lower.startsWith("who ") ||
+    lower.startsWith("how ")
   ) {
     return "question";
   }
@@ -46,7 +50,28 @@ export default async function handler(req, res) {
     const latestText = lastUserMessage?.content || "";
     const intent = detectIntent(latestText);
 
-    const systemPrompt = `
+    let systemPrompt = "";
+
+    if (intent === "question") {
+      systemPrompt = `
+You are Ombu, an AI story assistant.
+
+The user is asking a DIRECT QUESTION about the current story or scene.
+
+Your job:
+- Answer the user's question clearly and directly.
+- Do NOT continue the story scene unless the user explicitly asks you to continue it.
+- Do NOT write in cinematic story prose.
+- Do NOT roleplay the answer.
+- Speak normally and briefly, like a helpful assistant explaining the scene.
+- Base your answer on the conversation context so far.
+
+Important:
+If the answer is uncertain, say that clearly.
+Return only the answer.
+      `.trim();
+    } else {
+      systemPrompt = `
 You are Ombu, an AI storytelling partner for immersive, emotionally fitting, high-quality fiction.
 
 Your job is to CONTINUE and ADAPT an ongoing story session naturally.
@@ -55,7 +80,6 @@ Core behavior:
 - Do NOT restart the story unless the user clearly asks for a brand new story.
 - Treat each new message as part of the current ongoing session.
 - If the user changes direction, revise the direction of the current story instead of starting over.
-- If the user asks a question about the story, answer it clearly without resetting the scene.
 - Maintain consistency with prior events, tone, character behavior, and story logic.
 - Keep the writing immersive, emotionally fitting, and easy to read.
 - Use natural dialogue when dialogue fits.
@@ -67,14 +91,14 @@ Current mode: ${intent}
 Mode rules:
 - continue: continue the current story naturally
 - revise: adjust the current story based on the user’s new direction
-- question: answer the user's question about the current story/session first, and only continue the story if it fits naturally
 
 Output rules:
-- Return only the story text or direct answer/story response.
+- Return only the story text.
 - Do not explain what you're doing.
 - Do not label sections.
 - Do not summarize unless the user asks.
-    `.trim();
+      `.trim();
+    }
 
     const formattedMessages = [
       {
@@ -90,7 +114,7 @@ Output rules:
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: formattedMessages,
-      temperature: 1
+      temperature: intent === "question" ? 0.4 : 1
     });
 
     res.status(200).json({
