@@ -1,231 +1,264 @@
-import StoryControls from "../components/StoryControls";
-import { useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const sendMessage = async (customInput) => {
-    const text = customInput || input;
-    if (!text.trim() || loading) return;
-
-    const updatedMessages = [
-      ...messages,
-      { role: "user", content: text }
-    ];
-
-    setMessages(updatedMessages);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/story", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          messages: updatedMessages
-        })
-      });
-
-      const data = await res.json();
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: data.story || data.error || "Something went wrong."
-        }
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Something went wrong."
-        }
-      ]);
-    }
-
-    setLoading(false);
-  };
-
-  const handleContinue = () => {
-    if (!messages.length || loading) return;
-    sendMessage("Continue the story naturally from where we left off.");
-  };
-
-  const handleDirectionSubmit = (direction) => {
-    if (!messages.length || loading || !direction.trim()) return;
-    sendMessage(direction);
-  };
-
-  const handleReset = () => {
-    if (loading) return;
-    setMessages([]);
-    setInput("");
-  };
-
   return (
     <div style={styles.page}>
-      <div style={styles.title}>OMBU</div>
+      <header style={styles.nav}>
+        <div style={styles.logo}>OMBU</div>
 
-      <div style={styles.chat}>
-        {messages.length === 0 && (
-          <div style={styles.emptyState}>
-            Start a story, ask for a scene, continue one, or redirect it however you want.
+        <nav style={styles.navLinks}>
+          <Link href="/story" style={styles.navLink}>Story</Link>
+          <span style={styles.navLinkMuted}>Characters</span>
+          <span style={styles.navLinkMuted}>Universes</span>
+        </nav>
+      </header>
+
+      <main style={styles.main}>
+        <section style={styles.hero}>
+          <div style={styles.eyebrow}>AI-Powered Creative Platform</div>
+
+          <h1 style={styles.title}>
+            Build stories, shape characters, and create worlds that feel like yours.
+          </h1>
+
+          <p style={styles.subtitle}>
+            Ombu is more than a story generator. It’s a creative platform designed
+            for immersive storytelling, character creation, and world building.
+          </p>
+
+          <div style={styles.heroButtons}>
+            <Link href="/story" style={styles.primaryButton}>
+              Start Creating
+            </Link>
+
+            <a href="#features" style={styles.secondaryButton}>
+              Explore Features
+            </a>
           </div>
-        )}
+        </section>
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              ...styles.message,
-              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-              background:
-                msg.role === "user"
-                  ? "rgba(90, 120, 255, 0.18)"
-                  : "rgba(255,255,255,0.06)"
-            }}
-          >
-            {msg.content}
+        <section id="features" style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <div style={styles.sectionEyebrow}>Three Core Pillars</div>
+            <h2 style={styles.sectionTitle}>
+              A platform, not just a prompt box
+            </h2>
+            <p style={styles.sectionText}>
+              Ombu is built around systems that make storytelling deeper,
+              more personal, and worth returning to.
+            </p>
           </div>
-        ))}
 
-        {loading && <div style={styles.loading}>Ombu is thinking...</div>}
-      </div>
+          <div style={styles.cardGrid}>
+            <div style={styles.card}>
+              <div style={styles.cardLabel}>01</div>
+              <h3 style={styles.cardTitle}>Story Sessions</h3>
+              <p style={styles.cardText}>
+                Continue, redirect, and build scenes naturally inside a clean,
+                focused narrative workspace.
+              </p>
+              <Link href="/story" style={styles.cardLink}>
+                Open Story Workspace
+              </Link>
+            </div>
 
-      <div style={styles.controls}>
-        <textarea
-          placeholder={
-            messages.length === 0
-              ? "Start a story, scene, or idea..."
-              : "Continue, redirect, revise, or ask a question about the story..."
-          }
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          style={styles.input}
-        />
+            <div style={styles.card}>
+              <div style={styles.cardLabel}>02</div>
+              <h3 style={styles.cardTitle}>Character Creation</h3>
+              <p style={styles.cardText}>
+                Build reusable characters with personality, voice, and identity.
+              </p>
+              <div style={styles.cardSoon}>Coming Soon</div>
+            </div>
 
-        <button onClick={() => sendMessage()} style={styles.send} disabled={loading}>
-          {loading ? "..." : "Send"}
-        </button>
-      </div>
+            <div style={styles.card}>
+              <div style={styles.cardLabel}>03</div>
+              <h3 style={styles.cardTitle}>Universe Building</h3>
+              <p style={styles.cardText}>
+                Define worlds, rules, and lore to give stories real structure.
+              </p>
+              <div style={styles.cardSoon}>Coming Soon</div>
+            </div>
+          </div>
+        </section>
 
-      <div style={styles.bottomRow}>
-        <button onClick={handleReset} style={styles.reset} disabled={loading}>
-          New Story
-        </button>
-      </div>
+        <section style={styles.bottomCta}>
+          <h2 style={styles.bottomTitle}>
+            Start with one idea. Build something bigger.
+          </h2>
+          <p style={styles.bottomText}>
+            Your first story is one click away.
+          </p>
 
-      <div style={styles.storyControls}>
-        <StoryControls
-          hasStory={messages.length > 0}
-          isLoading={loading}
-          onContinue={handleContinue}
-          onSubmitDirection={handleDirectionSubmit}
-        />
-      </div>
+          <Link href="/story" style={styles.primaryButton}>
+            Start Now
+          </Link>
+        </section>
+      </main>
     </div>
   );
 }
 
 const styles = {
   page: {
-    height: "100vh",
-    display: "flex",
-    flexDirection: "column",
+    minHeight: "100vh",
     background:
       "radial-gradient(circle at 50% 20%, rgba(100,120,255,0.08), transparent 40%), #0b0b0f",
     color: "white",
     fontFamily: "sans-serif"
   },
 
-  title: {
-    textAlign: "center",
-    padding: "20px 0",
-    fontSize: 22,
+  nav: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "20px 40px",
+    alignItems: "center"
+  },
+
+  logo: {
+    fontSize: 18,
     letterSpacing: 4,
     opacity: 0.9
   },
 
-  chat: {
-    flex: 1,
-    overflowY: "auto",
-    padding: "20px",
+  navLinks: {
     display: "flex",
-    flexDirection: "column",
-    gap: 12
+    gap: 20
   },
 
-  emptyState: {
-    opacity: 0.5,
+  navLink: {
+    color: "white",
+    textDecoration: "none",
+    opacity: 0.8
+  },
+
+  navLinkMuted: {
+    opacity: 0.3
+  },
+
+  main: {
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: "40px 20px"
+  },
+
+  hero: {
     textAlign: "center",
-    marginTop: 30,
-    fontSize: 14
+    marginTop: 40
   },
 
-  message: {
-    maxWidth: "70%",
-    padding: "12px 16px",
-    borderRadius: 16,
-    lineHeight: 1.6,
-    whiteSpace: "pre-wrap"
-  },
-
-  loading: {
+  eyebrow: {
     opacity: 0.5,
-    fontSize: 14
+    fontSize: 12,
+    marginBottom: 10
   },
 
-  controls: {
+  title: {
+    fontSize: 40,
+    lineHeight: 1.2,
+    marginBottom: 20
+  },
+
+  subtitle: {
+    opacity: 0.6,
+    maxWidth: 600,
+    margin: "0 auto 30px auto"
+  },
+
+  heroButtons: {
     display: "flex",
-    gap: 10,
-    padding: 16,
-    borderTop: "1px solid rgba(255,255,255,0.05)"
+    justifyContent: "center",
+    gap: 15
   },
 
-  input: {
-    flex: 1,
-    borderRadius: 12,
-    padding: 12,
-    background: "rgba(255,255,255,0.05)",
-    color: "white",
-    border: "none",
-    outline: "none",
-    resize: "none",
-    minHeight: 70
-  },
-
-  send: {
-    padding: "10px 16px",
-    borderRadius: 12,
-    border: "none",
+  primaryButton: {
     background: "rgba(100,120,255,0.2)",
-    color: "white",
-    cursor: "pointer"
-  },
-
-  bottomRow: {
-    display: "flex",
-    justifyContent: "flex-end",
-    padding: "0 16px 12px 16px"
-  },
-
-  reset: {
-    padding: "8px 14px",
+    padding: "12px 20px",
     borderRadius: 10,
-    border: "none",
-    background: "rgba(255,255,255,0.08)",
-    color: "white",
-    cursor: "pointer"
+    textDecoration: "none",
+    color: "white"
   },
 
-  storyControls: {
-    padding: 10,
-    borderTop: "1px solid rgba(255,255,255,0.05)"
+  secondaryButton: {
+    opacity: 0.6,
+    textDecoration: "none",
+    color: "white"
+  },
+
+  section: {
+    marginTop: 80
+  },
+
+  sectionHeader: {
+    textAlign: "center",
+    marginBottom: 40
+  },
+
+  sectionEyebrow: {
+    opacity: 0.5,
+    fontSize: 12
+  },
+
+  sectionTitle: {
+    fontSize: 28,
+    marginTop: 10
+  },
+
+  sectionText: {
+    opacity: 0.6,
+    maxWidth: 600,
+    margin: "10px auto"
+  },
+
+  cardGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: 20
+  },
+
+  card: {
+    background: "rgba(255,255,255,0.03)",
+    padding: 20,
+    borderRadius: 14
+  },
+
+  cardLabel: {
+    opacity: 0.4,
+    fontSize: 12
+  },
+
+  cardTitle: {
+    marginTop: 10
+  },
+
+  cardText: {
+    opacity: 0.6,
+    marginTop: 10
+  },
+
+  cardLink: {
+    display: "inline-block",
+    marginTop: 15,
+    color: "white",
+    textDecoration: "none"
+  },
+
+  cardSoon: {
+    marginTop: 15,
+    opacity: 0.4
+  },
+
+  bottomCta: {
+    textAlign: "center",
+    marginTop: 100
+  },
+
+  bottomTitle: {
+    fontSize: 28
+  },
+
+  bottomText: {
+    opacity: 0.6,
+    margin: "10px 0 20px"
   }
 };
