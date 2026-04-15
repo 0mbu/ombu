@@ -24,6 +24,7 @@ const quickPrompts = [
 export default function Home() {
   const router = useRouter();
   const [input, setInput] = useState("");
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const randomHeadline = useMemo(() => {
     return heroStatements[Math.floor(Math.random() * heroStatements.length)];
@@ -31,8 +32,18 @@ export default function Home() {
 
   const goToStoryWithPrompt = (promptText) => {
     const trimmed = (promptText || "").trim();
-    if (!trimmed) return;
-    router.push(`/story?starter=${encodeURIComponent(trimmed)}`);
+    if (!trimmed || isLeaving) return;
+
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("ombu_starter_prompt", trimmed);
+      sessionStorage.setItem("ombu_route_transition", "1");
+    }
+
+    setIsLeaving(true);
+
+    setTimeout(() => {
+      router.push("/story");
+    }, 180);
   };
 
   const handleSubmit = (e) => {
@@ -56,7 +67,12 @@ export default function Home() {
         />
       </Head>
 
-      <div style={styles.page}>
+      <div
+        style={{
+          ...styles.page,
+          ...(isLeaving ? styles.pageLeaving : {})
+        }}
+      >
         <div style={styles.backgroundGlowTop} />
         <div style={styles.backgroundGlowBottom} />
 
@@ -71,18 +87,28 @@ export default function Home() {
               <Link href="/story" style={styles.navLink}>
                 Story
               </Link>
-              <Link
-                href="/story?starter=Create%20a%20character%20with%20a%20distinct%20voice%2C%20appearance%2C%20and%20personality."
-                style={styles.navLink}
+              <button
+                type="button"
+                onClick={() =>
+                  goToStoryWithPrompt(
+                    "Create a character with a distinct voice, appearance, and personality."
+                  )
+                }
+                style={styles.navButton}
               >
                 Characters
-              </Link>
-              <Link
-                href="/story?starter=Build%20a%20fictional%20world%20with%20clear%20rules%2C%20tone%2C%20and%20lore."
-                style={styles.navLink}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  goToStoryWithPrompt(
+                    "Build a fictional world with clear rules, tone, and lore."
+                  )
+                }
+                style={styles.navButton}
               >
                 Universes
-              </Link>
+              </button>
             </div>
 
             <Link href="/story" style={styles.loginButton}>
@@ -141,7 +167,11 @@ export default function Home() {
             </div>
 
             <div style={styles.cardGrid}>
-              <Link href="/story" style={{ ...styles.card, ...styles.cardInteractive }}>
+              <button
+                type="button"
+                onClick={() => goToStoryWithPrompt("Start a story.")}
+                style={{ ...styles.card, ...styles.cardInteractive }}
+              >
                 <div style={styles.cardIcon}>✦</div>
                 <h3 style={styles.cardTitle}>Start a Story</h3>
                 <p style={styles.cardText}>
@@ -149,10 +179,15 @@ export default function Home() {
                   without losing the feel.
                 </p>
                 <div style={styles.cardLink}>Open workspace</div>
-              </Link>
+              </button>
 
-              <Link
-                href="/story?starter=Create%20a%20character%20with%20depth%2C%20voice%2C%20identity%2C%20and%20strong%20personality."
+              <button
+                type="button"
+                onClick={() =>
+                  goToStoryWithPrompt(
+                    "Create a character with depth, voice, identity, and strong personality."
+                  )
+                }
                 style={{ ...styles.card, ...styles.cardInteractive }}
               >
                 <div style={styles.cardIcon}>◉</div>
@@ -162,10 +197,15 @@ export default function Home() {
                   across stories.
                 </p>
                 <div style={styles.cardLink}>Start from a character</div>
-              </Link>
+              </button>
 
-              <Link
-                href="/story?starter=Build%20a%20world%20with%20tone%2C%20lore%2C%20rules%2C%20and%20a%20clear%20identity."
+              <button
+                type="button"
+                onClick={() =>
+                  goToStoryWithPrompt(
+                    "Build a world with tone, lore, rules, and a clear identity."
+                  )
+                }
                 style={{ ...styles.card, ...styles.cardInteractive }}
               >
                 <div style={styles.cardIcon}>◎</div>
@@ -175,7 +215,7 @@ export default function Home() {
                   instead of random.
                 </p>
                 <div style={styles.cardLink}>Start from a world</div>
-              </Link>
+              </button>
             </div>
           </section>
         </main>
@@ -251,7 +291,14 @@ const styles = {
     position: "relative",
     overflow: "hidden",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    transition: "opacity 0.18s ease, transform 0.18s ease, filter 0.18s ease"
+  },
+
+  pageLeaving: {
+    opacity: 0,
+    transform: "translateY(-16px) scale(0.99)",
+    filter: "blur(4px)"
   },
 
   backgroundGlowTop: {
@@ -328,6 +375,16 @@ const styles = {
     textDecoration: "none",
     fontSize: 15,
     fontWeight: 500
+  },
+
+  navButton: {
+    color: "rgba(255,255,255,0.82)",
+    fontSize: 15,
+    fontWeight: 500,
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    padding: 0
   },
 
   loginButton: {
@@ -507,7 +564,8 @@ const styles = {
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
     display: "flex",
     flexDirection: "column",
-    textDecoration: "none"
+    textDecoration: "none",
+    textAlign: "left"
   },
 
   cardInteractive: {
