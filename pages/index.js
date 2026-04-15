@@ -1,107 +1,186 @@
+import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
+
+const heroStatements = [
+  "Stories worth disappearing into.",
+  "Build the kind of story you can’t stop thinking about.",
+  "Where worlds begin to feel real.",
+  "Give us a vibe. We’ll give it a pulse.",
+  "Make fiction feel personal again.",
+  "Start anywhere. Build something unforgettable.",
+  "Stories that feel lived in.",
+  "Start with a spark. Leave with a world."
+];
+
+const quickPrompts = [
+  "Dark fantasy",
+  "Enemies to lovers",
+  "Post-apocalyptic",
+  "Anime-style action"
+];
 
 export default function Home() {
+  const router = useRouter();
+  const [input, setInput] = useState("");
+
+  const randomHeadline = useMemo(() => {
+    return heroStatements[Math.floor(Math.random() * heroStatements.length)];
+  }, []);
+
+  const goToStoryWithPrompt = (promptText) => {
+    const trimmed = (promptText || "").trim();
+    if (!trimmed) return;
+    router.push(`/story?starter=${encodeURIComponent(trimmed)}`);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    goToStoryWithPrompt(input);
+  };
+
   return (
-    <div style={styles.page}>
-      <div style={styles.backgroundGlowTop} />
-      <div style={styles.backgroundGlowBottom} />
+    <>
+      <Head>
+        <title>OMBU</title>
+        <meta
+          name="description"
+          content="AI storytelling, character creation, and worldbuilding."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Lexend:wght@600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </Head>
 
-      <header style={styles.nav}>
-        <Link href="/" style={styles.brandWrap}>
-          <LogoMark />
-          <div style={styles.logoText}>OMBU</div>
-        </Link>
+      <div style={styles.page}>
+        <div style={styles.backgroundGlowTop} />
+        <div style={styles.backgroundGlowBottom} />
 
-        <nav style={styles.navRight}>
-          <div style={styles.navLinks}>
-            <Link href="/story" style={styles.navLink}>
-              Story
-            </Link>
-            <span style={styles.navLinkMuted}>Characters</span>
-            <span style={styles.navLinkMuted}>Universes</span>
-          </div>
+        <header style={styles.nav}>
+          <Link href="/" style={styles.brandWrap}>
+            <LogoMark />
+            <div style={styles.logoText}>OMBU</div>
+          </Link>
 
-          <button type="button" style={styles.loginButton}>
-            Log in
-          </button>
-        </nav>
-      </header>
-
-      <main style={styles.main}>
-        <section style={styles.hero}>
-          <div style={styles.heroInner}>
-            <div style={styles.heroEyebrow}>AI storytelling, character creation, and worldbuilding</div>
-
-            <h1 style={styles.title}>
-              Stories that feel
-              <br />
-              lived in.
-            </h1>
-
-            <p style={styles.subtitle}>
-              Start with a scene, a character, or just a vibe. Ombu turns it into
-              something cinematic, personal, and worth continuing.
-            </p>
-
-            <div style={styles.inputShell}>
-              <div style={styles.fakePrompt}>
-                Drop a character, a scene, or a vibe...
-              </div>
-
-              <Link href="/story" style={styles.heroCta}>
-                Start Story
+          <nav style={styles.navRight}>
+            <div style={styles.navLinks}>
+              <Link href="/story" style={styles.navLink}>
+                Story
+              </Link>
+              <Link
+                href="/story?starter=Create%20a%20character%20with%20a%20distinct%20voice%2C%20appearance%2C%20and%20personality."
+                style={styles.navLink}
+              >
+                Characters
+              </Link>
+              <Link
+                href="/story?starter=Build%20a%20fictional%20world%20with%20clear%20rules%2C%20tone%2C%20and%20lore."
+                style={styles.navLink}
+              >
+                Universes
               </Link>
             </div>
 
-            <div style={styles.quickRow}>
-              <div style={styles.quickChip}>Dark fantasy</div>
-              <div style={styles.quickChip}>Enemies to lovers</div>
-              <div style={styles.quickChip}>Post-apocalyptic</div>
-              <div style={styles.quickChip}>Anime-style action</div>
-            </div>
-          </div>
-        </section>
-
-        <section style={styles.cardsSection}>
-          <div style={styles.sectionTop}>
-            <div style={styles.sectionEyebrow}>Built to keep people coming back</div>
-            <h2 style={styles.sectionTitle}>More than a prompt box</h2>
-          </div>
-
-          <div style={styles.cardGrid}>
-            <Link href="/story" style={{ ...styles.card, ...styles.cardInteractive }}>
-              <div style={styles.cardIcon}>✦</div>
-              <h3 style={styles.cardTitle}>Start a Story</h3>
-              <p style={styles.cardText}>
-                Write openings, continue scenes, redirect the plot, and keep momentum
-                without losing the feel.
-              </p>
-              <div style={styles.cardLink}>Open workspace</div>
+            <Link href="/story" style={styles.loginButton}>
+              Log in
             </Link>
+          </nav>
+        </header>
 
-            <div style={styles.card}>
-              <div style={styles.cardIcon}>◉</div>
-              <h3 style={styles.cardTitle}>Create Characters</h3>
-              <p style={styles.cardText}>
-                Reusable characters with voice, identity, and depth that can carry
-                across stories.
+        <main style={styles.main}>
+          <section style={styles.hero}>
+            <div style={styles.heroInner}>
+              <div style={styles.heroEyebrow}>
+                AI storytelling, character creation, and worldbuilding
+              </div>
+
+              <h1 style={styles.title}>{randomHeadline}</h1>
+
+              <p style={styles.subtitle}>
+                Start with a scene, a character, or just a vibe. Ombu turns it into
+                something cinematic, personal, and worth continuing.
               </p>
-              <div style={styles.cardSoon}>Coming soon</div>
+
+              <form onSubmit={handleSubmit} style={styles.inputShell}>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Drop a character, a scene, or a vibe..."
+                  style={styles.heroInput}
+                />
+
+                <button type="submit" style={styles.heroCta}>
+                  Start Story
+                </button>
+              </form>
+
+              <div style={styles.quickRow}>
+                {quickPrompts.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => goToStoryWithPrompt(item)}
+                    style={styles.quickChip}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section style={styles.cardsSection}>
+            <div style={styles.sectionTop}>
+              <div style={styles.sectionEyebrow}>Built to keep people coming back</div>
+              <h2 style={styles.sectionTitle}>More than a prompt box</h2>
             </div>
 
-            <div style={styles.card}>
-              <div style={styles.cardIcon}>◎</div>
-              <h3 style={styles.cardTitle}>Build Worlds</h3>
-              <p style={styles.cardText}>
-                Universes with rules, lore, tone, and memory so stories feel grounded
-                instead of random.
-              </p>
-              <div style={styles.cardSoon}>Coming soon</div>
+            <div style={styles.cardGrid}>
+              <Link href="/story" style={{ ...styles.card, ...styles.cardInteractive }}>
+                <div style={styles.cardIcon}>✦</div>
+                <h3 style={styles.cardTitle}>Start a Story</h3>
+                <p style={styles.cardText}>
+                  Write openings, continue scenes, redirect the plot, and keep momentum
+                  without losing the feel.
+                </p>
+                <div style={styles.cardLink}>Open workspace</div>
+              </Link>
+
+              <Link
+                href="/story?starter=Create%20a%20character%20with%20depth%2C%20voice%2C%20identity%2C%20and%20strong%20personality."
+                style={{ ...styles.card, ...styles.cardInteractive }}
+              >
+                <div style={styles.cardIcon}>◉</div>
+                <h3 style={styles.cardTitle}>Create Characters</h3>
+                <p style={styles.cardText}>
+                  Reusable characters with voice, identity, and depth that can carry
+                  across stories.
+                </p>
+                <div style={styles.cardLink}>Start from a character</div>
+              </Link>
+
+              <Link
+                href="/story?starter=Build%20a%20world%20with%20tone%2C%20lore%2C%20rules%2C%20and%20a%20clear%20identity."
+                style={{ ...styles.card, ...styles.cardInteractive }}
+              >
+                <div style={styles.cardIcon}>◎</div>
+                <h3 style={styles.cardTitle}>Build Worlds</h3>
+                <p style={styles.cardText}>
+                  Universes with rules, lore, tone, and memory so stories feel grounded
+                  instead of random.
+                </p>
+                <div style={styles.cardLink}>Start from a world</div>
+              </Link>
             </div>
-          </div>
-        </section>
-      </main>
-    </div>
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
 
@@ -251,12 +330,6 @@ const styles = {
     fontWeight: 500
   },
 
-  navLinkMuted: {
-    color: "rgba(255,255,255,0.34)",
-    fontSize: 15,
-    fontWeight: 500
-  },
-
   loginButton: {
     height: 40,
     padding: "0 16px",
@@ -266,7 +339,11 @@ const styles = {
     color: "white",
     fontSize: 14,
     fontWeight: 600,
-    cursor: "pointer"
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textDecoration: "none"
   },
 
   main: {
@@ -311,7 +388,8 @@ const styles = {
     letterSpacing: "-0.06em",
     fontWeight: 800,
     margin: 0,
-    marginBottom: 22
+    marginBottom: 22,
+    fontFamily: '"Lexend", Inter, ui-sans-serif, system-ui, sans-serif'
   },
 
   subtitle: {
@@ -338,13 +416,16 @@ const styles = {
       "0 28px 80px rgba(0,0,0,0.38), 0 10px 40px rgba(72,91,255,0.12)"
   },
 
-  fakePrompt: {
+  heroInput: {
     flex: 1,
-    textAlign: "left",
-    padding: "0 14px",
-    color: "rgba(255,255,255,0.40)",
+    minWidth: 0,
+    height: 58,
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    color: "white",
     fontSize: 16,
-    lineHeight: 1.4
+    padding: "0 14px"
   },
 
   heroCta: {
@@ -359,6 +440,8 @@ const styles = {
     color: "white",
     fontWeight: 700,
     fontSize: 15,
+    border: "none",
+    cursor: "pointer",
     background: "linear-gradient(135deg, #5f6fff, #7b87ff)",
     boxShadow: "0 16px 34px rgba(95,111,255,0.38)"
   },
@@ -376,9 +459,10 @@ const styles = {
     borderRadius: 999,
     background: "rgba(255,255,255,0.04)",
     border: "1px solid rgba(255,255,255,0.06)",
-    color: "rgba(255,255,255,0.56)",
+    color: "rgba(255,255,255,0.70)",
     fontSize: 13,
-    fontWeight: 500
+    fontWeight: 500,
+    cursor: "pointer"
   },
 
   cardsSection: {
@@ -463,13 +547,6 @@ const styles = {
   cardLink: {
     marginTop: 20,
     color: "white",
-    fontWeight: 600,
-    fontSize: 14
-  },
-
-  cardSoon: {
-    marginTop: 20,
-    color: "rgba(255,255,255,0.34)",
     fontWeight: 600,
     fontSize: 14
   }
