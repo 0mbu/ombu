@@ -3,98 +3,161 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div style={styles.page}>
-      <header style={styles.nav}>
-        <div style={styles.logo}>OMBU</div>
+      <div style={styles.backgroundGlowTop} />
+      <div style={styles.backgroundGlowBottom} />
 
-        <nav style={styles.navLinks}>
-          <Link href="/story" style={styles.navLink}>Story</Link>
-          <span style={styles.navLinkMuted}>Characters</span>
-          <span style={styles.navLinkMuted}>Universes</span>
+      <header style={styles.nav}>
+        <Link href="/" style={styles.brandWrap}>
+          <LogoMark />
+          <div style={styles.logoText}>OMBU</div>
+        </Link>
+
+        <nav style={styles.navRight}>
+          <div style={styles.navLinks}>
+            <Link href="/story" style={styles.navLink}>
+              Story
+            </Link>
+            <span style={styles.navLinkMuted}>Characters</span>
+            <span style={styles.navLinkMuted}>Universes</span>
+          </div>
+
+          <button type="button" style={styles.loginButton}>
+            Log in
+          </button>
         </nav>
       </header>
 
       <main style={styles.main}>
         <section style={styles.hero}>
-          <div style={styles.eyebrow}>AI-Powered Creative Platform</div>
+          <div style={styles.heroInner}>
+            <div style={styles.heroEyebrow}>AI storytelling, character creation, and worldbuilding</div>
 
-          <h1 style={styles.title}>
-            Build stories, shape characters, and create worlds that feel like yours.
-          </h1>
+            <h1 style={styles.title}>
+              Stories that feel
+              <br />
+              lived in.
+            </h1>
 
-          <p style={styles.subtitle}>
-            Ombu is more than a story generator. It’s a creative platform designed
-            for immersive storytelling, character creation, and world building.
-          </p>
-
-          <div style={styles.heroButtons}>
-            <Link href="/story" style={styles.primaryButton}>
-              Start Creating
-            </Link>
-
-            <a href="#features" style={styles.secondaryButton}>
-              Explore Features
-            </a>
-          </div>
-        </section>
-
-        <section id="features" style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <div style={styles.sectionEyebrow}>Three Core Pillars</div>
-            <h2 style={styles.sectionTitle}>
-              A platform, not just a prompt box
-            </h2>
-            <p style={styles.sectionText}>
-              Ombu is built around systems that make storytelling deeper,
-              more personal, and worth returning to.
+            <p style={styles.subtitle}>
+              Start with a scene, a character, or just a vibe. Ombu turns it into
+              something cinematic, personal, and worth continuing.
             </p>
-          </div>
 
-          <div style={styles.cardGrid}>
-            <div style={styles.card}>
-              <div style={styles.cardLabel}>01</div>
-              <h3 style={styles.cardTitle}>Story Sessions</h3>
-              <p style={styles.cardText}>
-                Continue, redirect, and build scenes naturally inside a clean,
-                focused narrative workspace.
-              </p>
-              <Link href="/story" style={styles.cardLink}>
-                Open Story Workspace
+            <div style={styles.inputShell}>
+              <div style={styles.fakePrompt}>
+                Drop a character, a scene, or a vibe...
+              </div>
+
+              <Link href="/story" style={styles.heroCta}>
+                Start Story
               </Link>
             </div>
 
-            <div style={styles.card}>
-              <div style={styles.cardLabel}>02</div>
-              <h3 style={styles.cardTitle}>Character Creation</h3>
-              <p style={styles.cardText}>
-                Build reusable characters with personality, voice, and identity.
-              </p>
-              <div style={styles.cardSoon}>Coming Soon</div>
-            </div>
-
-            <div style={styles.card}>
-              <div style={styles.cardLabel}>03</div>
-              <h3 style={styles.cardTitle}>Universe Building</h3>
-              <p style={styles.cardText}>
-                Define worlds, rules, and lore to give stories real structure.
-              </p>
-              <div style={styles.cardSoon}>Coming Soon</div>
+            <div style={styles.quickRow}>
+              <div style={styles.quickChip}>Dark fantasy</div>
+              <div style={styles.quickChip}>Enemies to lovers</div>
+              <div style={styles.quickChip}>Post-apocalyptic</div>
+              <div style={styles.quickChip}>Anime-style action</div>
             </div>
           </div>
         </section>
 
-        <section style={styles.bottomCta}>
-          <h2 style={styles.bottomTitle}>
-            Start with one idea. Build something bigger.
-          </h2>
-          <p style={styles.bottomText}>
-            Your first story is one click away.
-          </p>
+        <section style={styles.cardsSection}>
+          <div style={styles.sectionTop}>
+            <div style={styles.sectionEyebrow}>Built to keep people coming back</div>
+            <h2 style={styles.sectionTitle}>More than a prompt box</h2>
+          </div>
 
-          <Link href="/story" style={styles.primaryButton}>
-            Start Now
-          </Link>
+          <div style={styles.cardGrid}>
+            <Link href="/story" style={{ ...styles.card, ...styles.cardInteractive }}>
+              <div style={styles.cardIcon}>✦</div>
+              <h3 style={styles.cardTitle}>Start a Story</h3>
+              <p style={styles.cardText}>
+                Write openings, continue scenes, redirect the plot, and keep momentum
+                without losing the feel.
+              </p>
+              <div style={styles.cardLink}>Open workspace</div>
+            </Link>
+
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>◉</div>
+              <h3 style={styles.cardTitle}>Create Characters</h3>
+              <p style={styles.cardText}>
+                Reusable characters with voice, identity, and depth that can carry
+                across stories.
+              </p>
+              <div style={styles.cardSoon}>Coming soon</div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>◎</div>
+              <h3 style={styles.cardTitle}>Build Worlds</h3>
+              <p style={styles.cardText}>
+                Universes with rules, lore, tone, and memory so stories feel grounded
+                instead of random.
+              </p>
+              <div style={styles.cardSoon}>Coming soon</div>
+            </div>
+          </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function LogoMark() {
+  return (
+    <div style={styles.logoMarkWrap} aria-hidden="true">
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 34 34"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          x="1"
+          y="1"
+          width="32"
+          height="32"
+          rx="11"
+          fill="url(#ombuBg)"
+          stroke="rgba(255,255,255,0.10)"
+        />
+        <path
+          d="M10 21.2C10 16.3 13.2 12.8 17.8 12.8C20.4 12.8 22.5 13.8 24 15.8"
+          stroke="url(#ombuStroke)"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 12.6V18.1H18.5"
+          stroke="url(#ombuStroke)"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M24 18.1C22.8 20.9 20.3 22.8 17.1 22.8C14.3 22.8 12 21.5 10.7 19.4"
+          stroke="url(#ombuStrokeSoft)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <defs>
+          <linearGradient id="ombuBg" x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+            <stop stopColor="rgba(96,115,255,0.26)" />
+            <stop offset="1" stopColor="rgba(96,115,255,0.08)" />
+          </linearGradient>
+          <linearGradient id="ombuStroke" x1="10" y1="12.8" x2="24" y2="18.1" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#EAF0FF" />
+            <stop offset="1" stopColor="#8EA0FF" />
+          </linearGradient>
+          <linearGradient id="ombuStrokeSoft" x1="10.7" y1="19.4" x2="24" y2="22.8" gradientUnits="userSpaceOnUse">
+            <stop stopColor="rgba(255,255,255,0.50)" />
+            <stop offset="1" stopColor="rgba(142,160,255,0.95)" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   );
 }
@@ -102,163 +165,312 @@ export default function Home() {
 const styles = {
   page: {
     minHeight: "100vh",
-    background:
-      "radial-gradient(circle at 50% 20%, rgba(100,120,255,0.08), transparent 40%), #0b0b0f",
+    background: "#06070d",
     color: "white",
-    fontFamily: "sans-serif"
+    fontFamily:
+      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    position: "relative",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column"
+  },
+
+  backgroundGlowTop: {
+    position: "absolute",
+    top: "-180px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "900px",
+    height: "900px",
+    background:
+      "radial-gradient(circle, rgba(88,108,255,0.16) 0%, rgba(88,108,255,0.08) 22%, rgba(88,108,255,0.03) 38%, transparent 65%)",
+    pointerEvents: "none",
+    zIndex: 0
+  },
+
+  backgroundGlowBottom: {
+    position: "absolute",
+    bottom: "-300px",
+    right: "-220px",
+    width: "700px",
+    height: "700px",
+    background:
+      "radial-gradient(circle, rgba(88,108,255,0.10) 0%, rgba(88,108,255,0.04) 30%, transparent 70%)",
+    pointerEvents: "none",
+    zIndex: 0
   },
 
   nav: {
+    position: "relative",
+    zIndex: 2,
+    width: "100%",
+    maxWidth: 1280,
+    margin: "0 auto",
+    padding: "22px 28px",
     display: "flex",
-    justifyContent: "space-between",
-    padding: "20px 40px",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "space-between"
   },
 
-  logo: {
+  brandWrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    textDecoration: "none",
+    color: "white"
+  },
+
+  logoMarkWrap: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+
+  logoText: {
     fontSize: 18,
-    letterSpacing: 4,
-    opacity: 0.9
+    fontWeight: 700,
+    letterSpacing: "0.28em"
+  },
+
+  navRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: 18
   },
 
   navLinks: {
     display: "flex",
-    gap: 20
+    alignItems: "center",
+    gap: 18
   },
 
   navLink: {
-    color: "white",
+    color: "rgba(255,255,255,0.82)",
     textDecoration: "none",
-    opacity: 0.8
+    fontSize: 15,
+    fontWeight: 500
   },
 
   navLinkMuted: {
-    opacity: 0.3
+    color: "rgba(255,255,255,0.34)",
+    fontSize: 15,
+    fontWeight: 500
+  },
+
+  loginButton: {
+    height: 40,
+    padding: "0 16px",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.09)",
+    background: "rgba(255,255,255,0.04)",
+    color: "white",
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: "pointer"
   },
 
   main: {
-    maxWidth: 1100,
+    position: "relative",
+    zIndex: 1,
+    width: "100%",
+    maxWidth: 1280,
     margin: "0 auto",
-    padding: "40px 20px"
+    padding: "0 28px 44px",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center"
   },
 
   hero: {
+    minHeight: "calc(100vh - 96px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     textAlign: "center",
-    marginTop: 40
+    padding: "12px 0 30px"
   },
 
-  eyebrow: {
-    opacity: 0.5,
+  heroInner: {
+    width: "100%",
+    maxWidth: 920,
+    margin: "0 auto"
+  },
+
+  heroEyebrow: {
     fontSize: 12,
-    marginBottom: 10
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.46)",
+    marginBottom: 16
   },
 
   title: {
-    fontSize: 40,
-    lineHeight: 1.2,
-    marginBottom: 20
+    fontSize: "clamp(3rem, 7vw, 5.7rem)",
+    lineHeight: 0.96,
+    letterSpacing: "-0.06em",
+    fontWeight: 800,
+    margin: 0,
+    marginBottom: 22
   },
 
   subtitle: {
-    opacity: 0.6,
-    maxWidth: 600,
-    margin: "0 auto 30px auto"
+    maxWidth: 700,
+    margin: "0 auto 30px",
+    fontSize: "clamp(1rem, 1.8vw, 1.16rem)",
+    lineHeight: 1.65,
+    color: "rgba(255,255,255,0.62)"
   },
 
-  heroButtons: {
+  inputShell: {
+    width: "100%",
+    maxWidth: 860,
+    margin: "0 auto",
+    minHeight: 84,
+    borderRadius: 24,
+    padding: 12,
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    background: "rgba(16,18,28,0.92)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow:
+      "0 28px 80px rgba(0,0,0,0.38), 0 10px 40px rgba(72,91,255,0.12)"
+  },
+
+  fakePrompt: {
+    flex: 1,
+    textAlign: "left",
+    padding: "0 14px",
+    color: "rgba(255,255,255,0.40)",
+    fontSize: 16,
+    lineHeight: 1.4
+  },
+
+  heroCta: {
+    flexShrink: 0,
+    height: 58,
+    padding: "0 22px",
+    borderRadius: 18,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textDecoration: "none",
+    color: "white",
+    fontWeight: 700,
+    fontSize: 15,
+    background: "linear-gradient(135deg, #5f6fff, #7b87ff)",
+    boxShadow: "0 16px 34px rgba(95,111,255,0.38)"
+  },
+
+  quickRow: {
+    marginTop: 18,
     display: "flex",
     justifyContent: "center",
-    gap: 15
+    flexWrap: "wrap",
+    gap: 10
   },
 
-  primaryButton: {
-    background: "rgba(100,120,255,0.2)",
-    padding: "12px 20px",
-    borderRadius: 10,
-    textDecoration: "none",
-    color: "white"
+  quickChip: {
+    padding: "9px 12px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    color: "rgba(255,255,255,0.56)",
+    fontSize: 13,
+    fontWeight: 500
   },
 
-  secondaryButton: {
-    opacity: 0.6,
-    textDecoration: "none",
-    color: "white"
+  cardsSection: {
+    width: "100%",
+    maxWidth: 1160,
+    margin: "0 auto",
+    paddingBottom: 24
   },
 
-  section: {
-    marginTop: 80
-  },
-
-  sectionHeader: {
+  sectionTop: {
     textAlign: "center",
-    marginBottom: 40
+    marginBottom: 28
   },
 
   sectionEyebrow: {
-    opacity: 0.5,
-    fontSize: 12
+    fontSize: 12,
+    letterSpacing: "0.10em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.42)",
+    marginBottom: 10
   },
 
   sectionTitle: {
-    fontSize: 28,
-    marginTop: 10
-  },
-
-  sectionText: {
-    opacity: 0.6,
-    maxWidth: 600,
-    margin: "10px auto"
+    margin: 0,
+    fontSize: "clamp(1.9rem, 3vw, 2.8rem)",
+    lineHeight: 1.04,
+    letterSpacing: "-0.04em"
   },
 
   cardGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: 20
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 18
   },
 
   card: {
-    background: "rgba(255,255,255,0.03)",
-    padding: 20,
-    borderRadius: 14
-  },
-
-  cardLabel: {
-    opacity: 0.4,
-    fontSize: 12
-  },
-
-  cardTitle: {
-    marginTop: 10
-  },
-
-  cardText: {
-    opacity: 0.6,
-    marginTop: 10
-  },
-
-  cardLink: {
-    display: "inline-block",
-    marginTop: 15,
-    color: "white",
+    minHeight: 240,
+    borderRadius: 24,
+    padding: 24,
+    background: "rgba(255,255,255,0.035)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+    display: "flex",
+    flexDirection: "column",
     textDecoration: "none"
   },
 
+  cardInteractive: {
+    cursor: "pointer"
+  },
+
+  cardIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "linear-gradient(135deg, rgba(95,111,255,0.22), rgba(95,111,255,0.10))",
+    border: "1px solid rgba(255,255,255,0.07)",
+    color: "white",
+    fontSize: 16,
+    marginBottom: 18
+  },
+
+  cardTitle: {
+    margin: 0,
+    marginBottom: 12,
+    fontSize: 24,
+    lineHeight: 1.05,
+    color: "white"
+  },
+
+  cardText: {
+    margin: 0,
+    color: "rgba(255,255,255,0.58)",
+    fontSize: 15,
+    lineHeight: 1.65,
+    flex: 1
+  },
+
+  cardLink: {
+    marginTop: 20,
+    color: "white",
+    fontWeight: 600,
+    fontSize: 14
+  },
+
   cardSoon: {
-    marginTop: 15,
-    opacity: 0.4
-  },
-
-  bottomCta: {
-    textAlign: "center",
-    marginTop: 100
-  },
-
-  bottomTitle: {
-    fontSize: 28
-  },
-
-  bottomText: {
-    opacity: 0.6,
-    margin: "10px 0 20px"
+    marginTop: 20,
+    color: "rgba(255,255,255,0.34)",
+    fontWeight: 600,
+    fontSize: 14
   }
 };
