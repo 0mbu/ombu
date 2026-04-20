@@ -7,6 +7,7 @@ export default function StoryPage() {
   const [direction, setDirection] = useState("");
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [didHydrateStarter, setDidHydrateStarter] = useState(false);
 
   const chatRef = useRef(null);
   const hasStarted = messages.length > 0 || loading;
@@ -16,6 +17,22 @@ export default function StoryPage() {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || didHydrateStarter) return;
+
+    const starterPrompt = sessionStorage.getItem("ombu_starter_prompt");
+    sessionStorage.removeItem("ombu_route_transition");
+
+    if (!starterPrompt) {
+      setDidHydrateStarter(true);
+      return;
+    }
+
+    sessionStorage.removeItem("ombu_starter_prompt");
+    setDidHydrateStarter(true);
+    sendMessage(starterPrompt);
+  }, [didHydrateStarter]);
 
   const sendMessage = async (customInput) => {
     const text = (customInput || input).trim();
@@ -76,6 +93,9 @@ export default function StoryPage() {
     setMessages([]);
     setInput("");
     setDirection("");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("ombu_starter_prompt");
+    }
   };
 
   const handleInputKeyDown = (e) => {
@@ -148,19 +168,19 @@ export default function StoryPage() {
             {!sidebarCollapsed && <span>Story</span>}
           </Link>
 
-          <button style={styles.sidebarItemMuted}>
+          <Link href="/characters" style={styles.sidebarItem}>
             <span style={styles.sidebarIconWrap}>
               <CharacterIcon />
             </span>
             {!sidebarCollapsed && <span>Characters</span>}
-          </button>
+          </Link>
 
-          <button style={styles.sidebarItemMuted}>
+          <Link href="/universes" style={styles.sidebarItem}>
             <span style={styles.sidebarIconWrap}>
               <UniverseIcon />
             </span>
             {!sidebarCollapsed && <span>Universes</span>}
-          </button>
+          </Link>
 
           <button style={styles.sidebarItemMuted}>
             <span style={styles.sidebarIconWrap}>
@@ -322,8 +342,6 @@ export default function StoryPage() {
   );
 }
 
-/* ---------- ICONS ---------- */
-
 function SendIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -374,24 +392,9 @@ function StoryIcon() {
         stroke="currentColor"
         strokeWidth="2"
       />
-      <path
-        d="M8 8H16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 12H16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 16H13"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M8 8H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 16H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -414,12 +417,7 @@ function UniverseIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M4 12H20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <path
         d="M12 4C14.5 6.5 16 9.16667 16 12C16 14.8333 14.5 17.5 12 20"
         stroke="currentColor"
@@ -453,18 +451,8 @@ function ProfileIcon() {
 function PlusIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M12 5V19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M5 12H19"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -482,8 +470,6 @@ function SparkIcon() {
   );
 }
 
-/* ---------- STYLES ---------- */
-
 const styles = {
   page: {
     minHeight: "100vh",
@@ -494,7 +480,6 @@ const styles = {
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
   },
-
   sidebar: {
     background: "rgba(10, 12, 20, 0.9)",
     borderRight: "1px solid rgba(255,255,255,0.06)",
@@ -508,20 +493,17 @@ const styles = {
     height: "100vh",
     backdropFilter: "blur(18px)"
   },
-
   sidebarTop: {
     display: "flex",
     flexDirection: "column",
     gap: 18
   },
-
   sidebarBrandRow: {
     display: "flex",
     alignItems: "center",
     gap: 12,
     padding: "4px 6px"
   },
-
   sidebarLogo: {
     width: 38,
     height: 38,
@@ -535,14 +517,12 @@ const styles = {
     fontSize: 16,
     boxShadow: "0 10px 30px rgba(55, 75, 255, 0.18)"
   },
-
   sidebarBrandText: {
     fontSize: 18,
     letterSpacing: 3,
     fontWeight: 600,
     opacity: 0.95
   },
-
   collapseButton: {
     height: 42,
     borderRadius: 12,
@@ -554,14 +534,12 @@ const styles = {
     alignItems: "center",
     justifyContent: "center"
   },
-
   sidebarSection: {
     display: "flex",
     flexDirection: "column",
     gap: 10,
     marginTop: 20
   },
-
   sidebarItem: {
     display: "flex",
     alignItems: "center",
@@ -574,7 +552,6 @@ const styles = {
     border: "1px solid transparent",
     transition: "all 0.2s ease"
   },
-
   sidebarItemActive: {
     display: "flex",
     alignItems: "center",
@@ -587,7 +564,6 @@ const styles = {
     border: "1px solid rgba(135,145,255,0.18)",
     boxShadow: "0 12px 28px rgba(55, 75, 255, 0.14)"
   },
-
   sidebarItemMuted: {
     display: "flex",
     alignItems: "center",
@@ -600,18 +576,15 @@ const styles = {
     cursor: "default",
     textAlign: "left"
   },
-
   sidebarIconWrap: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     minWidth: 18
   },
-
   sidebarBottom: {
     marginTop: 24
   },
-
   newStorySidebarButton: {
     width: "100%",
     display: "flex",
@@ -626,7 +599,6 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 14px 30px rgba(55, 75, 255, 0.14)"
   },
-
   main: {
     flex: 1,
     minWidth: 0,
@@ -634,7 +606,6 @@ const styles = {
     flexDirection: "column",
     padding: "22px 26px 18px"
   },
-
   topBar: {
     display: "flex",
     justifyContent: "space-between",
@@ -642,19 +613,16 @@ const styles = {
     gap: 16,
     paddingBottom: 18
   },
-
   topBarTitle: {
     fontSize: 24,
     fontWeight: 700,
     letterSpacing: "-0.02em"
   },
-
   topBarSub: {
     marginTop: 6,
     color: "rgba(255,255,255,0.52)",
     fontSize: 14
   },
-
   topResetButton: {
     padding: "10px 14px",
     borderRadius: 12,
@@ -663,7 +631,6 @@ const styles = {
     color: "white",
     cursor: "pointer"
   },
-
   workspace: {
     flex: 1,
     minHeight: 0,
@@ -671,24 +638,20 @@ const styles = {
     flexDirection: "column",
     position: "relative"
   },
-
   chatArea: {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
     paddingRight: 4
   },
-
   centerWrap: {
     minHeight: "calc(100vh - 170px)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: "0 20px 120px",
-    animation: "fadeIn 0.35s ease"
+    padding: "0 20px 120px"
   },
-
   heroTitle: {
     fontSize: 40,
     fontWeight: 700,
@@ -698,7 +661,6 @@ const styles = {
     maxWidth: 760,
     lineHeight: 1.08
   },
-
   centerInputShell: {
     width: "100%",
     maxWidth: 860,
@@ -712,7 +674,6 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.08)",
     boxShadow: "0 20px 60px rgba(0,0,0,0.35), 0 10px 30px rgba(72, 91, 255, 0.10)"
   },
-
   centerInput: {
     flex: 1,
     minHeight: 58,
@@ -726,7 +687,6 @@ const styles = {
     lineHeight: 1.55,
     padding: "14px 16px 12px"
   },
-
   centerSendButton: {
     width: 54,
     height: 54,
@@ -741,26 +701,22 @@ const styles = {
     flexShrink: 0,
     boxShadow: "0 14px 30px rgba(55, 75, 255, 0.18)"
   },
-
   helperText: {
     marginTop: 16,
     color: "rgba(255,255,255,0.48)",
     fontSize: 15,
     textAlign: "center"
   },
-
   messagesWrap: {
     width: "100%",
     maxWidth: 980,
     margin: "0 auto",
     padding: "20px 0 170px"
   },
-
   messageRow: {
     display: "flex",
     marginBottom: 16
   },
-
   messageBubble: {
     maxWidth: "78%",
     padding: "16px 18px",
@@ -769,18 +725,15 @@ const styles = {
     whiteSpace: "pre-wrap",
     fontSize: 15
   },
-
   userBubble: {
     background: "linear-gradient(135deg, rgba(98,120,255,0.22), rgba(98,120,255,0.10))",
     border: "1px solid rgba(137,148,255,0.16)",
     boxShadow: "0 14px 30px rgba(55, 75, 255, 0.10)"
   },
-
   assistantBubble: {
     background: "rgba(255,255,255,0.045)",
     border: "1px solid rgba(255,255,255,0.06)"
   },
-
   loadingBubble: {
     display: "flex",
     alignItems: "center",
@@ -790,14 +743,12 @@ const styles = {
     background: "rgba(255,255,255,0.045)",
     border: "1px solid rgba(255,255,255,0.06)"
   },
-
   dot: {
     width: 8,
     height: 8,
     borderRadius: "50%",
     background: "rgba(255,255,255,0.7)"
   },
-
   bottomComposerWrap: {
     position: "fixed",
     left: "50%",
@@ -807,11 +758,9 @@ const styles = {
     transition: "all 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
     zIndex: 20
   },
-
   bottomComposerWrapActive: {
     bottom: 22
   },
-
   bottomComposerShell: {
     display: "flex",
     alignItems: "flex-end",
@@ -823,7 +772,6 @@ const styles = {
     backdropFilter: "blur(18px)",
     boxShadow: "0 20px 50px rgba(0,0,0,0.34)"
   },
-
   bottomComposerInput: {
     flex: 1,
     minHeight: 54,
@@ -837,7 +785,6 @@ const styles = {
     lineHeight: 1.55,
     padding: "12px 14px"
   },
-
   bottomSendButton: {
     width: 50,
     height: 50,
@@ -852,14 +799,12 @@ const styles = {
     flexShrink: 0,
     boxShadow: "0 14px 30px rgba(55, 75, 255, 0.15)"
   },
-
   afterResponseControls: {
     marginTop: 12,
     display: "flex",
     gap: 12,
     alignItems: "stretch"
   },
-
   controlButton: {
     height: 52,
     padding: "0 18px",
@@ -873,7 +818,6 @@ const styles = {
     gap: 10,
     whiteSpace: "nowrap"
   },
-
   directionWrap: {
     flex: 1,
     display: "flex",
@@ -883,7 +827,6 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.08)",
     background: "rgba(255,255,255,0.05)"
   },
-
   directionInput: {
     flex: 1,
     minHeight: 32,
@@ -897,7 +840,6 @@ const styles = {
     lineHeight: 1.5,
     padding: "6px 6px"
   },
-
   directionButton: {
     minWidth: 88,
     borderRadius: 14,
