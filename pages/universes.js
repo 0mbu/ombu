@@ -1,90 +1,291 @@
+import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function UniversesPage() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    genre: "",
+    tone: "",
+    premise: "",
+    rules: "",
+    conflict: ""
+  });
+
+  const updateField = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   return (
-    <div style={styles.page}>
-      <aside
-        style={{
-          ...styles.sidebar,
-          width: sidebarCollapsed ? 88 : 260
-        }}
-      >
-        <div style={styles.sidebarTop}>
-          <div style={styles.sidebarBrandRow}>
-            <div style={styles.sidebarLogo}>O</div>
-            {!sidebarCollapsed && <div style={styles.sidebarBrandText}>OMBU</div>}
+    <>
+      <Head>
+        <title>Universes | OMBU</title>
+      </Head>
+
+      <div style={styles.page}>
+        <div style={styles.sidebar}>
+          <div style={styles.sidebarBrand}>OMBU</div>
+          <div style={styles.sidebarLinks}>
+            <Link href="/" style={styles.sidebarLink}>Home</Link>
+            <Link href="/story" style={styles.sidebarLink}>Story</Link>
+            <Link href="/characters" style={styles.sidebarLink}>Characters</Link>
+            <Link href="/universes" style={styles.sidebarActive}>Universes</Link>
           </div>
-
-          <button
-            onClick={() => setSidebarCollapsed((prev) => !prev)}
-            style={styles.collapseButton}
-            aria-label="Toggle sidebar"
-            title="Toggle sidebar"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M15 6L9 12L15 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
         </div>
 
-        <div style={styles.sidebarSection}>
-          <Link href="/" style={styles.sidebarItem}><span style={styles.sidebarIconWrap}><HomeIcon /></span>{!sidebarCollapsed && <span>Home</span>}</Link>
-          <Link href="/story" style={styles.sidebarItem}><span style={styles.sidebarIconWrap}><StoryIcon /></span>{!sidebarCollapsed && <span>Story</span>}</Link>
-          <Link href="/characters" style={styles.sidebarItem}><span style={styles.sidebarIconWrap}><CharacterIcon /></span>{!sidebarCollapsed && <span>Characters</span>}</Link>
-          <Link href="/universes" style={styles.sidebarItemActive}><span style={styles.sidebarIconWrap}><UniverseIcon /></span>{!sidebarCollapsed && <span>Universes</span>}</Link>
-        </div>
-      </aside>
-
-      <main style={styles.main}>
-        <div style={styles.topBarTitle}>Universe Builder</div>
-        <div style={styles.topBarSub}>This is the right route now. Build this next after the character page.</div>
-
-        <div style={styles.placeholderCard}>
-          <div style={styles.eyebrow}>Next Build</div>
-          <h1 style={styles.heading}>Universe creation has its own page now.</h1>
-          <p style={styles.copy}>
-            Right now this is a clean placeholder so your routing is fixed and the product architecture makes sense.
-            Next move is giving this page fields for world rules, tone, factions, power systems, lore, and reusable setting memory.
+        <main style={styles.main}>
+          <div style={styles.eyebrow}>Worldbuilding</div>
+          <h1 style={styles.title}>Build a universe with real structure.</h1>
+          <p style={styles.subtitle}>
+            This is the foundation for your worldbuilder. Right now it gives you a clean
+            place to define the universe, its rules, tone, and central conflict.
           </p>
-        </div>
-      </main>
+
+          <div style={styles.layout}>
+            <section style={styles.formCard}>
+              <div style={styles.sectionTitle}>Universe details</div>
+
+              <Field
+                label="Universe name"
+                value={form.name}
+                onChange={(value) => updateField("name", value)}
+                placeholder="The Hollow Dominion"
+              />
+              <Field
+                label="Genre"
+                value={form.genre}
+                onChange={(value) => updateField("genre", value)}
+                placeholder="Dark fantasy"
+              />
+              <Field
+                label="Tone"
+                value={form.tone}
+                onChange={(value) => updateField("tone", value)}
+                placeholder="Melancholic, brutal, mythic"
+              />
+              <TextAreaField
+                label="Premise"
+                value={form.premise}
+                onChange={(value) => updateField("premise", value)}
+                placeholder="What is this world at its core?"
+              />
+              <TextAreaField
+                label="Rules"
+                value={form.rules}
+                onChange={(value) => updateField("rules", value)}
+                placeholder="How does magic, power, technology, or society work?"
+              />
+              <TextAreaField
+                label="Central conflict"
+                value={form.conflict}
+                onChange={(value) => updateField("conflict", value)}
+                placeholder="What tension drives this world?"
+              />
+            </section>
+
+            <aside style={styles.previewCard}>
+              <div style={styles.sectionTitle}>Live preview</div>
+
+              <PreviewRow label="Universe name" value={form.name} />
+              <PreviewRow label="Genre" value={form.genre} />
+              <PreviewRow label="Tone" value={form.tone} />
+              <PreviewRow label="Premise" value={form.premise} />
+              <PreviewRow label="Rules" value={form.rules} />
+              <PreviewRow label="Central conflict" value={form.conflict} />
+            </aside>
+          </div>
+        </main>
+      </div>
+    </>
+  );
+}
+
+function Field({ label, value, onChange, placeholder }) {
+  return (
+    <label style={styles.field}>
+      <span style={styles.label}>{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={styles.input}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({ label, value, onChange, placeholder }) {
+  return (
+    <label style={styles.field}>
+      <span style={styles.label}>{label}</span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={styles.textarea}
+      />
+    </label>
+  );
+}
+
+function PreviewRow({ label, value }) {
+  return (
+    <div style={styles.previewRow}>
+      <div style={styles.previewLabel}>{label}</div>
+      <div style={styles.previewValue}>{value || "—"}</div>
     </div>
   );
 }
 
-function HomeIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3L21 10.5V20A1 1 0 0 1 20 21H4A1 1 0 0 1 3 20V10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M9 21V12H15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-function StoryIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z" stroke="currentColor" strokeWidth="2" /><path d="M8 8H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="M8 16H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
-}
-function CharacterIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 21C20 17.6863 16.4183 15 12 15C7.58172 15 4 17.6863 4 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" /></svg>;
-}
-function UniverseIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" /><path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="M12 4C14.5 6.5 16 9.16667 16 12C16 14.8333 14.5 17.5 12 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="M12 4C9.5 6.5 8 9.16667 8 12C8 14.8333 9.5 17.5 12 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
-}
-
 const styles = {
-  page: { minHeight: "100vh", display: "flex", background: "radial-gradient(circle at top, rgba(82, 99, 255, 0.18), transparent 28%), #05070d", color: "#ffffff", fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
-  sidebar: { background: "rgba(10, 12, 20, 0.9)", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "18px 14px", display: "flex", flexDirection: "column", transition: "width 0.25s ease", position: "sticky", top: 0, height: "100vh", backdropFilter: "blur(18px)" },
-  sidebarTop: { display: "flex", flexDirection: "column", gap: 18 },
-  sidebarBrandRow: { display: "flex", alignItems: "center", gap: 12, padding: "4px 6px" },
-  sidebarLogo: { width: 38, height: 38, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, rgba(120,140,255,0.28), rgba(120,140,255,0.08))", border: "1px solid rgba(255,255,255,0.08)", fontWeight: 700, fontSize: 16 },
-  sidebarBrandText: { fontSize: 18, letterSpacing: 3, fontWeight: 600, opacity: 0.95 },
-  collapseButton: { height: 42, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
-  sidebarSection: { display: "flex", flexDirection: "column", gap: 10, marginTop: 20 },
-  sidebarItem: { display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, color: "rgba(255,255,255,0.72)", textDecoration: "none", background: "transparent", border: "1px solid transparent" },
-  sidebarItemActive: { display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, color: "white", textDecoration: "none", background: "linear-gradient(135deg, rgba(96,115,255,0.22), rgba(96,115,255,0.08))", border: "1px solid rgba(135,145,255,0.18)" },
-  sidebarIconWrap: { display: "flex", alignItems: "center", justifyContent: "center", minWidth: 18 },
-  main: { flex: 1, padding: "28px" },
-  topBarTitle: { fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" },
-  topBarSub: { marginTop: 6, color: "rgba(255,255,255,0.52)", fontSize: 14 },
-  placeholderCard: { marginTop: 24, maxWidth: 760, borderRadius: 24, padding: 24, background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.06)" },
-  eyebrow: { fontSize: 12, textTransform: "uppercase", letterSpacing: "0.10em", color: "rgba(255,255,255,0.42)", marginBottom: 12 },
-  heading: { margin: 0, fontSize: 40, lineHeight: 1.04, letterSpacing: "-0.04em" },
-  copy: { marginTop: 16, color: "rgba(255,255,255,0.68)", fontSize: 16, lineHeight: 1.7 }
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    background: "#06070d",
+    color: "white",
+    fontFamily:
+      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  },
+
+  sidebar: {
+    width: 220,
+    borderRight: "1px solid rgba(255,255,255,0.06)",
+    padding: 24,
+    background: "rgba(10,12,20,0.9)"
+  },
+
+  sidebarBrand: {
+    fontSize: 18,
+    fontWeight: 700,
+    letterSpacing: "0.28em",
+    marginBottom: 28
+  },
+
+  sidebarLinks: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+
+  sidebarLink: {
+    textDecoration: "none",
+    color: "rgba(255,255,255,0.72)",
+    padding: "10px 12px",
+    borderRadius: 12
+  },
+
+  sidebarActive: {
+    textDecoration: "none",
+    color: "white",
+    background: "linear-gradient(135deg, rgba(96,115,255,0.22), rgba(96,115,255,0.08))",
+    padding: "10px 12px",
+    borderRadius: 12
+  },
+
+  main: {
+    flex: 1,
+    padding: 28
+  },
+
+  eyebrow: {
+    fontSize: 12,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.46)",
+    marginBottom: 10
+  },
+
+  title: {
+    margin: 0,
+    fontSize: "clamp(2rem, 4vw, 3rem)",
+    lineHeight: 1.03
+  },
+
+  subtitle: {
+    marginTop: 12,
+    maxWidth: 760,
+    color: "rgba(255,255,255,0.62)",
+    lineHeight: 1.6,
+    marginBottom: 24
+  },
+
+  layout: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.1fr) minmax(320px, 0.9fr)",
+    gap: 20
+  },
+
+  formCard: {
+    background: "rgba(255,255,255,0.035)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    borderRadius: 24,
+    padding: 22
+  },
+
+  previewCard: {
+    background: "rgba(255,255,255,0.035)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    borderRadius: 24,
+    padding: 22
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    marginBottom: 18
+  },
+
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    marginBottom: 16
+  },
+
+  label: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.74)"
+  },
+
+  input: {
+    height: 48,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(11,13,22,0.9)",
+    color: "white",
+    padding: "0 14px",
+    outline: "none"
+  },
+
+  textarea: {
+    minHeight: 110,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(11,13,22,0.9)",
+    color: "white",
+    padding: "12px 14px",
+    outline: "none",
+    resize: "vertical",
+    fontFamily: "inherit"
+  },
+
+  previewRow: {
+    marginBottom: 14
+  },
+
+  previewLabel: {
+    fontSize: 12,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.42)",
+    marginBottom: 6
+  },
+
+  previewValue: {
+    lineHeight: 1.6,
+    color: "rgba(255,255,255,0.88)"
+  }
 };
