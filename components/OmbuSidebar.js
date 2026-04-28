@@ -5,26 +5,10 @@ export default function OmbuSidebar({ actionSlot = null }) {
   const router = useRouter();
 
   const navItems = [
-    {
-      label: "Discover",
-      href: "/",
-      icon: <DiscoverIcon />
-    },
-    {
-      label: "Story Engine",
-      href: "/story",
-      icon: <StoryIcon />
-    },
-    {
-      label: "Character Hub",
-      href: "/characters",
-      icon: <CharacterIcon />
-    },
-    {
-      label: "World Engine",
-      href: "/universes",
-      icon: <WorldIcon />
-    }
+    { label: "Discover", href: "/", icon: <DiscoverIcon /> },
+    { label: "Story Engine", href: "/story", icon: <StoryIcon /> },
+    { label: "Character Hub", href: "/characters", icon: <CharacterIcon /> },
+    { label: "World Engine", href: "/universes", icon: <WorldIcon /> }
   ];
 
   const isActive = (href) => {
@@ -49,7 +33,7 @@ export default function OmbuSidebar({ actionSlot = null }) {
                 className={`ombuNavItem ${isActive(item.href) ? "active" : ""}`}
               >
                 <span className="ombuNavIcon">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="ombuNavLabel">{item.label}</span>
               </Link>
             ))}
           </nav>
@@ -57,7 +41,6 @@ export default function OmbuSidebar({ actionSlot = null }) {
 
         <div className="ombuSidebarBottom">
           {actionSlot}
-
           <div className="ombuSystemCard">
             <div className="ombuSystemLabel">System</div>
             <div className="ombuSystemText">Local build</div>
@@ -70,27 +53,29 @@ export default function OmbuSidebar({ actionSlot = null }) {
           width: 250px;
           min-height: 100vh;
           padding: 22px;
-          border-right: 1px solid rgba(255, 255, 255, 0.075);
-          background:
-            linear-gradient(180deg, rgba(9, 11, 20, 0.92), rgba(7, 8, 15, 0.96)),
-            rgba(8, 10, 18, 0.9);
-          backdrop-filter: blur(20px);
+          flex-shrink: 0;
           position: sticky;
           top: 0;
+          z-index: 20;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          flex-shrink: 0;
-          z-index: 20;
+          background:
+            radial-gradient(circle at 18% 4%, rgba(112, 129, 255, 0.16), transparent 28%),
+            linear-gradient(180deg, rgba(9, 11, 20, 0.96), rgba(5, 7, 13, 0.98));
+          border-right: 1px solid rgba(255, 255, 255, 0.075);
+          box-shadow: inset -1px 0 0 rgba(255,255,255,0.025);
+          backdrop-filter: blur(20px);
         }
 
         .ombuBrand {
           display: flex;
           align-items: center;
           gap: 12px;
-          color: white;
+          color: #fff;
           text-decoration: none;
-          margin-bottom: 34px;
+          margin-bottom: 38px;
+          height: 40px;
         }
 
         .ombuBrandMark {
@@ -99,61 +84,65 @@ export default function OmbuSidebar({ actionSlot = null }) {
           border-radius: 14px;
           display: grid;
           place-items: center;
-          font-weight: 850;
+          font-size: 15px;
+          font-weight: 900;
           background:
-            radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22), transparent 32%),
-            linear-gradient(135deg, rgba(111, 130, 255, 0.34), rgba(111, 130, 255, 0.1));
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 18px 45px rgba(85, 100, 255, 0.2);
+            radial-gradient(circle at 30% 24%, rgba(255,255,255,0.26), transparent 32%),
+            linear-gradient(135deg, rgba(113,130,255,0.40), rgba(113,130,255,0.12));
+          border: 1px solid rgba(255,255,255,0.14);
+          box-shadow: 0 16px 36px rgba(92, 110, 255, 0.18);
         }
 
         .ombuBrandText {
           font-size: 15px;
-          font-weight: 850;
-          letter-spacing: 0.3em;
+          font-weight: 900;
+          letter-spacing: 0.29em;
         }
 
         .ombuNav {
           display: flex;
           flex-direction: column;
-          gap: 9px;
+          gap: 11px;
         }
 
         .ombuNavItem {
           position: relative;
+          min-height: 48px;
           display: flex;
           align-items: center;
-          gap: 12px;
-          min-height: 46px;
-          padding: 12px 14px;
-          border-radius: 15px;
-          color: rgba(255, 255, 255, 0.64);
+          gap: 13px;
+          padding: 0 15px;
+          border-radius: 16px;
+          color: rgba(255,255,255,0.64);
           text-decoration: none;
-          border: 1px solid transparent;
-          background: transparent;
+          border: 1px solid rgba(255,255,255,0.045);
+          background: rgba(255,255,255,0.018);
+          overflow: hidden;
           transition:
-            transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+            color 220ms cubic-bezier(0.22, 1, 0.36, 1),
             background 220ms cubic-bezier(0.22, 1, 0.36, 1),
             border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            color 220ms cubic-bezier(0.22, 1, 0.36, 1);
-          overflow: hidden;
+            transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .ombuNavItem::before {
           content: "";
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at left, rgba(111, 130, 255, 0.18), transparent 58%);
           opacity: 0;
+          background:
+            radial-gradient(circle at 0% 50%, rgba(122,139,255,0.22), transparent 46%),
+            linear-gradient(135deg, rgba(101,116,255,0.12), rgba(155,124,255,0.055));
           transition: opacity 220ms ease;
           pointer-events: none;
         }
 
         .ombuNavItem:hover {
-          color: white;
+          color: rgba(255,255,255,0.94);
           transform: translateX(3px);
-          background: rgba(255, 255, 255, 0.045);
-          border-color: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.04);
         }
 
         .ombuNavItem:hover::before {
@@ -161,11 +150,18 @@ export default function OmbuSidebar({ actionSlot = null }) {
         }
 
         .ombuNavItem.active {
-          color: white;
+          color: #fff;
+          transform: translateX(0);
           background:
-            linear-gradient(135deg, rgba(101, 116, 255, 0.24), rgba(155, 124, 255, 0.1));
-          border-color: rgba(145, 155, 255, 0.24);
-          box-shadow: 0 14px 34px rgba(75, 92, 255, 0.14);
+            linear-gradient(135deg, rgba(101,116,255,0.24), rgba(155,124,255,0.09));
+          border-color: rgba(145,155,255,0.30);
+          box-shadow:
+            0 18px 44px rgba(78, 94, 255, 0.14),
+            inset 0 1px 0 rgba(255,255,255,0.055);
+        }
+
+        .ombuNavItem.active::before {
+          opacity: 1;
         }
 
         .ombuNavItem.active::after {
@@ -176,17 +172,25 @@ export default function OmbuSidebar({ actionSlot = null }) {
           bottom: 12px;
           width: 3px;
           border-radius: 999px;
-          background: linear-gradient(180deg, #7d8cff, #b08cff);
-          box-shadow: 0 0 18px rgba(125, 140, 255, 0.8);
+          background: linear-gradient(180deg, #7f8dff, #b18cff);
+          box-shadow: 0 0 18px rgba(127,141,255,0.9);
         }
 
         .ombuNavIcon {
-          display: grid;
-          place-items: center;
+          position: relative;
+          z-index: 1;
           width: 20px;
           height: 20px;
-          color: currentColor;
+          display: grid;
+          place-items: center;
           flex-shrink: 0;
+        }
+
+        .ombuNavLabel {
+          position: relative;
+          z-index: 1;
+          font-size: 15px;
+          font-weight: 650;
         }
 
         .ombuSidebarBottom {
@@ -199,42 +203,44 @@ export default function OmbuSidebar({ actionSlot = null }) {
         .ombuSystemCard {
           padding: 14px;
           border-radius: 18px;
-          background: rgba(255, 255, 255, 0.035);
-          border: 1px solid rgba(255, 255, 255, 0.07);
+          background: rgba(255,255,255,0.032);
+          border: 1px solid rgba(255,255,255,0.065);
         }
 
         .ombuSystemLabel {
           font-size: 11px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.38);
+          color: rgba(255,255,255,0.36);
           margin-bottom: 6px;
         }
 
         .ombuSystemText {
           font-size: 13px;
-          color: rgba(255, 255, 255, 0.68);
+          color: rgba(255,255,255,0.62);
         }
 
         .ombuSidebarAction {
           width: 100%;
           min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
           border: none;
           border-radius: 15px;
           color: white;
           cursor: pointer;
-          font-weight: 800;
+          font-weight: 850;
           background: linear-gradient(135deg, #6574ff, #927dff);
-          box-shadow: 0 18px 42px rgba(101, 116, 255, 0.26);
+          box-shadow: 0 18px 42px rgba(101,116,255,0.24);
           transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .ombuSidebarAction:hover {
           transform: translateY(-2px);
+        }
+
+        .ombuSidebarAction:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
         }
 
         @media (max-width: 900px) {
