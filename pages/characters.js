@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import OmbuSidebar from "../components/OmbuSidebar";
 
 const STORAGE_KEY = "ombu_saved_characters";
 
@@ -162,19 +162,13 @@ export default function CharactersPage() {
       </Head>
 
       <div className="page">
-        <aside className="sidebar">
-          <Link href="/" className="brand">
-            <span className="brandMark">O</span>
-            <span>OMBU</span>
-          </Link>
-
-          <nav className="nav">
-            <Link href="/" className="navItem">Home</Link>
-            <Link href="/story" className="navItem">Story Engine</Link>
-            <Link href="/characters" className="navItem active">Character Hub</Link>
-            <Link href="/universes" className="navItem">World Engine</Link>
-          </nav>
-        </aside>
+        <OmbuSidebar
+          actionSlot={
+            <button className="ombuSidebarAction" onClick={handleNew}>
+              + Create Character
+            </button>
+          }
+        />
 
         <main className="main">
           <section className="hero">
@@ -301,62 +295,6 @@ export default function CharactersPage() {
             #05070d;
           color: white;
           font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-
-        .sidebar {
-          width: 250px;
-          min-height: 100vh;
-          padding: 22px;
-          border-right: 1px solid rgba(255,255,255,0.07);
-          background: rgba(8, 10, 18, 0.72);
-          backdrop-filter: blur(18px);
-          position: sticky;
-          top: 0;
-        }
-
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          color: white;
-          text-decoration: none;
-          font-weight: 800;
-          letter-spacing: 0.22em;
-          margin-bottom: 34px;
-        }
-
-        .brandMark {
-          width: 38px;
-          height: 38px;
-          border-radius: 14px;
-          display: grid;
-          place-items: center;
-          background: linear-gradient(135deg, rgba(111,130,255,0.32), rgba(111,130,255,0.08));
-          border: 1px solid rgba(255,255,255,0.1);
-          box-shadow: 0 18px 45px rgba(80, 100, 255, 0.18);
-        }
-
-        .nav {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .navItem {
-          color: rgba(255,255,255,0.68);
-          text-decoration: none;
-          padding: 12px 14px;
-          border-radius: 14px;
-          transition: 220ms ease;
-          border: 1px solid transparent;
-        }
-
-        .navItem:hover,
-        .navItem.active {
-          color: white;
-          background: rgba(255,255,255,0.055);
-          border-color: rgba(255,255,255,0.08);
-          transform: translateX(3px);
         }
 
         .main {
@@ -735,17 +673,6 @@ export default function CharactersPage() {
         @media (max-width: 900px) {
           .page {
             flex-direction: column;
-          }
-
-          .sidebar {
-            width: 100%;
-            min-height: auto;
-            position: relative;
-          }
-
-          .nav {
-            flex-direction: row;
-            flex-wrap: wrap;
           }
 
           .hero {
