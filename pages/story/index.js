@@ -1,4 +1,4 @@
-import Link from "next/link";
+import OmbuSidebar from "../../components/OmbuSidebar";
 import { useEffect, useRef, useState } from "react";
 
 const STARTER_KEY = "ombu_starter_prompt";
@@ -9,7 +9,6 @@ export default function StoryPage() {
   const [input, setInput] = useState("");
   const [direction, setDirection] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [bootstrapped, setBootstrapped] = useState(false);
 
   const chatRef = useRef(null);
@@ -119,89 +118,22 @@ export default function StoryPage() {
 
   return (
     <div style={styles.page}>
-      <aside
-        style={{
-          ...styles.sidebar,
-          width: sidebarCollapsed ? 88 : 260
-        }}
-      >
-        <div style={styles.sidebarTop}>
-          <div style={styles.sidebarBrandRow}>
-            <div style={styles.sidebarLogo}>O</div>
-            {!sidebarCollapsed && <div style={styles.sidebarBrandText}>OMBU</div>}
-          </div>
-
+      <OmbuSidebar
+        actionSlot={
           <button
-            onClick={() => setSidebarCollapsed((prev) => !prev)}
-            style={styles.collapseButton}
-            aria-label="Toggle sidebar"
-            title="Toggle sidebar"
+            onClick={handleReset}
+            className="ombuSidebarAction"
+            disabled={loading}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              style={{
-                transform: sidebarCollapsed ? "rotate(180deg)" : "none",
-                transition: "transform 0.2s ease"
-              }}
-            >
-              <path
-                d="M15 6L9 12L15 18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            + New Story
           </button>
-        </div>
-
-        <div style={styles.sidebarSection}>
-          <Link href="/" style={styles.sidebarItem}>
-            <span style={styles.sidebarIconWrap}>
-              <HomeIcon />
-            </span>
-            {!sidebarCollapsed && <span>Home</span>}
-          </Link>
-
-          <Link href="/story" style={styles.sidebarItemActive}>
-            <span style={styles.sidebarIconWrap}>
-              <StoryIcon />
-            </span>
-            {!sidebarCollapsed && <span>Story</span>}
-          </Link>
-
-          <Link href="/characters" style={styles.sidebarItem}>
-            <span style={styles.sidebarIconWrap}>
-              <CharacterIcon />
-            </span>
-            {!sidebarCollapsed && <span>Characters</span>}
-          </Link>
-
-          <Link href="/universes" style={styles.sidebarItem}>
-            <span style={styles.sidebarIconWrap}>
-              <UniverseIcon />
-            </span>
-            {!sidebarCollapsed && <span>Universes</span>}
-          </Link>
-        </div>
-
-        <div style={styles.sidebarBottom}>
-          <button onClick={handleReset} style={styles.newStorySidebarButton} disabled={loading}>
-            <span style={styles.sidebarIconWrap}>
-              <PlusIcon />
-            </span>
-            {!sidebarCollapsed && <span>New Story</span>}
-          </button>
-        </div>
-      </aside>
+        }
+      />
 
       <main style={styles.main}>
         <div style={styles.topBar}>
           <div>
-            <div style={styles.topBarTitle}>Story Workspace</div>
+            <div style={styles.topBarTitle}>Story Engine</div>
             <div style={styles.topBarSub}>
               Build scenes, redirect the plot, and keep momentum.
             </div>
@@ -218,11 +150,12 @@ export default function StoryPage() {
           <div ref={chatRef} style={styles.chatArea}>
             {!hasStarted && (
               <div style={styles.centerWrap}>
+                <div style={styles.heroEyebrow}>Narrative workspace</div>
                 <div style={styles.heroTitle}>Create something worth getting lost in.</div>
 
                 <div style={styles.centerInputShell}>
                   <textarea
-                    placeholder="Start a story, scene, or idea..."
+                    placeholder="Start a story, scene, character idea, or vibe..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleInputKeyDown}
@@ -341,100 +274,8 @@ export default function StoryPage() {
 function SendIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M21 3L10 14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M21 3L14 21L10 14L3 10L21 3Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function HomeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M3 10.5L12 3L21 10.5V20A1 1 0 0 1 20 21H4A1 1 0 0 1 3 20V10.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9 21V12H15V21"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function StoryIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path d="M8 8H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M8 16H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CharacterIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M20 21C20 17.6863 16.4183 15 12 15C7.58172 15 4 17.6863 4 21"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function UniverseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-      <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path
-        d="M12 4C14.5 6.5 16 9.16667 16 12C16 14.8333 14.5 17.5 12 20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 4C9.5 6.5 8 9.16667 8 12C8 14.8333 9.5 17.5 12 20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M21 3L10 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -457,129 +298,10 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     background:
-      "radial-gradient(circle at top, rgba(82, 99, 255, 0.18), transparent 28%), #05070d",
+      "radial-gradient(circle at 22% 8%, rgba(92, 112, 255, 0.18), transparent 32%), radial-gradient(circle at 80% 70%, rgba(126, 84, 255, 0.12), transparent 30%), #05070d",
     color: "#ffffff",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-  },
-
-  sidebar: {
-    background: "rgba(10, 12, 20, 0.9)",
-    borderRight: "1px solid rgba(255,255,255,0.06)",
-    padding: "18px 14px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    transition: "width 0.25s ease",
-    position: "sticky",
-    top: 0,
-    height: "100vh",
-    backdropFilter: "blur(18px)"
-  },
-
-  sidebarTop: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 18
-  },
-
-  sidebarBrandRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "4px 6px"
-  },
-
-  sidebarLogo: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, rgba(120,140,255,0.28), rgba(120,140,255,0.08))",
-    border: "1px solid rgba(255,255,255,0.08)",
-    fontWeight: 700,
-    fontSize: 16,
-    boxShadow: "0 10px 30px rgba(55, 75, 255, 0.18)"
-  },
-
-  sidebarBrandText: {
-    fontSize: 18,
-    letterSpacing: 3,
-    fontWeight: 600,
-    opacity: 0.95
-  },
-
-  collapseButton: {
-    height: 42,
-    borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.03)",
-    color: "white",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-
-  sidebarSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    marginTop: 20
-  },
-
-  sidebarItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 14px",
-    borderRadius: 14,
-    color: "rgba(255,255,255,0.72)",
-    textDecoration: "none",
-    background: "transparent",
-    border: "1px solid transparent",
-    transition: "all 0.2s ease"
-  },
-
-  sidebarItemActive: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 14px",
-    borderRadius: 14,
-    color: "white",
-    textDecoration: "none",
-    background: "linear-gradient(135deg, rgba(96,115,255,0.22), rgba(96,115,255,0.08))",
-    border: "1px solid rgba(135,145,255,0.18)",
-    boxShadow: "0 12px 28px rgba(55, 75, 255, 0.14)"
-  },
-
-  sidebarIconWrap: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 18
-  },
-
-  sidebarBottom: {
-    marginTop: 24
-  },
-
-  newStorySidebarButton: {
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    justifyContent: "center",
-    padding: "13px 14px",
-    borderRadius: 14,
-    border: "1px solid rgba(130,145,255,0.18)",
-    background: "linear-gradient(135deg, rgba(98,120,255,0.20), rgba(98,120,255,0.10))",
-    color: "white",
-    cursor: "pointer",
-    boxShadow: "0 14px 30px rgba(55, 75, 255, 0.14)"
   },
 
   main: {
@@ -600,8 +322,8 @@ const styles = {
 
   topBarTitle: {
     fontSize: 24,
-    fontWeight: 700,
-    letterSpacing: "-0.02em"
+    fontWeight: 800,
+    letterSpacing: "-0.03em"
   },
 
   topBarSub: {
@@ -643,14 +365,22 @@ const styles = {
     padding: "0 20px 120px"
   },
 
+  heroEyebrow: {
+    fontSize: 12,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.42)",
+    marginBottom: 12
+  },
+
   heroTitle: {
-    fontSize: 40,
-    fontWeight: 700,
-    letterSpacing: "-0.04em",
+    fontSize: "clamp(2.5rem, 5vw, 4.4rem)",
+    fontWeight: 850,
+    letterSpacing: "-0.06em",
     marginBottom: 24,
     textAlign: "center",
-    maxWidth: 760,
-    lineHeight: 1.08
+    maxWidth: 860,
+    lineHeight: 0.98
   },
 
   centerInputShell: {
@@ -754,10 +484,10 @@ const styles = {
 
   bottomComposerWrap: {
     position: "fixed",
-    left: "50%",
+    left: "calc(250px + (100vw - 250px) / 2)",
     bottom: -220,
     transform: "translateX(-50%)",
-    width: "min(980px, calc(100vw - 140px))",
+    width: "min(980px, calc(100vw - 320px))",
     transition: "all 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
     zIndex: 20
   },
