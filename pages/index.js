@@ -1,42 +1,236 @@
 import Head from "next/head";
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import OmbuSidebar from "../components/OmbuSidebar";
 
-const heroStatements = [
-  "Stories worth disappearing into.",
-  "Build the kind of story you can’t stop thinking about.",
-  "Where worlds begin to feel real.",
-  "Give us a vibe. We’ll give it a pulse.",
-  "Make fiction feel personal again.",
-  "Start anywhere. Build something unforgettable.",
-  "Stories that feel lived in.",
-  "Start with a spark. Leave with a world."
+const STORAGE_KEY = "ombu_saved_characters";
+const STARTER_KEY = "ombu_starter_prompt";
+const TRANSITION_KEY = "ombu_route_transition";
+
+const publicCharacters = [
+  {
+    id: "public-1",
+    name: "Kael Varyn",
+    role: "Exiled Royal Tactician",
+    tagline: "Cold, brilliant, and impossible to fully trust.",
+    creator: "VoidWriter",
+    genre: "Dark Fantasy",
+    tags: ["Politics", "War", "Betrayal"],
+    symbol: "♛",
+    accent: "blue"
+  },
+  {
+    id: "public-2",
+    name: "Luna Seraph",
+    role: "Unstable Mage Prodigy",
+    tagline: "A gifted spellcaster haunted by what her power costs.",
+    creator: "AshenCore",
+    genre: "Magic Drama",
+    tags: ["Magic", "Trauma", "Redemption"],
+    symbol: "◐",
+    accent: "violet"
+  },
+  {
+    id: "public-3",
+    name: "Rex Hollow",
+    role: "Post-Collapse Survivor",
+    tagline: "A hardened leader trying not to become the monster people need.",
+    creator: "NorthSignal",
+    genre: "Post-Apocalyptic",
+    tags: ["Survival", "Grit", "Leadership"],
+    symbol: "⌁",
+    accent: "amber"
+  },
+  {
+    id: "public-4",
+    name: "Mira Voss",
+    role: "Corporate Assassin",
+    tagline: "Elegant, precise, and loyal only when it benefits her.",
+    creator: "NeonSaint",
+    genre: "Cyberpunk",
+    tags: ["Stealth", "Noir", "Betrayal"],
+    symbol: "◇",
+    accent: "pink"
+  },
+  {
+    id: "public-5",
+    name: "Arden Vale",
+    role: "Runaway Heir",
+    tagline: "Born to inherit a throne he wants nothing to do with.",
+    creator: "Starforge",
+    genre: "Fantasy",
+    tags: ["Royalty", "Adventure", "Identity"],
+    symbol: "✧",
+    accent: "green"
+  },
+  {
+    id: "public-6",
+    name: "Nyx Calder",
+    role: "Dream Broker",
+    tagline: "Sells impossible dreams to desperate people.",
+    creator: "NightMarket",
+    genre: "Surreal",
+    tags: ["Mystery", "Dreams", "Dark"],
+    symbol: "☾",
+    accent: "violet"
+  },
+  {
+    id: "public-7",
+    name: "Juno Cross",
+    role: "Mech Arena Pilot",
+    tagline: "A reckless prodigy with a machine that knows her too well.",
+    creator: "IronMuse",
+    genre: "Sci-Fi",
+    tags: ["Mecha", "Action", "Rivalry"],
+    symbol: "⬡",
+    accent: "blue"
+  },
+  {
+    id: "public-8",
+    name: "Eli Thorn",
+    role: "Cursed Detective",
+    tagline: "Every case he solves takes something from him.",
+    creator: "CaseFile",
+    genre: "Urban Fantasy",
+    tags: ["Detective", "Curse", "Mystery"],
+    symbol: "☍",
+    accent: "amber"
+  },
+  {
+    id: "public-9",
+    name: "Sable Ren",
+    role: "Silent Bodyguard",
+    tagline: "Protects everyone except herself.",
+    creator: "QuietBlade",
+    genre: "Action Drama",
+    tags: ["Protector", "Combat", "Loyalty"],
+    symbol: "◆",
+    accent: "red"
+  },
+  {
+    id: "public-10",
+    name: "Theo Marrow",
+    role: "Monster Researcher",
+    tagline: "Studies creatures that keep recognizing him.",
+    creator: "WildScript",
+    genre: "Creature Fiction",
+    tags: ["Monsters", "Science", "Secrets"],
+    symbol: "◎",
+    accent: "green"
+  },
+  {
+    id: "public-11",
+    name: "Astra Quinn",
+    role: "Fallen Star Idol",
+    tagline: "A celebrity with a voice powerful enough to bend reality.",
+    creator: "SignalBloom",
+    genre: "Pop Fantasy",
+    tags: ["Music", "Fame", "Power"],
+    symbol: "✦",
+    accent: "pink"
+  },
+  {
+    id: "public-12",
+    name: "Cain Draven",
+    role: "Reluctant Villain",
+    tagline: "He was written to lose. He found out.",
+    creator: "MetaVoid",
+    genre: "Meta Fiction",
+    tags: ["Villain", "Fate", "Rebellion"],
+    symbol: "♜",
+    accent: "red"
+  }
 ];
 
-const quickPrompts = [
-  "Dark fantasy",
-  "Enemies to lovers",
-  "Post-apocalyptic",
-  "Anime-style action"
+const categories = [
+  "All",
+  "Fantasy",
+  "Anime",
+  "Romance",
+  "Sci-Fi",
+  "Action",
+  "Dark",
+  "Mystery"
 ];
 
-export default function Home() {
+export default function DiscoverPage() {
   const router = useRouter();
-  const [input, setInput] = useState("");
+  const [activeTab, setActiveTab] = useState("public");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearch] = useState("");
+  const [savedCharacters, setSavedCharacters] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
 
-  const randomHeadline = useMemo(() => {
-    return heroStatements[Math.floor(Math.random() * heroStatements.length)];
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setSavedCharacters(parsed);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load saved characters:", error);
+    } finally {
+      setLoaded(true);
+    }
   }, []);
 
-  const goToStoryWithPrompt = (promptText) => {
-    const trimmed = (promptText || "").trim();
-    if (!trimmed || isLeaving) return;
+  const normalizedSavedCharacters = useMemo(() => {
+    return savedCharacters.map((character, index) => ({
+      id: character.id || `saved-${index}`,
+      name: character.name || "Unnamed Character",
+      role: character.role || "Original Character",
+      tagline:
+        character.tagline ||
+        character.personality ||
+        "A private character from your collection.",
+      creator: "You",
+      genre: character.genre || "Private",
+      tags: normalizeTags(character.tags),
+      symbol: character.avatar || "✦",
+      accent: pickAccent(index),
+      source: "private",
+      raw: character
+    }));
+  }, [savedCharacters]);
+
+  const visibleCharacters = useMemo(() => {
+    const base =
+      activeTab === "public" ? publicCharacters : normalizedSavedCharacters;
+
+    return base.filter((character) => {
+      const searchable = [
+        character.name,
+        character.role,
+        character.tagline,
+        character.creator,
+        character.genre,
+        ...(character.tags || [])
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch = searchable.includes(search.trim().toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "All" ||
+        searchable.includes(selectedCategory.toLowerCase());
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [activeTab, normalizedSavedCharacters, search, selectedCategory]);
+
+  const startStoryWithCharacter = (character) => {
+    const prompt = buildCharacterPrompt(character);
 
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("ombu_starter_prompt", trimmed);
-      sessionStorage.setItem("ombu_route_transition", "1");
+      sessionStorage.setItem(STARTER_KEY, prompt);
+      sessionStorage.setItem(TRANSITION_KEY, "1");
     }
 
     setIsLeaving(true);
@@ -46,450 +240,803 @@ export default function Home() {
     }, 160);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    goToStoryWithPrompt(input);
+  const goCreateCharacter = () => {
+    router.push("/characters");
   };
 
   return (
     <>
       <Head>
-        <title>OMBU</title>
+        <title>Discover | OMBU</title>
         <meta
           name="description"
-          content="AI storytelling, character creation, and worldbuilding."
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Lexend:wght@600;700;800&display=swap"
-          rel="stylesheet"
+          content="Discover characters, build worlds, and start immersive AI stories with Ombu."
         />
       </Head>
 
-      <div
-        style={{
-          ...styles.page,
-          ...(isLeaving ? styles.pageLeaving : {})
-        }}
-      >
-        <div style={styles.backgroundGlowTop} />
-        <div style={styles.backgroundGlowBottom} />
+      <div className={`discoverPage ${isLeaving ? "leaving" : ""}`}>
+        <OmbuSidebar
+          actionSlot={
+            <button className="ombuSidebarAction" onClick={goCreateCharacter}>
+              + Create Character
+            </button>
+          }
+        />
 
-        <header style={styles.nav}>
-          <Link href="/" style={styles.brandWrap}>
-            <div style={styles.logoMark}>O</div>
-            <div style={styles.logoText}>OMBU</div>
-          </Link>
-
-          <nav style={styles.navRight}>
-            <div style={styles.navLinks}>
-              <Link href="/story" style={styles.navLink}>
-                Story
-              </Link>
-              <Link href="/characters" style={styles.navLink}>
-                Characters
-              </Link>
-              <Link href="/universes" style={styles.navLink}>
-                Universes
-              </Link>
-            </div>
-          </nav>
-        </header>
-
-        <main style={styles.main}>
-          <section style={styles.hero}>
-            <div style={styles.heroInner}>
-              <div style={styles.heroEyebrow}>
-                AI storytelling, character creation, and worldbuilding
-              </div>
-
-              <h1 style={styles.title}>{randomHeadline}</h1>
-
-              <p style={styles.subtitle}>
-                Start with a scene, a character, or just a vibe. Ombu turns it into
-                something immersive, personal, and worth continuing.
-              </p>
-
-              <form onSubmit={handleSubmit} style={styles.inputShell}>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Drop a character, a scene, or a vibe..."
-                  style={styles.heroInput}
-                />
-                <button type="submit" style={styles.heroCta}>
-                  Start Story
-                </button>
-              </form>
-
-              <div style={styles.quickRow}>
-                {quickPrompts.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => goToStoryWithPrompt(item)}
-                    style={styles.quickChip}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section style={styles.cardsSection}>
-            <div style={styles.sectionTop}>
-              <div style={styles.sectionEyebrow}>Built to keep people coming back</div>
-              <h2 style={styles.sectionTitle}>More than a prompt box</h2>
+        <main className="discoverMain">
+          <header className="discoverTop">
+            <div>
+              <div className="eyebrow">Ombu Discover</div>
+              <h1>Choose a character. Start a world.</h1>
             </div>
 
-            <div style={styles.cardGrid}>
+            <button className="createButton" onClick={goCreateCharacter}>
+              + Create Character
+            </button>
+          </header>
+
+          <section className="controlDeck">
+            <div className="searchWrap">
+              <span className="searchIcon">⌕</span>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search characters, genres, tags..."
+                className="searchInput"
+              />
+            </div>
+
+            <div className="tabs">
               <button
-                type="button"
-                onClick={() => goToStoryWithPrompt("Start a story.")}
-                style={{ ...styles.card, ...styles.cardInteractive }}
+                className={`tab ${activeTab === "public" ? "active" : ""}`}
+                onClick={() => setActiveTab("public")}
               >
-                <div style={styles.cardIcon}>✦</div>
-                <h3 style={styles.cardTitle}>Start a Story</h3>
-                <p style={styles.cardText}>
-                  Write openings, continue scenes, redirect the plot, and keep momentum
-                  without losing the feel.
-                </p>
-                <div style={styles.cardLink}>Open workspace</div>
+                Public
               </button>
-
-              <Link href="/characters" style={{ ...styles.card, textDecoration: "none" }}>
-                <div style={styles.cardIcon}>◉</div>
-                <h3 style={styles.cardTitle}>Create Characters</h3>
-                <p style={styles.cardText}>
-                  Build reusable characters with identity, voice, personality, and depth.
-                </p>
-                <div style={styles.cardLink}>Open character creator</div>
-              </Link>
-
-              <Link href="/universes" style={{ ...styles.card, textDecoration: "none" }}>
-                <div style={styles.cardIcon}>◎</div>
-                <h3 style={styles.cardTitle}>Build Worlds</h3>
-                <p style={styles.cardText}>
-                  Create universes with tone, lore, rules, and a stronger sense of place.
-                </p>
-                <div style={styles.cardLink}>Open universe builder</div>
-              </Link>
+              <button
+                className={`tab ${activeTab === "private" ? "active" : ""}`}
+                onClick={() => setActiveTab("private")}
+              >
+                My Characters
+              </button>
             </div>
           </section>
+
+          <section className="categoryRow">
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`categoryChip ${
+                  selectedCategory === category ? "active" : ""
+                }`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </section>
+
+          <section className="featureStrip">
+            <div className="featureCard large">
+              <div className="featureGlow" />
+              <div className="featureContent">
+                <div className="featureLabel">Featured System</div>
+                <h2>Characters that actually drive the story.</h2>
+                <p>
+                  Browse personalities, choose a vibe, and launch straight into a scene.
+                </p>
+              </div>
+            </div>
+
+            <button
+              className="quickStoryCard"
+              onClick={() => startStoryWithCharacter(publicCharacters[0])}
+            >
+              <span>Start with Kael</span>
+              <strong>Dark political fantasy →</strong>
+            </button>
+          </section>
+
+          <section className="gridHeader">
+            <div>
+              <div className="gridTitle">
+                {activeTab === "public" ? "Public Characters" : "My Characters"}
+              </div>
+              <div className="gridSub">
+                {visibleCharacters.length} available
+              </div>
+            </div>
+          </section>
+
+          {activeTab === "private" && loaded && normalizedSavedCharacters.length === 0 ? (
+            <section className="emptyState">
+              <div className="emptyOrb">✦</div>
+              <h2>No private characters yet.</h2>
+              <p>Create your first character and they’ll appear here.</p>
+              <button className="createButton" onClick={goCreateCharacter}>
+                Create Character
+              </button>
+            </section>
+          ) : (
+            <section className="characterGrid">
+              {visibleCharacters.map((character) => (
+                <CharacterTile
+                  key={character.id}
+                  character={character}
+                  onStart={() => startStoryWithCharacter(character)}
+                />
+              ))}
+            </section>
+          )}
         </main>
       </div>
+
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          background: #05070d;
+        }
+
+        .discoverPage {
+          min-height: 100vh;
+          display: flex;
+          color: white;
+          background:
+            radial-gradient(circle at 18% 8%, rgba(85, 103, 255, 0.18), transparent 30%),
+            radial-gradient(circle at 82% 20%, rgba(155, 91, 255, 0.10), transparent 28%),
+            radial-gradient(circle at 60% 95%, rgba(50, 78, 255, 0.12), transparent 34%),
+            #05070d;
+          font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+          transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+        }
+
+        .discoverPage.leaving {
+          opacity: 0;
+          transform: translateY(-10px) scale(0.995);
+          filter: blur(3px);
+        }
+
+        .discoverMain {
+          flex: 1;
+          min-width: 0;
+          padding: 28px 34px 44px;
+          overflow-x: hidden;
+        }
+
+        .discoverTop {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 24px;
+          margin-bottom: 22px;
+          animation: riseIn 420ms ease both;
+        }
+
+        .eyebrow {
+          font-size: 12px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.42);
+          margin-bottom: 10px;
+        }
+
+        h1 {
+          margin: 0;
+          max-width: 900px;
+          font-size: clamp(2.9rem, 5.8vw, 5.8rem);
+          line-height: 0.92;
+          letter-spacing: -0.075em;
+          font-weight: 900;
+        }
+
+        .createButton {
+          min-height: 46px;
+          padding: 0 18px;
+          border: none;
+          border-radius: 15px;
+          color: white;
+          cursor: pointer;
+          font-weight: 850;
+          white-space: nowrap;
+          background: linear-gradient(135deg, #6574ff, #927dff);
+          box-shadow: 0 18px 48px rgba(101, 116, 255, 0.28);
+          transition:
+            transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .createButton:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 24px 58px rgba(101, 116, 255, 0.34);
+        }
+
+        .controlDeck {
+          display: grid;
+          grid-template-columns: minmax(260px, 1fr) auto;
+          gap: 14px;
+          align-items: center;
+          margin-bottom: 14px;
+          animation: riseIn 500ms ease both;
+        }
+
+        .searchWrap {
+          min-height: 58px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 18px;
+          background: rgba(255, 255, 255, 0.045);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        }
+
+        .searchIcon {
+          color: rgba(255, 255, 255, 0.45);
+          font-size: 20px;
+        }
+
+        .searchInput {
+          width: 100%;
+          border: none;
+          outline: none;
+          background: transparent;
+          color: white;
+          font-size: 15px;
+        }
+
+        .searchInput::placeholder {
+          color: rgba(255, 255, 255, 0.35);
+        }
+
+        .tabs {
+          display: flex;
+          gap: 10px;
+          padding: 6px;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.035);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .tab {
+          min-height: 44px;
+          border: none;
+          border-radius: 15px;
+          padding: 0 16px;
+          cursor: pointer;
+          color: rgba(255, 255, 255, 0.58);
+          background: transparent;
+          font-weight: 850;
+          transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .tab:hover,
+        .tab.active {
+          color: white;
+          background: rgba(101, 116, 255, 0.22);
+          box-shadow: 0 14px 32px rgba(85, 100, 255, 0.14);
+        }
+
+        .categoryRow {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 18px;
+          animation: riseIn 560ms ease both;
+        }
+
+        .categoryChip {
+          min-height: 36px;
+          padding: 0 13px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.075);
+          background: rgba(255, 255, 255, 0.035);
+          color: rgba(255, 255, 255, 0.58);
+          cursor: pointer;
+          font-weight: 750;
+          transition: 200ms ease;
+        }
+
+        .categoryChip:hover,
+        .categoryChip.active {
+          color: white;
+          border-color: rgba(145, 155, 255, 0.25);
+          background: rgba(101, 116, 255, 0.16);
+        }
+
+        .featureStrip {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 330px;
+          gap: 16px;
+          margin-bottom: 24px;
+          animation: riseIn 640ms ease both;
+        }
+
+        .featureCard {
+          position: relative;
+          overflow: hidden;
+          min-height: 170px;
+          border-radius: 30px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028)),
+            rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.085);
+          box-shadow: 0 24px 75px rgba(0, 0, 0, 0.28);
+        }
+
+        .featureGlow {
+          position: absolute;
+          inset: -40%;
+          background:
+            radial-gradient(circle at 20% 35%, rgba(103, 119, 255, 0.38), transparent 32%),
+            radial-gradient(circle at 80% 50%, rgba(184, 106, 255, 0.28), transparent 32%);
+          filter: blur(8px);
+          opacity: 0.8;
+        }
+
+        .featureContent {
+          position: relative;
+          z-index: 1;
+          padding: 24px;
+        }
+
+        .featureLabel {
+          font-size: 12px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.46);
+          margin-bottom: 10px;
+        }
+
+        .featureContent h2 {
+          margin: 0;
+          max-width: 780px;
+          font-size: clamp(2rem, 3vw, 3rem);
+          line-height: 0.98;
+          letter-spacing: -0.055em;
+        }
+
+        .featureContent p {
+          margin: 14px 0 0;
+          max-width: 610px;
+          color: rgba(255, 255, 255, 0.64);
+          line-height: 1.6;
+        }
+
+        .quickStoryCard {
+          min-height: 170px;
+          border-radius: 30px;
+          border: 1px solid rgba(255, 255, 255, 0.085);
+          background:
+            radial-gradient(circle at 80% 0%, rgba(116, 132, 255, 0.22), transparent 38%),
+            rgba(255, 255, 255, 0.04);
+          color: white;
+          cursor: pointer;
+          padding: 22px;
+          text-align: left;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .quickStoryCard:hover {
+          transform: translateY(-4px);
+          border-color: rgba(145, 155, 255, 0.24);
+          box-shadow: 0 24px 70px rgba(80, 100, 255, 0.13);
+        }
+
+        .quickStoryCard span {
+          color: rgba(255, 255, 255, 0.48);
+          font-size: 13px;
+        }
+
+        .quickStoryCard strong {
+          font-size: 22px;
+          line-height: 1.1;
+          letter-spacing: -0.04em;
+        }
+
+        .gridHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 4px 0 14px;
+          animation: riseIn 700ms ease both;
+        }
+
+        .gridTitle {
+          font-size: 21px;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+        }
+
+        .gridSub {
+          margin-top: 4px;
+          color: rgba(255, 255, 255, 0.42);
+          font-size: 13px;
+        }
+
+        .characterGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+          gap: 18px;
+          animation: riseIn 760ms ease both;
+        }
+
+        .characterTile {
+          position: relative;
+          min-height: 380px;
+          border-radius: 30px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.085);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+          box-shadow: 0 22px 70px rgba(0, 0, 0, 0.26);
+          cursor: pointer;
+          transition:
+            transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .characterTile:hover {
+          transform: translateY(-7px);
+          border-color: rgba(160, 170, 255, 0.24);
+          box-shadow:
+            0 30px 90px rgba(0, 0, 0, 0.34),
+            0 22px 70px rgba(85, 100, 255, 0.13);
+        }
+
+        .portrait {
+          position: relative;
+          height: 225px;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          background:
+            radial-gradient(circle at 50% 30%, var(--accent-strong), transparent 34%),
+            radial-gradient(circle at 20% 80%, var(--accent-soft), transparent 34%),
+            linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        }
+
+        .portrait::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, transparent 35%, rgba(5, 7, 13, 0.72) 100%),
+            radial-gradient(circle at center, transparent 24%, rgba(0,0,0,0.18) 100%);
+        }
+
+        .portraitSymbol {
+          position: relative;
+          z-index: 1;
+          width: 104px;
+          height: 104px;
+          display: grid;
+          place-items: center;
+          border-radius: 34px;
+          font-size: 48px;
+          font-weight: 900;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+          transform: rotate(-4deg);
+          transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .characterTile:hover .portraitSymbol {
+          transform: rotate(0deg) scale(1.05);
+        }
+
+        .tileContent {
+          padding: 18px;
+        }
+
+        .tileMeta {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+
+        .genreBadge {
+          max-width: 140px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 11px;
+          color: rgba(255,255,255,0.66);
+          padding: 7px 9px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .creator {
+          color: rgba(255,255,255,0.38);
+          font-size: 11px;
+          white-space: nowrap;
+        }
+
+        .characterTile h3 {
+          margin: 0 0 5px;
+          font-size: 23px;
+          letter-spacing: -0.045em;
+        }
+
+        .role {
+          color: rgba(255,255,255,0.52);
+          font-size: 13px;
+          margin-bottom: 10px;
+        }
+
+        .tagline {
+          color: rgba(255,255,255,0.72);
+          line-height: 1.48;
+          font-size: 14px;
+          min-height: 42px;
+        }
+
+        .tagRow {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 14px;
+        }
+
+        .tag {
+          font-size: 11px;
+          color: rgba(255,255,255,0.58);
+          padding: 6px 8px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.045);
+          border: 1px solid rgba(255,255,255,0.055);
+        }
+
+        .tileAction {
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          min-height: 44px;
+          border-radius: 15px;
+          border: 1px solid rgba(255,255,255,0.10);
+          background:
+            linear-gradient(135deg, rgba(101,116,255,0.36), rgba(155,124,255,0.18));
+          color: white;
+          font-weight: 900;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+          cursor: pointer;
+        }
+
+        .characterTile:hover .tileAction {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .emptyState {
+          min-height: 420px;
+          border-radius: 34px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          text-align: center;
+          padding: 30px;
+          border: 1px solid rgba(255,255,255,0.085);
+          background: rgba(255,255,255,0.035);
+        }
+
+        .emptyOrb {
+          width: 78px;
+          height: 78px;
+          display: grid;
+          place-items: center;
+          border-radius: 28px;
+          font-size: 34px;
+          margin-bottom: 14px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.09);
+        }
+
+        .emptyState h2 {
+          margin: 0 0 8px;
+          font-size: 28px;
+          letter-spacing: -0.04em;
+        }
+
+        .emptyState p {
+          margin: 0 0 18px;
+          color: rgba(255,255,255,0.58);
+        }
+
+        @keyframes riseIn {
+          from {
+            opacity: 0;
+            transform: translateY(14px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 1050px) {
+          .featureStrip {
+            grid-template-columns: 1fr;
+          }
+
+          .controlDeck {
+            grid-template-columns: 1fr;
+          }
+
+          .tabs {
+            width: fit-content;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .discoverPage {
+            flex-direction: column;
+          }
+
+          .discoverMain {
+            padding: 22px;
+          }
+
+          .discoverTop {
+            flex-direction: column;
+          }
+
+          .createButton {
+            width: 100%;
+          }
+
+          .characterGrid {
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+          }
+        }
+
+        @media (max-width: 560px) {
+          .characterGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .portrait {
+            height: 210px;
+          }
+        }
+      `}</style>
     </>
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#06070d",
-    color: "white",
-    fontFamily:
-      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    position: "relative",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    transition: "opacity 0.18s ease, transform 0.18s ease, filter 0.18s ease"
-  },
+function CharacterTile({ character, onStart }) {
+  const accent = getAccent(character.accent);
 
-  pageLeaving: {
-    opacity: 0,
-    transform: "translateY(-16px) scale(0.99)",
-    filter: "blur(4px)"
-  },
+  return (
+    <article
+      className="characterTile"
+      style={{
+        "--accent-strong": accent.strong,
+        "--accent-soft": accent.soft
+      }}
+      onClick={onStart}
+    >
+      <div className="portrait">
+        <div className="portraitSymbol">{character.symbol || "✦"}</div>
+      </div>
 
-  backgroundGlowTop: {
-    position: "absolute",
-    top: "-180px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "900px",
-    height: "900px",
-    background:
-      "radial-gradient(circle, rgba(88,108,255,0.16) 0%, rgba(88,108,255,0.08) 22%, rgba(88,108,255,0.03) 38%, transparent 65%)",
-    pointerEvents: "none",
-    zIndex: 0
-  },
+      <div className="tileContent">
+        <div className="tileMeta">
+          <span className="genreBadge">{character.genre || "Story"}</span>
+          <span className="creator">{character.creator || "Ombu"}</span>
+        </div>
 
-  backgroundGlowBottom: {
-    position: "absolute",
-    bottom: "-300px",
-    right: "-220px",
-    width: "700px",
-    height: "700px",
-    background:
-      "radial-gradient(circle, rgba(88,108,255,0.10) 0%, rgba(88,108,255,0.04) 30%, transparent 70%)",
-    pointerEvents: "none",
-    zIndex: 0
-  },
+        <h3>{character.name}</h3>
+        <div className="role">{character.role}</div>
+        <div className="tagline">{character.tagline}</div>
 
-  nav: {
-    position: "relative",
-    zIndex: 2,
-    width: "100%",
-    maxWidth: 1280,
-    margin: "0 auto",
-    padding: "22px 28px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
+        <div className="tagRow">
+          {(character.tags || []).slice(0, 3).map((tag) => (
+            <span className="tag" key={tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
 
-  brandWrap: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    textDecoration: "none",
-    color: "white"
-  },
+      <button
+        className="tileAction"
+        onClick={(event) => {
+          event.stopPropagation();
+          onStart();
+        }}
+      >
+        Enter Character
+      </button>
+    </article>
+  );
+}
 
-  logoMark: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, rgba(96,115,255,0.26), rgba(96,115,255,0.08))",
-    border: "1px solid rgba(255,255,255,0.10)",
-    fontWeight: 700
-  },
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags;
 
-  logoText: {
-    fontSize: 18,
-    fontWeight: 700,
-    letterSpacing: "0.28em"
-  },
-
-  navRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: 18
-  },
-
-  navLinks: {
-    display: "flex",
-    alignItems: "center",
-    gap: 18
-  },
-
-  navLink: {
-    color: "rgba(255,255,255,0.82)",
-    textDecoration: "none",
-    fontSize: 15,
-    fontWeight: 500
-  },
-
-  main: {
-    position: "relative",
-    zIndex: 1,
-    width: "100%",
-    maxWidth: 1280,
-    margin: "0 auto",
-    padding: "0 28px 44px",
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center"
-  },
-
-  hero: {
-    minHeight: "calc(100vh - 96px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    padding: "12px 0 30px"
-  },
-
-  heroInner: {
-    width: "100%",
-    maxWidth: 920,
-    margin: "0 auto"
-  },
-
-  heroEyebrow: {
-    fontSize: 12,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.46)",
-    marginBottom: 16
-  },
-
-  title: {
-    fontSize: "clamp(3rem, 7vw, 5.7rem)",
-    lineHeight: 0.96,
-    letterSpacing: "-0.06em",
-    fontWeight: 800,
-    margin: 0,
-    marginBottom: 22,
-    fontFamily: '"Lexend", Inter, ui-sans-serif, system-ui, sans-serif'
-  },
-
-  subtitle: {
-    maxWidth: 700,
-    margin: "0 auto 30px",
-    fontSize: "clamp(1rem, 1.8vw, 1.16rem)",
-    lineHeight: 1.65,
-    color: "rgba(255,255,255,0.62)"
-  },
-
-  inputShell: {
-    width: "100%",
-    maxWidth: 860,
-    margin: "0 auto",
-    minHeight: 84,
-    borderRadius: 24,
-    padding: 12,
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    background: "rgba(16,18,28,0.92)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    boxShadow:
-      "0 28px 80px rgba(0,0,0,0.38), 0 10px 40px rgba(72,91,255,0.12)"
-  },
-
-  heroInput: {
-    flex: 1,
-    minWidth: 0,
-    height: 58,
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    color: "white",
-    fontSize: 16,
-    padding: "0 14px"
-  },
-
-  heroCta: {
-    flexShrink: 0,
-    height: 58,
-    padding: "0 22px",
-    borderRadius: 18,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textDecoration: "none",
-    color: "white",
-    fontWeight: 700,
-    fontSize: 15,
-    border: "none",
-    cursor: "pointer",
-    background: "linear-gradient(135deg, #5f6fff, #7b87ff)",
-    boxShadow: "0 16px 34px rgba(95,111,255,0.38)"
-  },
-
-  quickRow: {
-    marginTop: 18,
-    display: "flex",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 10
-  },
-
-  quickChip: {
-    padding: "9px 12px",
-    borderRadius: 999,
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.06)",
-    color: "rgba(255,255,255,0.70)",
-    fontSize: 13,
-    fontWeight: 500,
-    cursor: "pointer"
-  },
-
-  cardsSection: {
-    width: "100%",
-    maxWidth: 1160,
-    margin: "0 auto",
-    paddingBottom: 24
-  },
-
-  sectionTop: {
-    textAlign: "center",
-    marginBottom: 28
-  },
-
-  sectionEyebrow: {
-    fontSize: 12,
-    letterSpacing: "0.10em",
-    textTransform: "uppercase",
-    color: "rgba(255,255,255,0.42)",
-    marginBottom: 10
-  },
-
-  sectionTitle: {
-    margin: 0,
-    fontSize: "clamp(1.9rem, 3vw, 2.8rem)",
-    lineHeight: 1.04,
-    letterSpacing: "-0.04em"
-  },
-
-  cardGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 18
-  },
-
-  card: {
-    minHeight: 240,
-    borderRadius: 24,
-    padding: 24,
-    background: "rgba(255,255,255,0.035)",
-    border: "1px solid rgba(255,255,255,0.06)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-    display: "flex",
-    flexDirection: "column",
-    textAlign: "left",
-    color: "white"
-  },
-
-  cardInteractive: {
-    cursor: "pointer"
-  },
-
-  cardIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, rgba(95,111,255,0.22), rgba(95,111,255,0.10))",
-    border: "1px solid rgba(255,255,255,0.07)",
-    color: "white",
-    fontSize: 16,
-    marginBottom: 18
-  },
-
-  cardTitle: {
-    margin: 0,
-    marginBottom: 12,
-    fontSize: 24,
-    lineHeight: 1.05,
-    color: "white"
-  },
-
-  cardText: {
-    margin: 0,
-    color: "rgba(255,255,255,0.58)",
-    fontSize: 15,
-    lineHeight: 1.65,
-    flex: 1
-  },
-
-  cardLink: {
-    marginTop: 20,
-    color: "white",
-    fontWeight: 600,
-    fontSize: 14
+  if (typeof tags === "string") {
+    return tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
   }
-};
+
+  return [];
+}
+
+function pickAccent(index) {
+  const accents = ["blue", "violet", "amber", "pink", "green", "red"];
+  return accents[index % accents.length];
+}
+
+function getAccent(accent) {
+  const accents = {
+    blue: {
+      strong: "rgba(92, 118, 255, 0.42)",
+      soft: "rgba(80, 120, 255, 0.20)"
+    },
+    violet: {
+      strong: "rgba(153, 102, 255, 0.42)",
+      soft: "rgba(142, 92, 255, 0.20)"
+    },
+    amber: {
+      strong: "rgba(255, 175, 74, 0.36)",
+      soft: "rgba(255, 190, 84, 0.16)"
+    },
+    pink: {
+      strong: "rgba(255, 96, 178, 0.34)",
+      soft: "rgba(255, 96, 178, 0.16)"
+    },
+    green: {
+      strong: "rgba(90, 220, 170, 0.32)",
+      soft: "rgba(80, 210, 165, 0.15)"
+    },
+    red: {
+      strong: "rgba(255, 86, 105, 0.34)",
+      soft: "rgba(255, 86, 105, 0.15)"
+    }
+  };
+
+  return accents[accent] || accents.blue;
+}
+
+function buildCharacterPrompt(character) {
+  const tags = (character.tags || []).join(", ");
+
+  return `
+Start an immersive scene featuring this character.
+
+Character:
+Name: ${character.name}
+Role: ${character.role}
+Genre: ${character.genre}
+Core hook: ${character.tagline}
+Tags: ${tags}
+
+Write a cinematic opening scene that immediately shows who this character is through action, atmosphere, and natural dialogue. Do not explain the character like a profile. Make it feel like the user just entered their story.
+  `.trim();
+}
