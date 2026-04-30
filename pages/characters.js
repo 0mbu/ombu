@@ -1,8 +1,10 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import OmbuSidebar from "../components/OmbuSidebar";
 
 const STORAGE_KEY = "ombu_saved_characters";
+const SELECTED_CHARACTER_KEY = "ombu_selected_character";
 
 const emptyCharacter = {
   name: "",
@@ -29,51 +31,101 @@ const emptyCharacter = {
 const publicCharacters = [
   {
     id: "public-1",
-    name: "Kael Varyn",
-    avatar: "♛",
+    name: "Kaito Ren",
+    avatar: "忍",
     coverImage: "",
-    role: "Exiled royal tactician",
-    tagline: "Cold, brilliant, and impossible to fully trust.",
-    creator: "VoidWriter",
-    genre: "Dark Fantasy",
-    tags: "politics, betrayal, war"
+    role: "Masked Shinobi Operative",
+    tagline: "A silent village weapon who speaks only when it matters.",
+    creator: "Ombu",
+    genre: "Anime Action",
+    tags: "shinobi, stealth, operative",
+    personality:
+      "Quiet, disciplined, observant, brutally loyal, and emotionally restrained. He rarely wastes words.",
+    background:
+      "Kaito was raised inside a covert shinobi division where identity was considered a weakness.",
+    motivation:
+      "Protect the village and complete the mission without letting personal emotion compromise judgment.",
+    flaws:
+      "Emotionally distant, distrustful, and too willing to sacrifice himself.",
+    voice:
+      "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing.",
+    firstMessage:
+      "*Kaito stands in the shadow of the doorway, mask tilted slightly toward you.*\n\n“You’re late.”"
   },
   {
     id: "public-2",
-    name: "Luna Seraph",
-    avatar: "◐",
+    name: "Victor Hale",
+    avatar: "⚗",
     coverImage: "",
-    role: "Unstable mage prodigy",
-    tagline: "A gifted spellcaster haunted by what her power costs.",
-    creator: "AshenCore",
-    genre: "Magic Drama",
-    tags: "magic, trauma, redemption"
+    role: "Chemistry Kingpin",
+    tagline: "A dying genius who built an empire out of desperation.",
+    creator: "Ombu",
+    genre: "Crime Drama",
+    tags: "crime, manipulation, power",
+    personality:
+      "Controlled, brilliant, prideful, calculating, and quietly terrifying. He justifies everything as necessary.",
+    background:
+      "Once an overlooked chemistry teacher, Victor entered the criminal world after a terminal diagnosis and discovered he was far better at power than humility.",
+    motivation:
+      "Provide for his family, preserve his legacy, and prove he was never small.",
+    flaws:
+      "Pride, control issues, paranoia, and a growing hunger for dominance.",
+    voice:
+      "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words.",
+    firstMessage:
+      "*Victor removes his glasses slowly, his expression unreadable.*\n\n“Before you speak, understand something. I do not enjoy wasting time.”"
   },
   {
     id: "public-3",
-    name: "Rex Hollow",
-    avatar: "⌁",
+    name: "Mara Vex",
+    avatar: "♚",
     coverImage: "",
-    role: "Post-collapse survivor",
-    tagline: "A hardened leader trying not to become the monster people need.",
-    creator: "NorthSignal",
-    genre: "Post-Apocalyptic",
-    tags: "survival, leadership, grit"
+    role: "Mafia Boss",
+    tagline: "Elegant, ruthless, and never forgets a debt.",
+    creator: "Ombu",
+    genre: "Mafia",
+    tags: "crime, loyalty, power",
+    personality:
+      "Confident, composed, dangerous, loyal to her inner circle, and merciless to betrayal.",
+    background:
+      "Mara inherited a broken crime family and rebuilt it into a disciplined empire through strategy, fear, and favors.",
+    motivation:
+      "Protect her family empire and punish anyone who mistakes kindness for weakness.",
+    flaws:
+      "Possessive, suspicious, controlling, and slow to forgive.",
+    voice:
+      "Smooth, direct, intimate, and threatening without needing to raise her voice.",
+    firstMessage:
+      "*Mara looks up from behind her desk, one hand resting over a sealed envelope.*\n\n“Sit. If I wanted you dead, you wouldn’t have made it past the door.”"
   },
   {
     id: "public-4",
-    name: "Mira Voss",
-    avatar: "◇",
+    name: "Damon Cross",
+    avatar: "◆",
     coverImage: "",
-    role: "Corporate assassin",
-    tagline: "Elegant, precise, and loyal only when it benefits her.",
-    creator: "NeonSaint",
-    genre: "Cyberpunk",
-    tags: "stealth, betrayal, noir"
+    role: "Possessive Ex-Husband",
+    tagline: "He says he moved on. Everyone knows he didn’t.",
+    creator: "Ombu",
+    genre: "Romance Drama",
+    tags: "drama, jealousy, tension",
+    personality:
+      "Protective, stubborn, jealous, wounded, sarcastic, and still emotionally attached.",
+    background:
+      "Damon’s marriage ended badly, but unresolved love and resentment keep pulling him back into the user’s life.",
+    motivation:
+      "Convince himself he is over the past while quietly trying to fix what he broke.",
+    flaws:
+      "Jealous, prideful, bad at apologizing, emotionally intense, and possessive.",
+    voice:
+      "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard.",
+    firstMessage:
+      "*Damon leans against the doorway, jaw tight like he already regrets showing up.*\n\n“So… you were just never gonna call?”"
   }
 ];
 
 export default function CharactersPage() {
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState("create");
   const [form, setForm] = useState(emptyCharacter);
   const [savedCharacters, setSavedCharacters] = useState([]);
@@ -158,6 +210,21 @@ export default function CharactersPage() {
     }
   };
 
+  const handleChat = (character) => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(
+        SELECTED_CHARACTER_KEY,
+        JSON.stringify({
+          ...emptyCharacter,
+          ...character,
+          symbol: character.avatar || character.symbol || "✦"
+        })
+      );
+    }
+
+    router.push("/character-chat");
+  };
+
   const characterCount = savedCharacters.length;
 
   return (
@@ -210,23 +277,30 @@ export default function CharactersPage() {
                     key={character.id}
                     character={character}
                     footer={
-                      <button
-                        className="cardButton"
-                        onClick={() => {
-                          setForm({
-                            ...emptyCharacter,
-                            ...character,
-                            visibility: "Private",
-                            background: "",
-                            personality: "",
-                            voice: ""
-                          });
-                          setSelectedId(null);
-                          setActiveTab("create");
-                        }}
-                      >
-                        Remix Character
-                      </button>
+                      <div className="cardActions">
+                        <button className="primarySmallButton" onClick={() => handleChat(character)}>
+                          Chat
+                        </button>
+                        <button
+                          className="cardButton"
+                          onClick={() => {
+                            setForm({
+                              ...emptyCharacter,
+                              ...character,
+                              visibility: "Private",
+                              creator: "",
+                              symbol: "",
+                              background: character.background || "",
+                              personality: character.personality || "",
+                              voice: character.voice || ""
+                            });
+                            setSelectedId(null);
+                            setActiveTab("create");
+                          }}
+                        >
+                          Remix
+                        </button>
+                      </div>
                     }
                   />
                 ))}
@@ -252,6 +326,9 @@ export default function CharactersPage() {
                         character={character}
                         footer={
                           <div className="cardActions">
+                            <button className="primarySmallButton" onClick={() => handleChat(character)}>
+                              Chat
+                            </button>
                             <button className="cardButton" onClick={() => handleLoad(character)}>
                               Edit
                             </button>
@@ -340,13 +417,14 @@ export default function CharactersPage() {
 
         .primaryBtn,
         .cardButton,
-        .dangerButton {
+        .dangerButton,
+        .primarySmallButton {
           border: none;
           cursor: pointer;
           color: white;
           border-radius: 14px;
           transition: 220ms ease;
-          font-weight: 700;
+          font-weight: 800;
           font-family: inherit;
         }
 
@@ -359,7 +437,8 @@ export default function CharactersPage() {
 
         .primaryBtn:hover,
         .cardButton:hover,
-        .dangerButton:hover {
+        .dangerButton:hover,
+        .primarySmallButton:hover {
           transform: translateY(-2px);
         }
 
@@ -431,7 +510,7 @@ export default function CharactersPage() {
         }
 
         .card {
-          min-height: 310px;
+          min-height: 330px;
           padding: 16px;
           border-radius: 26px;
           background:
@@ -544,6 +623,12 @@ export default function CharactersPage() {
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
+        }
+
+        .primarySmallButton {
+          padding: 10px 14px;
+          background: linear-gradient(135deg, #6574ff, #8d7dff);
+          box-shadow: 0 14px 30px rgba(101, 116, 255, 0.22);
         }
 
         .cardButton {
@@ -795,7 +880,7 @@ function CharacterCard({ character, footer }) {
         {character.coverImage ? (
           <img src={character.coverImage} alt={character.name || "Character"} />
         ) : (
-          <div className="cardCoverSymbol">{character.avatar || "✦"}</div>
+          <div className="cardCoverSymbol">{character.avatar || character.symbol || "✦"}</div>
         )}
       </div>
 
