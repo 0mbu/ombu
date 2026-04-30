@@ -11,6 +11,7 @@ const emptyCharacter = {
   visibility: "Private",
   genre: "",
   avatar: "✦",
+  coverImage: "",
   tagline: "",
   appearance: "",
   personality: "",
@@ -30,6 +31,7 @@ const publicCharacters = [
     id: "public-1",
     name: "Kael Varyn",
     avatar: "♛",
+    coverImage: "",
     role: "Exiled royal tactician",
     tagline: "Cold, brilliant, and impossible to fully trust.",
     creator: "VoidWriter",
@@ -40,6 +42,7 @@ const publicCharacters = [
     id: "public-2",
     name: "Luna Seraph",
     avatar: "◐",
+    coverImage: "",
     role: "Unstable mage prodigy",
     tagline: "A gifted spellcaster haunted by what her power costs.",
     creator: "AshenCore",
@@ -50,6 +53,7 @@ const publicCharacters = [
     id: "public-3",
     name: "Rex Hollow",
     avatar: "⌁",
+    coverImage: "",
     role: "Post-collapse survivor",
     tagline: "A hardened leader trying not to become the monster people need.",
     creator: "NorthSignal",
@@ -60,6 +64,7 @@ const publicCharacters = [
     id: "public-4",
     name: "Mira Voss",
     avatar: "◇",
+    coverImage: "",
     role: "Corporate assassin",
     tagline: "Elegant, precise, and loyal only when it benefits her.",
     creator: "NeonSaint",
@@ -69,7 +74,7 @@ const publicCharacters = [
 ];
 
 export default function CharactersPage() {
-  const [activeTab, setActiveTab] = useState("public");
+  const [activeTab, setActiveTab] = useState("create");
   const [form, setForm] = useState(emptyCharacter);
   const [savedCharacters, setSavedCharacters] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -158,7 +163,7 @@ export default function CharactersPage() {
   return (
     <>
       <Head>
-        <title>Character Hub | OMBU</title>
+        <title>Character Studio | OMBU</title>
       </Head>
 
       <div className="page">
@@ -173,11 +178,10 @@ export default function CharactersPage() {
         <main className="main">
           <section className="hero">
             <div>
-              <div className="eyebrow">Character system</div>
-              <h1>Character Hub</h1>
+              <div className="eyebrow">Creation system</div>
+              <h1>Character Studio</h1>
               <p>
-                Build, browse, save, and shape reusable characters for your stories,
-                worlds, and future universes.
+                Build the personality, voice, image, history, and behavior rules that power your character chats.
               </p>
             </div>
 
@@ -193,9 +197,9 @@ export default function CharactersPage() {
           </section>
 
           <div className="tabs">
-            <Tab label="Public Characters" value="public" activeTab={activeTab} setActiveTab={setActiveTab} />
-            <Tab label="My Characters" value="mine" activeTab={activeTab} setActiveTab={setActiveTab} />
             <Tab label="Create" value="create" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <Tab label="My Characters" value="mine" activeTab={activeTab} setActiveTab={setActiveTab} />
+            <Tab label="Public Preview" value="public" activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
 
           <section className="panel">
@@ -328,7 +332,7 @@ export default function CharactersPage() {
         }
 
         .hero p {
-          max-width: 720px;
+          max-width: 760px;
           color: rgba(255,255,255,0.62);
           line-height: 1.65;
           font-size: 16px;
@@ -427,8 +431,8 @@ export default function CharactersPage() {
         }
 
         .card {
-          min-height: 265px;
-          padding: 20px;
+          min-height: 310px;
+          padding: 16px;
           border-radius: 26px;
           background:
             linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.032));
@@ -458,37 +462,59 @@ export default function CharactersPage() {
           opacity: 1;
         }
 
-        .avatar {
-          width: 54px;
-          height: 54px;
-          border-radius: 18px;
+        .cardCover {
+          position: relative;
+          z-index: 1;
+          height: 160px;
+          border-radius: 20px;
+          overflow: hidden;
+          margin-bottom: 16px;
           display: grid;
           place-items: center;
-          font-size: 24px;
-          background: rgba(255,255,255,0.06);
+          background:
+            radial-gradient(circle at 50% 30%, rgba(92,112,255,0.34), transparent 38%),
+            radial-gradient(circle at 20% 80%, rgba(155,124,255,0.18), transparent 38%),
+            rgba(255,255,255,0.045);
           border: 1px solid rgba(255,255,255,0.08);
-          margin-bottom: 16px;
+        }
+
+        .cardCover img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .cardCoverSymbol {
+          font-size: 42px;
         }
 
         .card h3 {
+          position: relative;
+          z-index: 1;
           margin: 0 0 6px;
           font-size: 22px;
           letter-spacing: -0.03em;
         }
 
         .role {
+          position: relative;
+          z-index: 1;
           color: rgba(255,255,255,0.58);
           font-size: 14px;
           margin-bottom: 12px;
         }
 
         .tagline {
+          position: relative;
+          z-index: 1;
           color: rgba(255,255,255,0.78);
           line-height: 1.55;
           margin-bottom: 14px;
         }
 
         .chipRow {
+          position: relative;
+          z-index: 1;
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
@@ -505,18 +531,24 @@ export default function CharactersPage() {
         }
 
         .creator {
+          position: relative;
+          z-index: 1;
           font-size: 12px;
           color: rgba(255,255,255,0.42);
           margin-bottom: 14px;
         }
 
         .cardActions {
+          position: relative;
+          z-index: 1;
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
         }
 
         .cardButton {
+          position: relative;
+          z-index: 1;
           padding: 10px 12px;
           background: rgba(255,255,255,0.09);
           border: 1px solid rgba(255,255,255,0.08);
@@ -608,6 +640,10 @@ export default function CharactersPage() {
           transition: 200ms ease;
         }
 
+        input[type="file"] {
+          cursor: pointer;
+        }
+
         input:focus,
         textarea:focus,
         select:focus {
@@ -630,6 +666,34 @@ export default function CharactersPage() {
           gap: 12px;
           flex-wrap: wrap;
           margin-top: 10px;
+        }
+
+        .previewCover {
+          width: 100%;
+          height: 240px;
+          border-radius: 24px;
+          overflow: hidden;
+          margin-bottom: 16px;
+          border: 1px solid rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.04);
+        }
+
+        .previewCover img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .avatar {
+          width: 58px;
+          height: 58px;
+          border-radius: 20px;
+          display: grid;
+          place-items: center;
+          font-size: 26px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
+          margin-bottom: 16px;
         }
 
         .previewName {
@@ -727,7 +791,14 @@ function CharacterCard({ character, footer }) {
 
   return (
     <article className="card">
-      <div className="avatar">{character.avatar || "✦"}</div>
+      <div className="cardCover">
+        {character.coverImage ? (
+          <img src={character.coverImage} alt={character.name || "Character"} />
+        ) : (
+          <div className="cardCoverSymbol">{character.avatar || "✦"}</div>
+        )}
+      </div>
+
       <h3>{character.name || "Unnamed Character"}</h3>
       <div className="role">{character.role || "No role set"}</div>
       <div className="tagline">
@@ -755,6 +826,27 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
     .map((tag) => tag.trim())
     .filter(Boolean);
 
+  const handleImageUpload = (file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      updateField("coverImage", reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const removeCoverImage = () => {
+    updateField("coverImage", "");
+  };
+
   return (
     <div className="createLayout">
       <section className="formCard">
@@ -776,6 +868,20 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
 
           <Field label="Genre" value={form.genre} onChange={(v) => updateField("genre", v)} placeholder="Dark fantasy" />
           <Field label="Avatar symbol" value={form.avatar} onChange={(v) => updateField("avatar", v)} placeholder="✦" />
+
+          <div className="field wide">
+            <label>Cover image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e.target.files?.[0])}
+            />
+            {form.coverImage && (
+              <button className="cardButton" type="button" onClick={removeCoverImage}>
+                Remove Image
+              </button>
+            )}
+          </div>
 
           <Field className="wide" label="Short tagline" value={form.tagline} onChange={(v) => updateField("tagline", v)} placeholder="A one-line hook for the character." />
           <TextField className="wide" label="Appearance" value={form.appearance} onChange={(v) => updateField("appearance", v)} placeholder="Face, clothing, build, scars, aura, style..." />
@@ -804,7 +910,14 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
       <aside className="previewCard">
         <h2 className="sectionTitle">Live preview</h2>
 
-        <div className="avatar">{form.avatar || "✦"}</div>
+        {form.coverImage ? (
+          <div className="previewCover">
+            <img src={form.coverImage} alt={form.name || "Character preview"} />
+          </div>
+        ) : (
+          <div className="avatar">{form.avatar || "✦"}</div>
+        )}
+
         <div className="previewName">{form.name || "Unnamed character"}</div>
         <div className="role">{form.role || "No role yet"}</div>
 
