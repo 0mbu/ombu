@@ -4,8 +4,7 @@ import { useRouter } from "next/router";
 import OmbuSidebar from "../components/OmbuSidebar";
 
 const STORAGE_KEY = "ombu_saved_characters";
-const STARTER_KEY = "ombu_starter_prompt";
-const TRANSITION_KEY = "ombu_route_transition";
+const SELECTED_CHARACTER_KEY = "ombu_selected_character";
 
 const publicCharacters = [
   {
@@ -17,7 +16,8 @@ const publicCharacters = [
     genre: "Dark Fantasy",
     tags: ["Politics", "War", "Betrayal"],
     symbol: "♛",
-    accent: "blue"
+    accent: "blue",
+    coverImage: ""
   },
   {
     id: "public-2",
@@ -28,7 +28,8 @@ const publicCharacters = [
     genre: "Magic Drama",
     tags: ["Magic", "Trauma", "Redemption"],
     symbol: "◐",
-    accent: "violet"
+    accent: "violet",
+    coverImage: ""
   },
   {
     id: "public-3",
@@ -39,7 +40,8 @@ const publicCharacters = [
     genre: "Post-Apocalyptic",
     tags: ["Survival", "Grit", "Leadership"],
     symbol: "⌁",
-    accent: "amber"
+    accent: "amber",
+    coverImage: ""
   },
   {
     id: "public-4",
@@ -50,7 +52,8 @@ const publicCharacters = [
     genre: "Cyberpunk",
     tags: ["Stealth", "Noir", "Betrayal"],
     symbol: "◇",
-    accent: "pink"
+    accent: "pink",
+    coverImage: ""
   },
   {
     id: "public-5",
@@ -61,7 +64,8 @@ const publicCharacters = [
     genre: "Fantasy",
     tags: ["Royalty", "Adventure", "Identity"],
     symbol: "✧",
-    accent: "green"
+    accent: "green",
+    coverImage: ""
   },
   {
     id: "public-6",
@@ -72,7 +76,8 @@ const publicCharacters = [
     genre: "Surreal",
     tags: ["Mystery", "Dreams", "Dark"],
     symbol: "☾",
-    accent: "violet"
+    accent: "violet",
+    coverImage: ""
   },
   {
     id: "public-7",
@@ -83,7 +88,8 @@ const publicCharacters = [
     genre: "Sci-Fi",
     tags: ["Mecha", "Action", "Rivalry"],
     symbol: "⬡",
-    accent: "blue"
+    accent: "blue",
+    coverImage: ""
   },
   {
     id: "public-8",
@@ -94,7 +100,8 @@ const publicCharacters = [
     genre: "Urban Fantasy",
     tags: ["Detective", "Curse", "Mystery"],
     symbol: "☍",
-    accent: "amber"
+    accent: "amber",
+    coverImage: ""
   },
   {
     id: "public-9",
@@ -105,7 +112,8 @@ const publicCharacters = [
     genre: "Action Drama",
     tags: ["Protector", "Combat", "Loyalty"],
     symbol: "◆",
-    accent: "red"
+    accent: "red",
+    coverImage: ""
   },
   {
     id: "public-10",
@@ -116,7 +124,8 @@ const publicCharacters = [
     genre: "Creature Fiction",
     tags: ["Monsters", "Science", "Secrets"],
     symbol: "◎",
-    accent: "green"
+    accent: "green",
+    coverImage: ""
   },
   {
     id: "public-11",
@@ -127,7 +136,8 @@ const publicCharacters = [
     genre: "Pop Fantasy",
     tags: ["Music", "Fame", "Power"],
     symbol: "✦",
-    accent: "pink"
+    accent: "pink",
+    coverImage: ""
   },
   {
     id: "public-12",
@@ -138,7 +148,8 @@ const publicCharacters = [
     genre: "Meta Fiction",
     tags: ["Villain", "Fate", "Rebellion"],
     symbol: "♜",
-    accent: "red"
+    accent: "red",
+    coverImage: ""
   }
 ];
 
@@ -194,6 +205,7 @@ export default function DiscoverPage() {
       tags: normalizeTags(character.tags),
       symbol: character.avatar || "✦",
       accent: pickAccent(index),
+      coverImage: character.coverImage || "",
       source: "private",
       raw: character
     }));
@@ -225,18 +237,15 @@ export default function DiscoverPage() {
     });
   }, [activeTab, normalizedSavedCharacters, search, selectedCategory]);
 
-  const startStoryWithCharacter = (character) => {
-    const prompt = buildCharacterPrompt(character);
-
+  const enterCharacter = (character) => {
     if (typeof window !== "undefined") {
-      sessionStorage.setItem(STARTER_KEY, prompt);
-      sessionStorage.setItem(TRANSITION_KEY, "1");
+      sessionStorage.setItem(SELECTED_CHARACTER_KEY, JSON.stringify(character));
     }
 
     setIsLeaving(true);
 
     setTimeout(() => {
-      router.push("/story");
+      router.push("/character-chat");
     }, 160);
   };
 
@@ -323,17 +332,17 @@ export default function DiscoverPage() {
                 <div className="featureLabel">Featured System</div>
                 <h2>Characters that actually drive the story.</h2>
                 <p>
-                  Browse personalities, choose a vibe, and launch straight into a scene.
+                  Browse personalities, choose a vibe, and launch straight into a one-on-one character chat.
                 </p>
               </div>
             </div>
 
             <button
               className="quickStoryCard"
-              onClick={() => startStoryWithCharacter(publicCharacters[0])}
+              onClick={() => enterCharacter(publicCharacters[0])}
             >
-              <span>Start with Kael</span>
-              <strong>Dark political fantasy →</strong>
+              <span>Featured character</span>
+              <strong>Enter Kael’s world →</strong>
             </button>
           </section>
 
@@ -363,7 +372,7 @@ export default function DiscoverPage() {
                 <CharacterTile
                   key={character.id}
                   character={character}
-                  onStart={() => startStoryWithCharacter(character)}
+                  onStart={() => enterCharacter(character)}
                 />
               ))}
             </section>
@@ -718,6 +727,13 @@ export default function DiscoverPage() {
           background:
             linear-gradient(180deg, transparent 35%, rgba(5, 7, 13, 0.72) 100%),
             radial-gradient(circle at center, transparent 24%, rgba(0,0,0,0.18) 100%);
+          pointer-events: none;
+        }
+
+        .portraitImage {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .portraitSymbol {
@@ -940,7 +956,15 @@ function CharacterTile({ character, onStart }) {
       onClick={onStart}
     >
       <div className="portrait">
-        <div className="portraitSymbol">{character.symbol || "✦"}</div>
+        {character.coverImage ? (
+          <img
+            className="portraitImage"
+            src={character.coverImage}
+            alt={character.name || "Character"}
+          />
+        ) : (
+          <div className="portraitSymbol">{character.symbol || "✦"}</div>
+        )}
       </div>
 
       <div className="tileContent">
@@ -1022,21 +1046,4 @@ function getAccent(accent) {
   };
 
   return accents[accent] || accents.blue;
-}
-
-function buildCharacterPrompt(character) {
-  const tags = (character.tags || []).join(", ");
-
-  return `
-Start an immersive scene featuring this character.
-
-Character:
-Name: ${character.name}
-Role: ${character.role}
-Genre: ${character.genre}
-Core hook: ${character.tagline}
-Tags: ${tags}
-
-Write a cinematic opening scene that immediately shows who this character is through action, atmosphere, and natural dialogue. Do not explain the character like a profile. Make it feel like the user just entered their story.
-  `.trim();
 }
