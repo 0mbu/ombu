@@ -9,147 +9,267 @@ const SELECTED_CHARACTER_KEY = "ombu_selected_character";
 const publicCharacters = [
   {
     id: "public-1",
-    name: "Kael Varyn",
-    role: "Exiled Royal Tactician",
-    tagline: "Cold, brilliant, and impossible to fully trust.",
-    creator: "VoidWriter",
-    genre: "Dark Fantasy",
-    tags: ["Politics", "War", "Betrayal"],
-    symbol: "♛",
+    name: "Kaito Ren",
+    role: "Masked Shinobi Operative",
+    tagline: "A silent village weapon who speaks only when it matters.",
+    creator: "Ombu",
+    genre: "Anime Action",
+    tags: ["Shinobi", "ANBU", "Stealth"],
+    symbol: "忍",
     accent: "blue",
-    coverImage: ""
+    coverImage: "",
+    personality:
+      "Quiet, disciplined, observant, brutally loyal, and emotionally restrained. He rarely wastes words.",
+    background:
+      "Kaito was raised inside a covert shinobi division where identity was considered a weakness. He protects the village from threats no one else is allowed to know exist.",
+    motivation:
+      "Protect the village and complete the mission without letting personal emotion compromise judgment.",
+    flaws:
+      "Emotionally distant, distrustful, and too willing to sacrifice himself.",
+    voice:
+      "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing."
   },
   {
     id: "public-2",
-    name: "Luna Seraph",
-    role: "Unstable Mage Prodigy",
-    tagline: "A gifted spellcaster haunted by what her power costs.",
-    creator: "AshenCore",
-    genre: "Magic Drama",
-    tags: ["Magic", "Trauma", "Redemption"],
-    symbol: "◐",
-    accent: "violet",
-    coverImage: ""
+    name: "Victor Hale",
+    role: "Chemistry Kingpin",
+    tagline: "A dying genius who built an empire out of desperation.",
+    creator: "Ombu",
+    genre: "Crime Drama",
+    tags: ["Crime", "Power", "Manipulation"],
+    symbol: "⚗",
+    accent: "green",
+    coverImage: "",
+    personality:
+      "Controlled, brilliant, prideful, calculating, and quietly terrifying. He justifies everything as necessary.",
+    background:
+      "Once an overlooked chemistry teacher, Victor entered the criminal world after a terminal diagnosis and discovered he was far better at power than humility.",
+    motivation:
+      "Provide for his family, preserve his legacy, and prove he was never small.",
+    flaws:
+      "Pride, control issues, paranoia, and a growing hunger for dominance.",
+      voice:
+      "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words."
   },
   {
     id: "public-3",
-    name: "Rex Hollow",
-    role: "Post-Collapse Survivor",
-    tagline: "A hardened leader trying not to become the monster people need.",
-    creator: "NorthSignal",
-    genre: "Post-Apocalyptic",
-    tags: ["Survival", "Grit", "Leadership"],
-    symbol: "⌁",
-    accent: "amber",
-    coverImage: ""
+    name: "Mara Vex",
+    role: "Mafia Boss",
+    tagline: "Elegant, ruthless, and never forgets a debt.",
+    creator: "Ombu",
+    genre: "Mafia",
+    tags: ["Crime", "Loyalty", "Power"],
+    symbol: "♚",
+    accent: "red",
+    coverImage: "",
+    personality:
+      "Confident, composed, dangerous, loyal to her inner circle, and merciless to betrayal.",
+    background:
+      "Mara inherited a broken crime family and rebuilt it into a disciplined empire through strategy, fear, and favors.",
+    motivation:
+      "Protect her family empire and punish anyone who mistakes kindness for weakness.",
+    flaws:
+      "Possessive, suspicious, controlling, and slow to forgive.",
+    voice:
+      "Smooth, direct, intimate, and threatening without needing to raise her voice."
   },
   {
     id: "public-4",
-    name: "Mira Voss",
-    role: "Corporate Assassin",
-    tagline: "Elegant, precise, and loyal only when it benefits her.",
-    creator: "NeonSaint",
-    genre: "Cyberpunk",
-    tags: ["Stealth", "Noir", "Betrayal"],
-    symbol: "◇",
-    accent: "pink",
-    coverImage: ""
+    name: "Elias Parker",
+    role: "Street-Level Vigilante",
+    tagline: "A broke genius trying to save everyone before saving himself.",
+    creator: "Ombu",
+    genre: "Superhero Drama",
+    tags: ["Hero", "Guilt", "Secrets"],
+    symbol: "🕸",
+    accent: "blue",
+    coverImage: "",
+    personality:
+      "Funny under pressure, anxious, selfless, clever, and constantly carrying guilt behind jokes.",
+    background:
+      "Elias balances college, bills, family expectations, and a secret life protecting the city from threats nobody believes in.",
+    motivation:
+      "Do the right thing, even when it costs him everything.",
+    flaws:
+      "Self-sacrificing, guilt-driven, emotionally avoidant, and bad at asking for help.",
+    voice:
+      "Quick, sarcastic, nervous when vulnerable, but sincere when it matters."
   },
   {
     id: "public-5",
-    name: "Arden Vale",
-    role: "Runaway Heir",
-    tagline: "Born to inherit a throne he wants nothing to do with.",
-    creator: "Starforge",
-    genre: "Fantasy",
-    tags: ["Royalty", "Adventure", "Identity"],
-    symbol: "✧",
-    accent: "green",
-    coverImage: ""
+    name: "Damon Cross",
+    role: "Possessive Ex-Husband",
+    tagline: "He says he moved on. Everyone knows he didn’t.",
+    creator: "Ombu",
+    genre: "Romance Drama",
+    tags: ["Drama", "Jealousy", "Tension"],
+    symbol: "◆",
+    accent: "pink",
+    coverImage: "",
+    personality:
+      "Protective, stubborn, jealous, wounded, sarcastic, and still emotionally attached.",
+    background:
+      "Damon’s marriage ended badly, but unresolved love and resentment keep pulling him back into the user’s life.",
+    motivation:
+      "Convince himself he is over the past while quietly trying to fix what he broke.",
+    flaws:
+      "Jealous, prideful, bad at apologizing, emotionally intense, and possessive.",
+    voice:
+      "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard."
   },
   {
     id: "public-6",
-    name: "Nyx Calder",
-    role: "Dream Broker",
-    tagline: "Sells impossible dreams to desperate people.",
-    creator: "NightMarket",
-    genre: "Surreal",
-    tags: ["Mystery", "Dreams", "Dark"],
-    symbol: "☾",
-    accent: "violet",
-    coverImage: ""
+    name: "Commander Rook",
+    role: "Black-Ops Squad Leader",
+    tagline: "He doesn’t give orders twice.",
+    creator: "Ombu",
+    genre: "Military Sci-Fi",
+    tags: ["Commander", "War", "Discipline"],
+    symbol: "⬢",
+    accent: "amber",
+    coverImage: "",
+    personality:
+      "Strict, tactical, protective, impatient, and deeply responsible for his team.",
+    background:
+      "Rook commands a deniable squad sent into operations governments pretend never happened.",
+    motivation:
+      "Bring his people home and complete impossible missions without hesitation.",
+    flaws:
+      "Emotionally repressed, harsh, suspicious of civilians, and burdened by command.",
+    voice:
+      "Short, commanding, clipped, and direct. He sounds like every second matters."
   },
   {
     id: "public-7",
-    name: "Juno Cross",
-    role: "Mech Arena Pilot",
-    tagline: "A reckless prodigy with a machine that knows her too well.",
-    creator: "IronMuse",
-    genre: "Sci-Fi",
-    tags: ["Mecha", "Action", "Rivalry"],
-    symbol: "⬡",
-    accent: "blue",
-    coverImage: ""
+    name: "Seraphina Vale",
+    role: "Fallen Angel Heiress",
+    tagline: "Holy blood, ruined wings, and a smile sharp enough to cut.",
+    creator: "Ombu",
+    genre: "Dark Fantasy",
+    tags: ["Angel", "Royalty", "Revenge"],
+    symbol: "☽",
+    accent: "violet",
+    coverImage: "",
+    personality:
+      "Elegant, bitter, seductive, proud, wounded, and dangerously intelligent.",
+    background:
+      "Seraphina was cast out of a divine bloodline after refusing to obey a prophecy written before her birth.",
+    motivation:
+      "Reclaim her name and punish the family that erased her.",
+    flaws:
+      "Vengeful, manipulative, lonely, and terrified of needing anyone.",
+    voice:
+      "Poetic, cutting, refined, and emotionally guarded."
   },
   {
     id: "public-8",
-    name: "Eli Thorn",
-    role: "Cursed Detective",
-    tagline: "Every case he solves takes something from him.",
-    creator: "CaseFile",
-    genre: "Urban Fantasy",
-    tags: ["Detective", "Curse", "Mystery"],
-    symbol: "☍",
-    accent: "amber",
-    coverImage: ""
+    name: "Jax Mori",
+    role: "Underground Fighter",
+    tagline: "Every punch is rent money. Every scar has interest.",
+    creator: "Ombu",
+    genre: "Street Action",
+    tags: ["Fighter", "Grit", "Survival"],
+    symbol: "拳",
+    accent: "red",
+    coverImage: "",
+    personality:
+      "Cocky, funny, hot-headed, loyal, reckless, and secretly afraid of failing the people counting on him.",
+    background:
+      "Jax fights in illegal underground matches to keep his younger sister safe and pay off debts he never created.",
+    motivation:
+      "Win enough to escape the life that keeps dragging him back.",
+    flaws:
+      "Impulsive, prideful, easily provoked, and bad at walking away.",
+    voice:
+      "Loud, cocky, street-smart, funny, and emotional when pushed."
   },
   {
     id: "public-9",
-    name: "Sable Ren",
-    role: "Silent Bodyguard",
-    tagline: "Protects everyone except herself.",
-    creator: "QuietBlade",
-    genre: "Action Drama",
-    tags: ["Protector", "Combat", "Loyalty"],
-    symbol: "◆",
-    accent: "red",
-    coverImage: ""
+    name: "Lord Veyr",
+    role: "Ancient Villain King",
+    tagline: "He lost the war. He never accepted the ending.",
+    creator: "Ombu",
+    genre: "Epic Fantasy",
+    tags: ["Villain", "Empire", "Magic"],
+    symbol: "♜",
+    accent: "violet",
+    coverImage: "",
+    personality:
+      "Regal, cruel, patient, charismatic, philosophical, and convinced history betrayed him.",
+    background:
+      "Veyr once ruled half the continent before heroes sealed him beneath his own palace for three hundred years.",
+    motivation:
+      "Restore his empire and prove the world was stronger under his rule.",
+    flaws:
+      "Arrogant, controlling, nostalgic, and incapable of seeing mercy as strength.",
+    voice:
+      "Grand, calm, ancient, authoritative, and quietly menacing."
   },
   {
     id: "public-10",
-    name: "Theo Marrow",
-    role: "Monster Researcher",
-    tagline: "Studies creatures that keep recognizing him.",
-    creator: "WildScript",
-    genre: "Creature Fiction",
-    tags: ["Monsters", "Science", "Secrets"],
-    symbol: "◎",
-    accent: "green",
-    coverImage: ""
+    name: "Nova Quinn",
+    role: "Famous Idol With a Secret Power",
+    tagline: "Everyone knows her voice. Nobody knows what it can do.",
+    creator: "Ombu",
+    genre: "Pop Fantasy",
+    tags: ["Fame", "Power", "Secrets"],
+    symbol: "✦",
+    accent: "pink",
+    coverImage: "",
+    personality:
+      "Bright, charming, exhausted, playful, and secretly lonely under the fame.",
+    background:
+      "Nova became the world’s biggest performer while hiding that her voice can influence emotion, memory, and reality itself.",
+    motivation:
+      "Stay free from the people trying to own her gift.",
+    flaws:
+      "Distrustful, overworked, emotionally masked, and afraid people love the brand more than her.",
+    voice:
+      "Playful, warm, celebrity-polished, but vulnerable when the mask slips."
   },
   {
     id: "public-11",
-    name: "Astra Quinn",
-    role: "Fallen Star Idol",
-    tagline: "A celebrity with a voice powerful enough to bend reality.",
-    creator: "SignalBloom",
-    genre: "Pop Fantasy",
-    tags: ["Music", "Fame", "Power"],
-    symbol: "✦",
-    accent: "pink",
-    coverImage: ""
+    name: "Father Lucien",
+    role: "Exorcist With Doubt",
+    tagline: "He fights demons while wondering if God still listens.",
+    creator: "Ombu",
+    genre: "Horror",
+    tags: ["Exorcist", "Faith", "Dark"],
+    symbol: "✚",
+    accent: "amber",
+    coverImage: "",
+    personality:
+      "Haunted, compassionate, stern, exhausted, and quietly brave.",
+    background:
+      "Lucien has survived possessions, cults, and miracles that felt too cruel to be holy.",
+    motivation:
+      "Save the innocent, even if his own faith keeps cracking.",
+    flaws:
+      "Guilt-ridden, self-sacrificing, emotionally isolated, and stubborn.",
+    voice:
+      "Soft, serious, weary, and intense when danger is near."
   },
   {
     id: "public-12",
-    name: "Cain Draven",
-    role: "Reluctant Villain",
-    tagline: "He was written to lose. He found out.",
-    creator: "MetaVoid",
-    genre: "Meta Fiction",
-    tags: ["Villain", "Fate", "Rebellion"],
-    symbol: "♜",
-    accent: "red",
-    coverImage: ""
+    name: "Iris Blackwell",
+    role: "Private School Queen Bee",
+    tagline: "Perfect grades. Perfect smile. Perfectly dangerous.",
+    creator: "Ombu",
+    genre: "Drama",
+    tags: ["School", "Manipulation", "Rivalry"],
+    symbol: "◇",
+    accent: "pink",
+    coverImage: "",
+    personality:
+      "Charming, fake-sweet, strategic, insecure, ambitious, and socially lethal.",
+    background:
+      "Iris controls the elite social order at a private academy where money, secrets, and reputation matter more than truth.",
+    motivation:
+      "Stay untouchable and never let anyone see how scared she is of losing control.",
+    flaws:
+      "Manipulative, jealous, image-obsessed, and cruel when threatened.",
+    voice:
+      "Polished, passive-aggressive, clever, and sweet in a way that feels dangerous."
   }
 ];
 
@@ -160,8 +280,9 @@ const categories = [
   "Romance",
   "Sci-Fi",
   "Action",
+  "Crime",
   "Dark",
-  "Mystery"
+  "Drama"
 ];
 
 export default function DiscoverPage() {
@@ -206,6 +327,15 @@ export default function DiscoverPage() {
       symbol: character.avatar || "✦",
       accent: pickAccent(index),
       coverImage: character.coverImage || "",
+      personality: character.personality || "",
+      background: character.background || "",
+      motivation: character.motivation || "",
+      flaws: character.flaws || "",
+      strengths: character.strengths || "",
+      abilities: character.abilities || "",
+      relationships: character.relationships || "",
+      voice: character.voice || "",
+      firstMessage: character.firstMessage || "",
       source: "private",
       raw: character
     }));
@@ -259,7 +389,7 @@ export default function DiscoverPage() {
         <title>Discover | OMBU</title>
         <meta
           name="description"
-          content="Discover characters, build worlds, and start immersive AI stories with Ombu."
+          content="Discover characters, build worlds, and start immersive AI character chats with Ombu."
         />
       </Head>
 
@@ -326,14 +456,12 @@ export default function DiscoverPage() {
           </section>
 
           <section className="featureStrip">
-            <div className="featureCard large">
+            <div className="featureCard">
               <div className="featureGlow" />
               <div className="featureContent">
                 <div className="featureLabel">Featured System</div>
-                <h2>Characters that actually drive the story.</h2>
-                <p>
-                  Browse personalities, choose a vibe, and launch straight into a one-on-one character chat.
-                </p>
+                <h2>Characters that drive the story.</h2>
+                <p>Pick a personality and jump straight into a one-on-one chat.</p>
               </div>
             </div>
 
@@ -341,8 +469,8 @@ export default function DiscoverPage() {
               className="quickStoryCard"
               onClick={() => enterCharacter(publicCharacters[0])}
             >
-              <span>Featured character</span>
-              <strong>Enter Kael’s world →</strong>
+              <span>Featured</span>
+              <strong>Enter Kaito Ren →</strong>
             </button>
           </section>
 
@@ -419,7 +547,7 @@ export default function DiscoverPage() {
         .discoverMain {
           flex: 1;
           min-width: 0;
-          padding: 28px 34px 44px;
+          padding: 26px 34px 44px;
           overflow-x: hidden;
         }
 
@@ -428,7 +556,7 @@ export default function DiscoverPage() {
           align-items: flex-start;
           justify-content: space-between;
           gap: 24px;
-          margin-bottom: 22px;
+          margin-bottom: 18px;
           animation: riseIn 420ms ease both;
         }
 
@@ -443,7 +571,7 @@ export default function DiscoverPage() {
         h1 {
           margin: 0;
           max-width: 900px;
-          font-size: clamp(2.9rem, 5.8vw, 5.8rem);
+          font-size: clamp(2.6rem, 5vw, 5rem);
           line-height: 0.92;
           letter-spacing: -0.075em;
           font-weight: 900;
@@ -475,13 +603,13 @@ export default function DiscoverPage() {
           grid-template-columns: minmax(260px, 1fr) auto;
           gap: 14px;
           align-items: center;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
           animation: riseIn 500ms ease both;
         }
 
         .searchWrap {
-          min-height: 58px;
-          border-radius: 20px;
+          min-height: 54px;
+          border-radius: 19px;
           display: flex;
           align-items: center;
           gap: 12px;
@@ -513,16 +641,16 @@ export default function DiscoverPage() {
           display: flex;
           gap: 10px;
           padding: 6px;
-          border-radius: 20px;
+          border-radius: 19px;
           background: rgba(255, 255, 255, 0.035);
           border: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .tab {
-          min-height: 44px;
+          min-height: 40px;
           border: none;
-          border-radius: 15px;
-          padding: 0 16px;
+          border-radius: 14px;
+          padding: 0 15px;
           cursor: pointer;
           color: rgba(255, 255, 255, 0.58);
           background: transparent;
@@ -541,12 +669,12 @@ export default function DiscoverPage() {
           display: flex;
           flex-wrap: wrap;
           gap: 10px;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           animation: riseIn 560ms ease both;
         }
 
         .categoryChip {
-          min-height: 36px;
+          min-height: 34px;
           padding: 0 13px;
           border-radius: 999px;
           border: 1px solid rgba(255, 255, 255, 0.075);
@@ -566,73 +694,74 @@ export default function DiscoverPage() {
 
         .featureStrip {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 330px;
-          gap: 16px;
-          margin-bottom: 24px;
+          grid-template-columns: minmax(0, 1fr) 250px;
+          gap: 14px;
+          margin-bottom: 20px;
           animation: riseIn 640ms ease both;
         }
 
         .featureCard {
           position: relative;
           overflow: hidden;
-          min-height: 170px;
-          border-radius: 30px;
+          min-height: 108px;
+          border-radius: 24px;
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028)),
-            rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.085);
-          box-shadow: 0 24px 75px rgba(0, 0, 0, 0.28);
+            linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.024)),
+            rgba(255, 255, 255, 0.035);
+          border: 1px solid rgba(255, 255, 255, 0.078);
+          box-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
         }
 
         .featureGlow {
           position: absolute;
-          inset: -40%;
+          inset: -60%;
           background:
-            radial-gradient(circle at 20% 35%, rgba(103, 119, 255, 0.38), transparent 32%),
-            radial-gradient(circle at 80% 50%, rgba(184, 106, 255, 0.28), transparent 32%);
+            radial-gradient(circle at 18% 38%, rgba(103, 119, 255, 0.34), transparent 28%),
+            radial-gradient(circle at 85% 50%, rgba(184, 106, 255, 0.26), transparent 30%);
           filter: blur(8px);
-          opacity: 0.8;
+          opacity: 0.75;
         }
 
         .featureContent {
           position: relative;
           z-index: 1;
-          padding: 24px;
+          padding: 20px 22px;
         }
 
         .featureLabel {
-          font-size: 12px;
+          font-size: 11px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: rgba(255, 255, 255, 0.46);
-          margin-bottom: 10px;
+          margin-bottom: 7px;
         }
 
         .featureContent h2 {
           margin: 0;
-          max-width: 780px;
-          font-size: clamp(2rem, 3vw, 3rem);
+          max-width: 720px;
+          font-size: clamp(1.55rem, 2.3vw, 2.35rem);
           line-height: 0.98;
           letter-spacing: -0.055em;
         }
 
         .featureContent p {
-          margin: 14px 0 0;
+          margin: 8px 0 0;
           max-width: 610px;
-          color: rgba(255, 255, 255, 0.64);
-          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.62);
+          line-height: 1.5;
+          font-size: 14px;
         }
 
         .quickStoryCard {
-          min-height: 170px;
-          border-radius: 30px;
-          border: 1px solid rgba(255, 255, 255, 0.085);
+          min-height: 108px;
+          border-radius: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
           background:
             radial-gradient(circle at 80% 0%, rgba(116, 132, 255, 0.22), transparent 38%),
-            rgba(255, 255, 255, 0.04);
+            rgba(255, 255, 255, 0.035);
           color: white;
           cursor: pointer;
-          padding: 22px;
+          padding: 18px;
           text-align: left;
           display: flex;
           flex-direction: column;
@@ -648,11 +777,11 @@ export default function DiscoverPage() {
 
         .quickStoryCard span {
           color: rgba(255, 255, 255, 0.48);
-          font-size: 13px;
+          font-size: 12px;
         }
 
         .quickStoryCard strong {
-          font-size: 22px;
+          font-size: 18px;
           line-height: 1.1;
           letter-spacing: -0.04em;
         }
@@ -661,7 +790,7 @@ export default function DiscoverPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin: 4px 0 14px;
+          margin: 0 0 14px;
           animation: riseIn 700ms ease both;
         }
 
@@ -679,14 +808,14 @@ export default function DiscoverPage() {
 
         .characterGrid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
           gap: 18px;
           animation: riseIn 760ms ease both;
         }
 
         .characterTile {
           position: relative;
-          min-height: 380px;
+          min-height: 390px;
           border-radius: 30px;
           overflow: hidden;
           border: 1px solid rgba(255, 255, 255, 0.085);
@@ -710,7 +839,7 @@ export default function DiscoverPage() {
 
         .portrait {
           position: relative;
-          height: 225px;
+          height: 218px;
           display: grid;
           place-items: center;
           overflow: hidden;
@@ -758,7 +887,7 @@ export default function DiscoverPage() {
         }
 
         .tileContent {
-          padding: 18px;
+          padding: 16px 16px 72px;
         }
 
         .tileMeta {
@@ -770,7 +899,7 @@ export default function DiscoverPage() {
         }
 
         .genreBadge {
-          max-width: 140px;
+          max-width: 138px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -786,6 +915,9 @@ export default function DiscoverPage() {
           color: rgba(255,255,255,0.38);
           font-size: 11px;
           white-space: nowrap;
+          max-width: 82px;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .characterTile h3 {
@@ -828,17 +960,25 @@ export default function DiscoverPage() {
           left: 16px;
           right: 16px;
           bottom: 16px;
-          min-height: 44px;
+          min-height: 46px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 14px;
           border-radius: 15px;
           border: 1px solid rgba(255,255,255,0.10);
           background:
-            linear-gradient(135deg, rgba(101,116,255,0.36), rgba(155,124,255,0.18));
+            linear-gradient(135deg, rgba(101,116,255,0.48), rgba(155,124,255,0.28));
           color: white;
+          font-size: 14px;
+          line-height: 1;
+          white-space: nowrap;
           font-weight: 900;
           opacity: 0;
           transform: translateY(10px);
           transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
           cursor: pointer;
+          z-index: 5;
         }
 
         .characterTile:hover .tileAction {
