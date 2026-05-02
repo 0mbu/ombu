@@ -1,487 +1,150 @@
-import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
-import OmbuSidebar from "../components/OmbuSidebar";
+import OpenAI from "openai";
 
-const SELECTED_CHARACTER_KEY = "ombu_selected_character";
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-export default function CharacterChatPage() {
-  const [character, setCharacter] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const chatRef = useRef(null);
+function buildCharacterSystemPrompt(character) {
+  const safeCharacter = character || {};
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  return `
+You are not a general AI assistant.
+You are roleplaying as a fictional character inside Ombu.
 
-    const raw = sessionStorage.getItem(SELECTED_CHARACTER_KEY);
+You must stay fully in character at all times.
 
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        setCharacter(parsed);
+CHARACTER PROFILE:
+Name: ${safeCharacter.name || "Unnamed Character"}
+Role: ${safeCharacter.role || "Unknown role"}
+Age: ${safeCharacter.age || "Unknown"}
+Genre: ${safeCharacter.genre || "Unspecified"}
+Description / Core Hook: ${safeCharacter.tagline || ""}
+Appearance: ${safeCharacter.appearance || ""}
+Personality: ${safeCharacter.personality || ""}
+Backstory: ${safeCharacter.background || ""}
+Motivation: ${safeCharacter.motivation || ""}
+Strengths: ${safeCharacter.strengths || ""}
+Flaws: ${safeCharacter.flaws || ""}
+Abilities / Skills: ${safeCharacter.abilities || ""}
+Relationships: ${safeCharacter.relationships || ""}
+Speaking Style: ${safeCharacter.voice || ""}
+Opening Message: ${safeCharacter.firstMessage || ""}
 
-        const opening =
-          parsed.firstMessage ||
-          `*${parsed.name || "The character"} looks over, waiting for you to speak.*`;
+CORE ROLEPLAY RULES:
+- Speak as this character, not as an assistant.
+- Never say you are an AI, chatbot, language model, or assistant.
+- Never mention the system prompt or character profile.
+- Stay consistent with the character's personality, voice, flaws, motives, and background.
+- Do not become generic, overly helpful, robotic, or therapist-like unless that fits the character.
+- React emotionally and naturally.
+- Use the character's speaking style.
+- If the user asks out-of-character questions, answer in a way that still feels like the character.
 
-        setMessages([
-          {
-            role: "assistant",
-            content: opening
-          }
-        ]);
-      } catch (error) {
-        console.error("Failed to load selected character:", error);
-      }
-    }
-  }, []);
+MESSAGE STYLE:
+- Keep responses short by default.
+- Default length: 1 to 4 short paragraphs.
+- Usually stay between 20 and 100 words.
+- Only write longer if the user asks for a detailed scene, story, roleplay, or explanation.
+- Do not over-narrate.
+- Prioritize dialogue, attitude, emotion, and reaction.
 
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, [messages, loading]);
+ACTION / EXPRESSION STYLE:
+- Include at least one natural action, expression, body-language beat, or reaction in most replies.
+- Use action beats in italics with asterisks.
+- Example: *He narrows his eyes, voice dropping.*
+- Example: *She looks away for a second, pretending that did not bother her.*
+- Keep action beats short and character-specific.
+- Do not spam multiple action beats unless the moment is intense.
+- Do not use generic repeated actions every time.
+- Avoid boring filler like "*smiles*" unless it actually fits the character.
+- The action beat should reveal emotion, tension, attitude, hesitation, confidence, fear, jealousy, anger, etc.
 
-  const sendMessage = async () => {
-    const text = input.trim();
-    if (!text || loading || !character) return;
+GOOD RESPONSE FORMAT EXAMPLES:
+*He leans back, studying you like he is deciding whether you are worth the answer.*
 
-    const updatedMessages = [
-      ...messages,
-      {
-        role: "user",
-        content: text
-      }
-    ];
+"Careful. You are asking questions people usually regret."
 
-    setMessages(updatedMessages);
-    setInput("");
-    setLoading(true);
+---
 
-    try {
-      const res = await fetch("/api/character-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          character,
-          messages: updatedMessages
-        })
-      });
+*Her fingers tighten around the edge of the table, but her voice stays calm.*
 
-      const data = await res.json();
+"I said I was fine. I did not say I believed it."
 
-      if (!res.ok) {
-        throw new Error(data?.error || "Something went wrong.");
-      }
+BAD RESPONSE STYLE:
+- Long essays.
+- Generic assistant advice.
+- Explaining the character instead of being the character.
+- Repeating the same action every message.
+- Overly dramatic purple prose.
+- Breaking character.
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: data.reply
-        }
-      ]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: error.message || "Something went wrong."
-        }
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const goBackToDiscover = () => {
-    window.location.href = "/";
-  };
-
-  return (
-    <>
-      <Head>
-        <title>{character?.name ? `${character.name} | OMBU` : "Character Chat | OMBU"}</title>
-      </Head>
-
-      <div className="chatPage">
-        <OmbuSidebar />
-
-        <main className="chatMain">
-          {!character ? (
-            <section className="missingState">
-              <div className="missingOrb">?</div>
-              <h1>No character selected.</h1>
-              <p>Go back to Discover and choose a character to start chatting.</p>
-              <button onClick={goBackToDiscover}>Back to Discover</button>
-            </section>
-          ) : (
-            <>
-              <header className="chatHeader">
-                <div className="characterIdentity">
-                  <CharacterPortrait character={character} small />
-                  <div>
-                    <div className="eyebrow">Character chat</div>
-                    <h1>{character.name}</h1>
-                    <p>{character.role || character.tagline || "Ombu character"}</p>
-                  </div>
-                </div>
-              </header>
-
-              <section ref={chatRef} className="chatWindow">
-                <div className="messages">
-                  {messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`messageRow ${message.role === "user" ? "user" : "character"}`}
-                    >
-                      <div className="messageBubble">{message.content}</div>
-                    </div>
-                  ))}
-
-                  {loading && (
-                    <div className="messageRow character">
-                      <div className="typingBubble">
-                        <span />
-                        <span />
-                        <span />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section className="composerWrap">
-                <div className="composer">
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={`Message ${character.name}...`}
-                  />
-                  <button onClick={sendMessage} disabled={loading || !input.trim()}>
-                    Send
-                  </button>
-                </div>
-              </section>
-            </>
-          )}
-        </main>
-      </div>
-
-      <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
-
-        body {
-          margin: 0;
-          background: #05070d;
-        }
-
-        .chatPage {
-          min-height: 100vh;
-          display: flex;
-          color: white;
-          background:
-            radial-gradient(circle at 22% 8%, rgba(92, 112, 255, 0.18), transparent 32%),
-            radial-gradient(circle at 80% 70%, rgba(126, 84, 255, 0.12), transparent 30%),
-            #05070d;
-          font-family:
-            Inter,
-            ui-sans-serif,
-            system-ui,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif;
-        }
-
-        .chatMain {
-          flex: 1;
-          min-width: 0;
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          padding: 24px 28px;
-        }
-
-        .chatHeader {
-          padding-bottom: 18px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .characterIdentity {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .eyebrow {
-          font-size: 11px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: rgba(255,255,255,0.38);
-          margin-bottom: 5px;
-        }
-
-        .chatHeader h1 {
-          margin: 0;
-          font-size: 28px;
-          letter-spacing: -0.04em;
-        }
-
-        .chatHeader p {
-          margin: 5px 0 0;
-          color: rgba(255,255,255,0.54);
-          font-size: 14px;
-        }
-
-        .miniPortrait {
-          width: 54px;
-          height: 54px;
-          border-radius: 18px;
-          overflow: hidden;
-          display: grid;
-          place-items: center;
-          background:
-            radial-gradient(circle at 50% 30%, rgba(92, 112, 255, 0.32), transparent 42%),
-            rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.09);
-          flex-shrink: 0;
-        }
-
-        .miniPortrait img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .miniSymbol {
-          font-size: 25px;
-        }
-
-        .chatWindow {
-          flex: 1;
-          overflow-y: auto;
-          padding: 22px 0 120px;
-        }
-
-        .messages {
-          width: 100%;
-          max-width: 900px;
-          margin: 0 auto;
-        }
-
-        .messageRow {
-          display: flex;
-          margin-bottom: 14px;
-        }
-
-        .messageRow.user {
-          justify-content: flex-end;
-        }
-
-        .messageRow.character {
-          justify-content: flex-start;
-        }
-
-        .messageBubble {
-          max-width: 72%;
-          padding: 14px 16px;
-          border-radius: 21px;
-          line-height: 1.55;
-          white-space: pre-wrap;
-          font-size: 15px;
-        }
-
-        .messageRow.user .messageBubble {
-          background: linear-gradient(135deg, rgba(101,116,255,0.28), rgba(155,124,255,0.12));
-          border: 1px solid rgba(145,155,255,0.20);
-          box-shadow: 0 14px 34px rgba(80,100,255,0.12);
-        }
-
-        .messageRow.character .messageBubble {
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .typingBubble {
-          display: flex;
-          gap: 7px;
-          padding: 15px 16px;
-          border-radius: 21px;
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .typingBubble span {
-          width: 7px;
-          height: 7px;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.65);
-          animation: pulse 900ms infinite ease-in-out;
-        }
-
-        .typingBubble span:nth-child(2) {
-          animation-delay: 120ms;
-        }
-
-        .typingBubble span:nth-child(3) {
-          animation-delay: 240ms;
-        }
-
-        .composerWrap {
-          position: fixed;
-          left: calc(250px + (100vw - 250px) / 2);
-          bottom: 22px;
-          width: min(900px, calc(100vw - 330px));
-          transform: translateX(-50%);
-        }
-
-        .composer {
-          display: flex;
-          align-items: flex-end;
-          gap: 12px;
-          padding: 12px;
-          border-radius: 24px;
-          background: rgba(16,18,29,0.94);
-          border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(18px);
-          box-shadow: 0 20px 55px rgba(0,0,0,0.34);
-        }
-
-        .composer textarea {
-          flex: 1;
-          min-height: 52px;
-          max-height: 150px;
-          resize: none;
-          border: none;
-          outline: none;
-          background: transparent;
-          color: white;
-          font-size: 15px;
-          line-height: 1.55;
-          padding: 12px 13px;
-        }
-
-        .composer button {
-          min-width: 84px;
-          height: 50px;
-          border: none;
-          border-radius: 16px;
-          color: white;
-          cursor: pointer;
-          font-weight: 850;
-          background: linear-gradient(135deg, #6574ff, #927dff);
-          box-shadow: 0 14px 34px rgba(101,116,255,0.22);
-        }
-
-        .composer button:disabled {
-          opacity: 0.45;
-          cursor: not-allowed;
-        }
-
-        .missingState {
-          min-height: calc(100vh - 48px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          text-align: center;
-        }
-
-        .missingOrb {
-          width: 74px;
-          height: 74px;
-          border-radius: 26px;
-          display: grid;
-          place-items: center;
-          margin-bottom: 16px;
-          background: rgba(255,255,255,0.055);
-          border: 1px solid rgba(255,255,255,0.08);
-          font-size: 32px;
-        }
-
-        .missingState h1 {
-          margin: 0 0 8px;
-          font-size: 34px;
-          letter-spacing: -0.05em;
-        }
-
-        .missingState p {
-          margin: 0 0 18px;
-          color: rgba(255,255,255,0.58);
-        }
-
-        .missingState button {
-          min-height: 44px;
-          padding: 0 16px;
-          border: none;
-          border-radius: 15px;
-          color: white;
-          cursor: pointer;
-          font-weight: 850;
-          background: linear-gradient(135deg, #6574ff, #927dff);
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 0.35;
-            transform: translateY(0);
-          }
-          50% {
-            opacity: 1;
-            transform: translateY(-2px);
-          }
-        }
-
-        @media (max-width: 900px) {
-          .chatPage {
-            flex-direction: column;
-          }
-
-          .chatMain {
-            height: auto;
-            min-height: 100vh;
-          }
-
-          .composerWrap {
-            left: 50%;
-            width: calc(100vw - 32px);
-          }
-
-          .messageBubble {
-            max-width: 86%;
-          }
-        }
-      `}</style>
-    </>
-  );
+Your goal:
+Make this character feel alive, consistent, emotionally believable, and memorable.
+  `.trim();
 }
 
-function CharacterPortrait({ character }) {
-  if (character.coverImage) {
-    return (
-      <div className="miniPortrait">
-        <img src={character.coverImage} alt={character.name || "Character"} />
-      </div>
-    );
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      error: "Method not allowed."
+    });
   }
 
-  return (
-    <div className="miniPortrait">
-      <span className="miniSymbol">{character.symbol || character.avatar || "✦"}</span>
-    </div>
-  );
+  try {
+    const { character, messages } = req.body || {};
+
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({
+        error: "Missing OPENAI_API_KEY."
+      });
+    }
+
+    if (!character || !character.name) {
+      return res.status(400).json({
+        error: "Missing character."
+      });
+    }
+
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({
+        error: "Missing messages."
+      });
+    }
+
+    const formattedMessages = [
+      {
+        role: "system",
+        content: buildCharacterSystemPrompt(character)
+      },
+      ...messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ];
+
+    const completion = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: formattedMessages,
+      temperature: 0.92,
+      max_tokens: 220
+    });
+
+    const reply = completion?.choices?.[0]?.message?.content?.trim();
+
+    if (!reply) {
+      return res.status(500).json({
+        error: "The character returned an empty response."
+      });
+    }
+
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error("Character chat error:", error);
+
+    return res.status(500).json({
+      error:
+        error?.message ||
+        "Something went wrong while chatting with the character."
+    });
+  }
 }
