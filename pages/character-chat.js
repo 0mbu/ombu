@@ -4,26 +4,18 @@ import { useRouter } from "next/router";
 import OmbuSidebar from "../components/OmbuSidebar";
 
 const SELECTED_CHARACTER_KEY = "ombu_selected_character";
+const RECENT_CHATS_KEY = "ombu_recent_chats";
 
-function getCharacterKey(character) {
-  if (!character) return null;
+function createChatId() {
+  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
 
-  const stableId =
-    character.id ||
-    character.name ||
-    character.role ||
-    "unknown-character";
-
-  return `ombu_chat_history_${String(stableId)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")}`;
+function getHistoryKey(chatId) {
+  return `ombu_chat_history_${chatId}`;
 }
 
 function buildOpeningMessage(character) {
-  if (!character) {
-    return "";
-  }
+  if (!character) return "";
 
   if (character.firstMessage && character.firstMessage.trim()) {
     return character.firstMessage.trim();
@@ -40,7 +32,7 @@ function buildOpeningMessage(character) {
     role.includes("operative") ||
     role.includes("assassin")
   ) {
-    return `*${name} studies you in silence for a moment, expression unreadable.*\n\n“Speak.”`;
+    return `*${name} studies you in silence for a moment, expression unreadable.*\n\nSpeak.`;
   }
 
   if (
@@ -48,7 +40,7 @@ function buildOpeningMessage(character) {
     personality.includes("possessive") ||
     role.includes("ex")
   ) {
-    return `*${name} leans against the doorway, trying badly to look like this does not matter.*\n\n“So… you were just not going to say anything?”`;
+    return `*${name} leans against the doorway, trying badly to look like this does not matter.*\n\nSo… you were just not going to say anything?`;
   }
 
   if (
@@ -56,7 +48,7 @@ function buildOpeningMessage(character) {
     role.includes("kingpin") ||
     role.includes("mafia")
   ) {
-    return `*${name} looks up slowly, calm in a way that feels more dangerous than anger.*\n\n“You have my attention. Use it carefully.”`;
+    return `*${name} looks up slowly, calm in a way that feels more dangerous than anger.*\n\nYou have my attention. Use it carefully.`;
   }
 
   if (
@@ -64,16 +56,68 @@ function buildOpeningMessage(character) {
     personality.includes("sarcastic") ||
     role.includes("hero")
   ) {
-    return `*${name} glances over, half a smile pulling at their face.*\n\n“Okay. I’m listening. Try not to make it weird.”`;
+    return `*${name} glances over, half a smile pulling at their face.*\n\nOkay. I’m listening. Try not to make it weird.`;
   }
 
   return `*${name} turns toward you, waiting to see what you’ll say first.*`;
+}
+
+function getLastReadableMessage(messages) {
+  const last = [...messages].reverse().find((msg) => msg?.content);
+  if (!last) return "Continue chat";
+
+  return String(last.content)
+    .replace(/\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 58);
+}
+
+function saveRecentChat({ chatId, character, messages }) {
+  if (typeof window === "undefined" || !chatId || !character) return;
+
+  try {
+    const raw = localStorage.getItem(RECENT_CHATS_KEY);
+    const existing = raw ? JSON.parse(raw) : [];
+    const current = Array.isArray(existing) ? existing : [];
+
+    const entry = {
+      chatId,
+      character,
+      lastMessage: getLastReadableMessage(messages),
+      updatedAt: new Date().toISOString()
+    };
+
+    const next = [
+      entry,
+      ...current.filter((item) => item.chatId !== chatId)
+    ].slice(0, 12);
+
+    localStorage.setItem(RECENT_CHATS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event("ombu_recent_chats_updated"));
+  } catch (error) {
+    console.error("Failed to save recent chat:", error);
+  }
+}
+
+function renderMessageContent(content) {
+  const text = String(content || "");
+  const parts = text.split(/(\*[^*]+\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return <em key={index}>{part.slice(1, -1)}</em>;
+    }
+
+    return <span key={index}>{part}</span>;
+  });
 }
 
 export default function CharacterChatPage() {
   const router = useRouter();
 
   const [character, setCharacter] = useState(null);
+  const [chatId, setChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,8 +126,8 @@ export default function CharacterChatPage() {
   const chatRef = useRef(null);
 
   const chatStorageKey = useMemo(() => {
-    return getCharacterKey(character);
-  }, [character]);
+    return chatId ? getHistoryKey(chatId) : null;
+  }, [chatId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -97,12 +141,18 @@ export default function CharacterChatPage() {
 
     try {
       const parsed = JSON.parse(raw);
-      setCharacter(parsed);
 
-      const key = getCharacterKey(parsed);
-      const savedRaw = key ? localStorage.getItem(key) : null;
+      const selectedCharacter = parsed.character || parsed;
+      const selectedChatId = parsed.chatId || createChatId();
+      const mode = parsed.mode || "new";
 
-      if (savedRaw) {
+      setCharacter(selectedCharacter);
+      setChatId(selectedChatId);
+
+      const historyKey = getHistoryKey(selectedChatId);
+      const savedRaw = localStorage.getItem(historyKey);
+
+      if (mode === "resume" && savedRaw) {
         const savedMessages = JSON.parse(savedRaw);
 
         if (Array.isArray(savedMessages) && savedMessages.length > 0) {
@@ -112,12 +162,21 @@ export default function CharacterChatPage() {
         }
       }
 
-      setMessages([
+      const opening = [
         {
           role: "assistant",
-          content: buildOpeningMessage(parsed)
+          content: buildOpeningMessage(selectedCharacter)
         }
-      ]);
+      ];
+
+      setMessages(opening);
+      localStorage.setItem(historyKey, JSON.stringify(opening));
+
+      saveRecentChat({
+        chatId: selectedChatId,
+        character: selectedCharacter,
+        messages: opening
+      });
     } catch (error) {
       console.error("Failed to load selected character:", error);
     } finally {
@@ -130,8 +189,9 @@ export default function CharacterChatPage() {
 
     if (messages.length > 0) {
       localStorage.setItem(chatStorageKey, JSON.stringify(messages));
+      saveRecentChat({ chatId, character, messages });
     }
-  }, [messages, loaded, chatStorageKey]);
+  }, [messages, loaded, chatStorageKey, chatId, character]);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -196,15 +256,29 @@ export default function CharacterChatPage() {
   const handleNewChat = () => {
     if (!character || loading) return;
 
-    const opening = {
-      role: "assistant",
-      content: buildOpeningMessage(character)
-    };
+    const newChatId = createChatId();
+    const opening = [
+      {
+        role: "assistant",
+        content: buildOpeningMessage(character)
+      }
+    ];
 
-    setMessages([opening]);
+    setChatId(newChatId);
+    setMessages(opening);
 
-    if (typeof window !== "undefined" && chatStorageKey) {
-      localStorage.setItem(chatStorageKey, JSON.stringify([opening]));
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(
+        SELECTED_CHARACTER_KEY,
+        JSON.stringify({
+          character,
+          chatId: newChatId,
+          mode: "resume"
+        })
+      );
+
+      localStorage.setItem(getHistoryKey(newChatId), JSON.stringify(opening));
+      saveRecentChat({ chatId: newChatId, character, messages: opening });
     }
   };
 
@@ -286,7 +360,9 @@ export default function CharacterChatPage() {
                         message.role === "user" ? "user" : "character"
                       }`}
                     >
-                      <div className="messageBubble">{message.content}</div>
+                      <div className="messageBubble">
+                        {renderMessageContent(message.content)}
+                      </div>
                     </div>
                   ))}
 
@@ -495,6 +571,11 @@ export default function CharacterChatPage() {
           line-height: 1.55;
           white-space: pre-wrap;
           font-size: 15px;
+        }
+
+        .messageBubble em {
+          font-style: italic;
+          color: rgba(255, 255, 255, 0.68);
         }
 
         .messageRow.user .messageBubble {
