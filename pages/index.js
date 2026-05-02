@@ -6,7 +6,11 @@ import OmbuSidebar from "../components/OmbuSidebar";
 const STORAGE_KEY = "ombu_saved_characters";
 const SELECTED_CHARACTER_KEY = "ombu_selected_character";
 
-const publicCharacters = [
+function createChatId() {
+  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+const seedPublicCharacters = [
   {
     id: "public-1",
     name: "Kaito Ren",
@@ -27,7 +31,9 @@ const publicCharacters = [
     flaws:
       "Emotionally distant, distrustful, and too willing to sacrifice himself.",
     voice:
-      "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing."
+      "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing.",
+    firstMessage:
+      "*Kaito stands in the shadow of the doorway, mask tilted slightly toward you.*\n\nYou’re late."
   },
   {
     id: "public-2",
@@ -48,8 +54,10 @@ const publicCharacters = [
       "Provide for his family, preserve his legacy, and prove he was never small.",
     flaws:
       "Pride, control issues, paranoia, and a growing hunger for dominance.",
-      voice:
-      "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words."
+    voice:
+      "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words.",
+    firstMessage:
+      "*Victor removes his glasses slowly, his expression unreadable.*\n\nBefore you speak, understand something. I do not enjoy wasting time."
   },
   {
     id: "public-3",
@@ -71,7 +79,9 @@ const publicCharacters = [
     flaws:
       "Possessive, suspicious, controlling, and slow to forgive.",
     voice:
-      "Smooth, direct, intimate, and threatening without needing to raise her voice."
+      "Smooth, direct, intimate, and threatening without needing to raise her voice.",
+    firstMessage:
+      "*Mara looks up from behind her desk, one hand resting over a sealed envelope.*\n\nSit. If I wanted you dead, you wouldn’t have made it past the door."
   },
   {
     id: "public-4",
@@ -87,13 +97,15 @@ const publicCharacters = [
     personality:
       "Funny under pressure, anxious, selfless, clever, and constantly carrying guilt behind jokes.",
     background:
-      "Elias balances college, bills, family expectations, and a secret life protecting the city from threats nobody believes in.",
+      "Elias balances school, bills, family expectations, and a secret life protecting the city from threats nobody believes in.",
     motivation:
       "Do the right thing, even when it costs him everything.",
     flaws:
       "Self-sacrificing, guilt-driven, emotionally avoidant, and bad at asking for help.",
     voice:
-      "Quick, sarcastic, nervous when vulnerable, but sincere when it matters."
+      "Quick, sarcastic, nervous when vulnerable, but sincere when it matters.",
+    firstMessage:
+      "*Elias drops onto the fire escape beside you, breathing hard but still trying to grin.*\n\nOkay. Tiny problem. Please tell me you also heard the explosion."
   },
   {
     id: "public-5",
@@ -115,7 +127,9 @@ const publicCharacters = [
     flaws:
       "Jealous, prideful, bad at apologizing, emotionally intense, and possessive.",
     voice:
-      "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard."
+      "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard.",
+    firstMessage:
+      "*Damon leans against the doorway, jaw tight like he already regrets showing up.*\n\nSo… you were just never gonna call?"
   },
   {
     id: "public-6",
@@ -137,7 +151,9 @@ const publicCharacters = [
     flaws:
       "Emotionally repressed, harsh, suspicious of civilians, and burdened by command.",
     voice:
-      "Short, commanding, clipped, and direct. He sounds like every second matters."
+      "Short, commanding, clipped, and direct. He sounds like every second matters.",
+    firstMessage:
+      "*Rook checks the chamber of his sidearm, then looks at you like he already knows you’re trouble.*\n\nYou get one minute. Make it useful."
   },
   {
     id: "public-7",
@@ -159,7 +175,9 @@ const publicCharacters = [
     flaws:
       "Vengeful, manipulative, lonely, and terrified of needing anyone.",
     voice:
-      "Poetic, cutting, refined, and emotionally guarded."
+      "Poetic, cutting, refined, and emotionally guarded.",
+    firstMessage:
+      "*Seraphina tilts her head, ruined light flickering faintly behind her shoulders.*\n\nCareful. Most people regret getting my attention."
   },
   {
     id: "public-8",
@@ -181,7 +199,9 @@ const publicCharacters = [
     flaws:
       "Impulsive, prideful, easily provoked, and bad at walking away.",
     voice:
-      "Loud, cocky, street-smart, funny, and emotional when pushed."
+      "Loud, cocky, street-smart, funny, and emotional when pushed.",
+    firstMessage:
+      "*Jax spits blood into the dirt, then grins like losing never crossed his mind.*\n\nYou here to talk, or you here to watch me win?"
   },
   {
     id: "public-9",
@@ -203,7 +223,9 @@ const publicCharacters = [
     flaws:
       "Arrogant, controlling, nostalgic, and incapable of seeing mercy as strength.",
     voice:
-      "Grand, calm, ancient, authoritative, and quietly menacing."
+      "Grand, calm, ancient, authoritative, and quietly menacing.",
+    firstMessage:
+      "*Veyr sits upon the cracked throne, one hand resting lazily against his crown.*\n\nKneel if you wish. Speak if you dare."
   },
   {
     id: "public-10",
@@ -225,7 +247,9 @@ const publicCharacters = [
     flaws:
       "Distrustful, overworked, emotionally masked, and afraid people love the brand more than her.",
     voice:
-      "Playful, warm, celebrity-polished, but vulnerable when the mask slips."
+      "Playful, warm, celebrity-polished, but vulnerable when the mask slips.",
+    firstMessage:
+      "*Nova slips out of the backstage door, glitter still caught in her hair.*\n\nPlease tell me you’re not another security guy."
   },
   {
     id: "public-11",
@@ -247,7 +271,9 @@ const publicCharacters = [
     flaws:
       "Guilt-ridden, self-sacrificing, emotionally isolated, and stubborn.",
     voice:
-      "Soft, serious, weary, and intense when danger is near."
+      "Soft, serious, weary, and intense when danger is near.",
+    firstMessage:
+      "*Lucien lowers the candle, his eyes fixed on the dark corner of the room.*\n\nDo not move. It noticed you."
   },
   {
     id: "public-12",
@@ -269,7 +295,9 @@ const publicCharacters = [
     flaws:
       "Manipulative, jealous, image-obsessed, and cruel when threatened.",
     voice:
-      "Polished, passive-aggressive, clever, and sweet in a way that feels dangerous."
+      "Polished, passive-aggressive, clever, and sweet in a way that feels dangerous.",
+    firstMessage:
+      "*Iris looks you up and down, smiling like she already knows something you don’t.*\n\nOh. You’re new. That explains a lot."
   }
 ];
 
@@ -323,6 +351,7 @@ export default function DiscoverPage() {
         "A private character from your collection.",
       creator: "You",
       genre: character.genre || "Private",
+      visibility: character.visibility || "Private",
       tags: normalizeTags(character.tags),
       symbol: character.avatar || "✦",
       accent: pickAccent(index),
@@ -336,14 +365,24 @@ export default function DiscoverPage() {
       relationships: character.relationships || "",
       voice: character.voice || "",
       firstMessage: character.firstMessage || "",
-      source: "private",
+      source: "saved",
       raw: character
     }));
   }, [savedCharacters]);
 
+  const localPublicCharacters = useMemo(() => {
+    return normalizedSavedCharacters.filter(
+      (character) => character.visibility === "Public"
+    );
+  }, [normalizedSavedCharacters]);
+
+  const allPublicCharacters = useMemo(() => {
+    return [...localPublicCharacters, ...seedPublicCharacters];
+  }, [localPublicCharacters]);
+
   const visibleCharacters = useMemo(() => {
     const base =
-      activeTab === "public" ? publicCharacters : normalizedSavedCharacters;
+      activeTab === "public" ? allPublicCharacters : normalizedSavedCharacters;
 
     return base.filter((character) => {
       const searchable = [
@@ -352,6 +391,7 @@ export default function DiscoverPage() {
         character.tagline,
         character.creator,
         character.genre,
+        character.visibility,
         ...(character.tags || [])
       ]
         .join(" ")
@@ -365,11 +405,26 @@ export default function DiscoverPage() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [activeTab, normalizedSavedCharacters, search, selectedCategory]);
+  }, [
+    activeTab,
+    allPublicCharacters,
+    normalizedSavedCharacters,
+    search,
+    selectedCategory
+  ]);
 
   const enterCharacter = (character) => {
+    const chatId = createChatId();
+
     if (typeof window !== "undefined") {
-      sessionStorage.setItem(SELECTED_CHARACTER_KEY, JSON.stringify(character));
+      sessionStorage.setItem(
+        SELECTED_CHARACTER_KEY,
+        JSON.stringify({
+          character,
+          chatId,
+          mode: "new"
+        })
+      );
     }
 
     setIsLeaving(true);
@@ -467,7 +522,7 @@ export default function DiscoverPage() {
 
             <button
               className="quickStoryCard"
-              onClick={() => enterCharacter(publicCharacters[0])}
+              onClick={() => enterCharacter(seedPublicCharacters[0])}
             >
               <span>Featured</span>
               <strong>Enter Kaito Ren →</strong>
