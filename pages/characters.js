@@ -6,6 +6,10 @@ import OmbuSidebar from "../components/OmbuSidebar";
 const STORAGE_KEY = "ombu_saved_characters";
 const SELECTED_CHARACTER_KEY = "ombu_selected_character";
 
+function createChatId() {
+  return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 const emptyCharacter = {
   name: "",
   role: "",
@@ -50,7 +54,7 @@ const publicCharacters = [
     voice:
       "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing.",
     firstMessage:
-      "*Kaito stands in the shadow of the doorway, mask tilted slightly toward you.*\n\n“You’re late.”"
+      "*Kaito stands in the shadow of the doorway, mask tilted slightly toward you.*\n\nYou’re late."
   },
   {
     id: "public-2",
@@ -73,7 +77,7 @@ const publicCharacters = [
     voice:
       "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words.",
     firstMessage:
-      "*Victor removes his glasses slowly, his expression unreadable.*\n\n“Before you speak, understand something. I do not enjoy wasting time.”"
+      "*Victor removes his glasses slowly, his expression unreadable.*\n\nBefore you speak, understand something. I do not enjoy wasting time."
   },
   {
     id: "public-3",
@@ -96,7 +100,7 @@ const publicCharacters = [
     voice:
       "Smooth, direct, intimate, and threatening without needing to raise her voice.",
     firstMessage:
-      "*Mara looks up from behind her desk, one hand resting over a sealed envelope.*\n\n“Sit. If I wanted you dead, you wouldn’t have made it past the door.”"
+      "*Mara looks up from behind her desk, one hand resting over a sealed envelope.*\n\nSit. If I wanted you dead, you wouldn’t have made it past the door."
   },
   {
     id: "public-4",
@@ -119,7 +123,7 @@ const publicCharacters = [
     voice:
       "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard.",
     firstMessage:
-      "*Damon leans against the doorway, jaw tight like he already regrets showing up.*\n\n“So… you were just never gonna call?”"
+      "*Damon leans against the doorway, jaw tight like he already regrets showing up.*\n\nSo… you were just never gonna call?"
   }
 ];
 
@@ -214,19 +218,30 @@ export default function CharactersPage() {
   };
 
   const handleChat = (character) => {
+    const chatId = createChatId();
+
     if (typeof window !== "undefined") {
       sessionStorage.setItem(
         SELECTED_CHARACTER_KEY,
         JSON.stringify({
-          ...emptyCharacter,
-          ...character,
-          symbol: character.avatar || character.symbol || "✦"
+          character: {
+            ...emptyCharacter,
+            ...character,
+            symbol: character.avatar || character.symbol || "✦"
+          },
+          chatId,
+          mode: "new"
         })
       );
     }
 
     router.push("/character-chat");
   };
+
+  const publicPreviewCharacters = [
+    ...savedCharacters.filter((character) => character.visibility === "Public"),
+    ...publicCharacters
+  ];
 
   const characterCount = savedCharacters.length;
 
@@ -262,7 +277,7 @@ export default function CharactersPage() {
 
           <section className="stats">
             <Stat label="Saved characters" value={characterCount} />
-            <Stat label="Public preview" value={publicCharacters.length} />
+            <Stat label="Local public" value={savedCharacters.filter((c) => c.visibility === "Public").length} />
             <Stat label="Storage" value="Local" />
           </section>
 
@@ -275,7 +290,7 @@ export default function CharactersPage() {
           <section className="panel">
             {activeTab === "public" && (
               <CharacterGrid>
-                {publicCharacters.map((character) => (
+                {publicPreviewCharacters.map((character) => (
                   <CharacterCard
                     key={character.id}
                     character={character}
@@ -1043,7 +1058,7 @@ function CreateCharacter({
             label="Opening message"
             value={form.firstMessage}
             onChange={(v) => updateField("firstMessage", v)}
-            placeholder="Optional. Example: “You’re late. Speak.”"
+            placeholder="Optional. Example: *He looks over coldly.* You’re late."
           />
 
           <div className="field wide">
