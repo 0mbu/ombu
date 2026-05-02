@@ -142,7 +142,9 @@ export default async function handler(req, res) {
     console.error("Character chat error:", error);
 
     return res.status(500).json({
-      error: error?.message || "Something went wrong while chatting with the character."
+      error:
+        error?.message ||
+        "Something went wrong while chatting with the character."
     });
   }
 }
