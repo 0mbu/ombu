@@ -127,6 +127,7 @@ export default function CharactersPage() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("create");
+  const [creatorMode, setCreatorMode] = useState("basic");
   const [form, setForm] = useState(emptyCharacter);
   const [savedCharacters, setSavedCharacters] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -165,6 +166,7 @@ export default function CharactersPage() {
   const handleNew = () => {
     setSelectedId(null);
     setForm(emptyCharacter);
+    setCreatorMode("basic");
     setActiveTab("create");
   };
 
@@ -198,6 +200,7 @@ export default function CharactersPage() {
       ...emptyCharacter,
       ...character
     });
+    setCreatorMode("basic");
     setActiveTab("create");
   };
 
@@ -248,7 +251,7 @@ export default function CharactersPage() {
               <div className="eyebrow">Creation system</div>
               <h1>Character Studio</h1>
               <p>
-                Build the personality, voice, image, history, and behavior rules that power your character chats.
+                Create fast with the basics, then open Advanced when you want deeper control.
               </p>
             </div>
 
@@ -295,6 +298,7 @@ export default function CharactersPage() {
                               voice: character.voice || ""
                             });
                             setSelectedId(null);
+                            setCreatorMode("basic");
                             setActiveTab("create");
                           }}
                         >
@@ -351,6 +355,8 @@ export default function CharactersPage() {
                 handleSave={handleSave}
                 handleNew={handleNew}
                 selectedId={selectedId}
+                creatorMode={creatorMode}
+                setCreatorMode={setCreatorMode}
               />
             )}
           </section>
@@ -674,7 +680,7 @@ export default function CharactersPage() {
 
         .createLayout {
           display: grid;
-          grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+          grid-template-columns: minmax(0, 1.1fr) minmax(310px, 0.9fr);
           gap: 18px;
         }
 
@@ -693,9 +699,38 @@ export default function CharactersPage() {
           letter-spacing: -0.03em;
         }
 
+        .creatorModeTabs {
+          display: flex;
+          gap: 10px;
+          padding: 6px;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.035);
+          border: 1px solid rgba(255,255,255,0.07);
+          margin-bottom: 18px;
+          width: fit-content;
+        }
+
+        .creatorModeButton {
+          min-height: 38px;
+          border: none;
+          border-radius: 13px;
+          padding: 0 14px;
+          cursor: pointer;
+          color: rgba(255,255,255,0.62);
+          background: transparent;
+          font-weight: 850;
+          transition: 200ms ease;
+        }
+
+        .creatorModeButton.active,
+        .creatorModeButton:hover {
+          color: white;
+          background: rgba(101,116,255,0.22);
+        }
+
         .formGrid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 14px;
         }
 
@@ -744,6 +779,19 @@ export default function CharactersPage() {
 
         .wide {
           grid-column: 1 / -1;
+        }
+
+        .advancedPanel {
+          margin-top: 4px;
+          padding-top: 8px;
+          border-top: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .advancedNote {
+          color: rgba(255,255,255,0.48);
+          font-size: 13px;
+          line-height: 1.5;
+          margin: -2px 0 16px;
         }
 
         .formActions {
@@ -905,7 +953,15 @@ function CharacterCard({ character, footer }) {
   );
 }
 
-function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId }) {
+function CreateCharacter({
+  form,
+  updateField,
+  handleSave,
+  handleNew,
+  selectedId,
+  creatorMode,
+  setCreatorMode
+}) {
   const previewTags = (form.tags || "")
     .split(",")
     .map((tag) => tag.trim())
@@ -939,10 +995,25 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
           {selectedId ? "Edit character" : "Create character"}
         </h2>
 
+        <div className="creatorModeTabs">
+          <button
+            type="button"
+            className={`creatorModeButton ${creatorMode === "basic" ? "active" : ""}`}
+            onClick={() => setCreatorMode("basic")}
+          >
+            Basic
+          </button>
+          <button
+            type="button"
+            className={`creatorModeButton ${creatorMode === "advanced" ? "active" : ""}`}
+            onClick={() => setCreatorMode("advanced")}
+          >
+            Advanced
+          </button>
+        </div>
+
         <div className="formGrid">
-          <Field label="Name" value={form.name} onChange={(v) => updateField("name", v)} placeholder="Jace Vale" />
-          <Field label="Role" value={form.role} onChange={(v) => updateField("role", v)} placeholder="Reluctant anti-hero" />
-          <Field label="Age" value={form.age} onChange={(v) => updateField("age", v)} placeholder="24" />
+          <Field label="Name" value={form.name} onChange={(v) => updateField("name", v)} placeholder="Sasuke, Invincible, Mafia Boss..." />
 
           <SelectField
             label="Visibility"
@@ -951,8 +1022,29 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
             options={["Private", "Public"]}
           />
 
-          <Field label="Genre" value={form.genre} onChange={(v) => updateField("genre", v)} placeholder="Dark fantasy" />
-          <Field label="Avatar symbol" value={form.avatar} onChange={(v) => updateField("avatar", v)} placeholder="✦" />
+          <TextField
+            className="wide"
+            label="Description"
+            value={form.tagline}
+            onChange={(v) => updateField("tagline", v)}
+            placeholder="A cold rival obsessed with revenge. A young hero learning what power costs. A mafia boss who never forgives betrayal..."
+          />
+
+          <TextField
+            className="wide"
+            label="Personality"
+            value={form.personality}
+            onChange={(v) => updateField("personality", v)}
+            placeholder="Quiet, arrogant, emotionally guarded, loyal only to his mission..."
+          />
+
+          <TextField
+            className="wide"
+            label="Opening message"
+            value={form.firstMessage}
+            onChange={(v) => updateField("firstMessage", v)}
+            placeholder="Optional. Example: “You’re late. Speak.”"
+          />
 
           <div className="field wide">
             <label>Cover image</label>
@@ -967,20 +1059,32 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
               </button>
             )}
           </div>
-
-          <Field className="wide" label="Short tagline" value={form.tagline} onChange={(v) => updateField("tagline", v)} placeholder="A one-line hook for the character." />
-          <TextField className="wide" label="Appearance" value={form.appearance} onChange={(v) => updateField("appearance", v)} placeholder="Face, clothing, build, scars, aura, style..." />
-          <TextField className="wide" label="Personality" value={form.personality} onChange={(v) => updateField("personality", v)} placeholder="How they act, what they hide, what makes them interesting..." />
-          <TextField className="wide" label="Backstory" value={form.background} onChange={(v) => updateField("background", v)} placeholder="What shaped them?" />
-          <TextField className="wide" label="Motivation" value={form.motivation} onChange={(v) => updateField("motivation", v)} placeholder="What do they want most?" />
-          <TextField className="wide" label="Strengths" value={form.strengths} onChange={(v) => updateField("strengths", v)} placeholder="Skills, traits, advantages..." />
-          <TextField className="wide" label="Flaws" value={form.flaws} onChange={(v) => updateField("flaws", v)} placeholder="Weaknesses, fears, bad habits..." />
-          <TextField className="wide" label="Abilities / Skills" value={form.abilities} onChange={(v) => updateField("abilities", v)} placeholder="Powers, fighting style, talents, limits..." />
-          <TextField className="wide" label="Relationships" value={form.relationships} onChange={(v) => updateField("relationships", v)} placeholder="Friends, enemies, family, rivals..." />
-          <TextField className="wide" label="Speaking style" value={form.voice} onChange={(v) => updateField("voice", v)} placeholder="How do they talk? Calm, sarcastic, nervous, poetic..." />
-          <TextField className="wide" label="Opening message" value={form.firstMessage} onChange={(v) => updateField("firstMessage", v)} placeholder="Optional first message if this becomes interactive later." />
-          <Field className="wide" label="Tags" value={form.tags} onChange={(v) => updateField("tags", v)} placeholder="anime, villain, romance, soldier" />
         </div>
+
+        {creatorMode === "advanced" && (
+          <div className="advancedPanel">
+            <p className="advancedNote">
+              Advanced fields help Ombu keep the character more consistent in longer chats.
+            </p>
+
+            <div className="formGrid">
+              <Field label="Role" value={form.role} onChange={(v) => updateField("role", v)} placeholder="Rival shinobi, superhero, crime boss..." />
+              <Field label="Age" value={form.age} onChange={(v) => updateField("age", v)} placeholder="17, 24, unknown..." />
+              <Field label="Genre" value={form.genre} onChange={(v) => updateField("genre", v)} placeholder="Anime, superhero, mafia, romance..." />
+              <Field label="Avatar symbol" value={form.avatar} onChange={(v) => updateField("avatar", v)} placeholder="✦" />
+
+              <TextField className="wide" label="Appearance" value={form.appearance} onChange={(v) => updateField("appearance", v)} placeholder="Face, clothing, build, scars, aura, style..." />
+              <TextField className="wide" label="Backstory" value={form.background} onChange={(v) => updateField("background", v)} placeholder="What shaped them?" />
+              <TextField className="wide" label="Motivation" value={form.motivation} onChange={(v) => updateField("motivation", v)} placeholder="What do they want most?" />
+              <TextField className="wide" label="Strengths" value={form.strengths} onChange={(v) => updateField("strengths", v)} placeholder="Skills, traits, advantages..." />
+              <TextField className="wide" label="Flaws" value={form.flaws} onChange={(v) => updateField("flaws", v)} placeholder="Weaknesses, fears, bad habits..." />
+              <TextField className="wide" label="Abilities / Skills" value={form.abilities} onChange={(v) => updateField("abilities", v)} placeholder="Powers, fighting style, talents, limits..." />
+              <TextField className="wide" label="Relationships" value={form.relationships} onChange={(v) => updateField("relationships", v)} placeholder="Friends, enemies, family, rivals..." />
+              <TextField className="wide" label="Speaking style" value={form.voice} onChange={(v) => updateField("voice", v)} placeholder="How do they talk? Calm, sarcastic, cold, aggressive..." />
+              <Field className="wide" label="Tags" value={form.tags} onChange={(v) => updateField("tags", v)} placeholder="anime, villain, romance, soldier" />
+            </div>
+          </div>
+        )}
 
         <div className="formActions">
           <button className="primaryBtn" onClick={handleSave}>
@@ -1004,10 +1108,10 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
         )}
 
         <div className="previewName">{form.name || "Unnamed character"}</div>
-        <div className="role">{form.role || "No role yet"}</div>
+        <div className="role">{form.role || form.genre || "No role yet"}</div>
 
         <p className="previewText">
-          {form.tagline || form.personality || "Start filling out the character and the preview will build itself."}
+          {form.tagline || form.personality || "Start with a name, description, and personality."}
         </p>
 
         <div className="chipRow">
@@ -1018,10 +1122,15 @@ function CreateCharacter({ form, updateField, handleSave, handleNew, selectedId 
           ))}
         </div>
 
-        <PreviewBlock label="Appearance" value={form.appearance} />
-        <PreviewBlock label="Motivation" value={form.motivation} />
-        <PreviewBlock label="Abilities" value={form.abilities} />
-        <PreviewBlock label="Voice" value={form.voice} />
+        <PreviewBlock label="Personality" value={form.personality} />
+        <PreviewBlock label="Opening Message" value={form.firstMessage} />
+        {creatorMode === "advanced" && (
+          <>
+            <PreviewBlock label="Motivation" value={form.motivation} />
+            <PreviewBlock label="Abilities" value={form.abilities} />
+            <PreviewBlock label="Voice" value={form.voice} />
+          </>
+        )}
       </aside>
     </div>
   );
