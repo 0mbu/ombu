@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+const SELECTED_CHARACTER_KEY = "ombu_selected_character";
+const RECENT_CHATS_KEY = "ombu_recent_chats";
 
 export default function OmbuSidebar({ actionSlot = null }) {
   const router = useRouter();
+  const [recentChats, setRecentChats] = useState([]);
 
   const navItems = [
     { label: "Discover", href: "/", icon: <DiscoverIcon /> },
@@ -14,6 +19,69 @@ export default function OmbuSidebar({ actionSlot = null }) {
   const isActive = (href) => {
     if (href === "/") return router.pathname === "/";
     return router.pathname.startsWith(href);
+  };
+
+  const loadRecentChats = () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = localStorage.getItem(RECENT_CHATS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      setRecentChats(Array.isArray(parsed) ? parsed : []);
+    } catch (error) {
+      console.error("Failed to load recent chats:", error);
+      setRecentChats([]);
+    }
+  };
+
+  useEffect(() => {
+    loadRecentChats();
+
+    const handleRecentUpdate = () => loadRecentChats();
+    const handleStorageUpdate = (event) => {
+      if (event.key === RECENT_CHATS_KEY) loadRecentChats();
+    };
+
+    window.addEventListener("ombu_recent_chats_updated", handleRecentUpdate);
+    window.addEventListener("storage", handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener("ombu_recent_chats_updated", handleRecentUpdate);
+      window.removeEventListener("storage", handleStorageUpdate);
+    };
+  }, [router.pathname]);
+
+  const openRecentChat = (chat) => {
+    if (typeof window === "undefined") return;
+
+    sessionStorage.setItem(
+      SELECTED_CHARACTER_KEY,
+      JSON.stringify({
+        character: chat.character,
+        chatId: chat.chatId,
+        mode: "resume"
+      })
+    );
+
+    router.push("/character-chat");
+  };
+
+  const deleteRecentChats = () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      recentChats.forEach((chat) => {
+        if (chat.chatId) {
+          localStorage.removeItem(`ombu_chat_history_${chat.chatId}`);
+        }
+      });
+
+      localStorage.removeItem(RECENT_CHATS_KEY);
+      setRecentChats([]);
+      window.dispatchEvent(new Event("ombu_recent_chats_updated"));
+    } catch (error) {
+      console.error("Failed to delete recent chats:", error);
+    }
   };
 
   return (
@@ -37,6 +105,49 @@ export default function OmbuSidebar({ actionSlot = null }) {
               </Link>
             ))}
           </nav>
+
+          <section className="ombuRecent">
+            <div className="ombuRecentHeader">
+              <span>Recent Chats</span>
+              {recentChats.length > 0 && (
+                <button onClick={deleteRecentChats}>Delete</button>
+              )}
+            </div>
+
+            {recentChats.length === 0 ? (
+              <div className="ombuNoRecent">No recent chats</div>
+            ) : (
+              <div className="ombuRecentList">
+                {recentChats.slice(0, 6).map((chat) => (
+                  <button
+                    key={chat.chatId}
+                    className="ombuRecentItem"
+                    onClick={() => openRecentChat(chat)}
+                  >
+                    <span className="ombuRecentAvatar">
+                      {chat.character?.coverImage ? (
+                        <img
+                          src={chat.character.coverImage}
+                          alt={chat.character?.name || "Character"}
+                        />
+                      ) : (
+                        <span>
+                          {chat.character?.avatar ||
+                            chat.character?.symbol ||
+                            "✦"}
+                        </span>
+                      )}
+                    </span>
+
+                    <span className="ombuRecentText">
+                      <strong>{chat.character?.name || "Unknown"}</strong>
+                      <small>{chat.lastMessage || "Continue chat"}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
 
         <div className="ombuSidebarBottom">
@@ -118,12 +229,7 @@ export default function OmbuSidebar({ actionSlot = null }) {
           border: 1px solid rgba(255,255,255,0.045);
           background: rgba(255,255,255,0.018);
           overflow: hidden;
-          transition:
-            color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            background 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .ombuNavItem::before {
@@ -152,8 +258,7 @@ export default function OmbuSidebar({ actionSlot = null }) {
         .ombuNavItem.active {
           color: #fff;
           transform: translateX(0);
-          background:
-            linear-gradient(135deg, rgba(101,116,255,0.24), rgba(155,124,255,0.09));
+          background: linear-gradient(135deg, rgba(101,116,255,0.24), rgba(155,124,255,0.09));
           border-color: rgba(145,155,255,0.30);
           box-shadow:
             0 18px 44px rgba(78, 94, 255, 0.14),
@@ -176,9 +281,13 @@ export default function OmbuSidebar({ actionSlot = null }) {
           box-shadow: 0 0 18px rgba(127,141,255,0.9);
         }
 
-        .ombuNavIcon {
+        .ombuNavIcon,
+        .ombuNavLabel {
           position: relative;
           z-index: 1;
+        }
+
+        .ombuNavIcon {
           width: 20px;
           height: 20px;
           display: grid;
@@ -187,10 +296,113 @@ export default function OmbuSidebar({ actionSlot = null }) {
         }
 
         .ombuNavLabel {
-          position: relative;
-          z-index: 1;
           font-size: 15px;
           font-weight: 650;
+        }
+
+        .ombuRecent {
+          margin-top: 30px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .ombuRecentHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          font-size: 11px;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.38);
+        }
+
+        .ombuRecentHeader button {
+          border: none;
+          background: transparent;
+          color: rgba(255,255,255,0.46);
+          cursor: pointer;
+          font-size: 11px;
+          padding: 0;
+        }
+
+        .ombuRecentHeader button:hover {
+          color: white;
+        }
+
+        .ombuNoRecent {
+          font-size: 13px;
+          color: rgba(255,255,255,0.38);
+          padding: 10px 2px;
+        }
+
+        .ombuRecentList {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .ombuRecentItem {
+          width: 100%;
+          border: 1px solid rgba(255,255,255,0.055);
+          background: rgba(255,255,255,0.025);
+          color: white;
+          border-radius: 14px;
+          padding: 9px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          text-align: left;
+          transition: 200ms ease;
+        }
+
+        .ombuRecentItem:hover {
+          background: rgba(255,255,255,0.055);
+          transform: translateX(2px);
+          border-color: rgba(145,155,255,0.18);
+        }
+
+        .ombuRecentAvatar {
+          width: 34px;
+          height: 34px;
+          border-radius: 12px;
+          flex-shrink: 0;
+          overflow: hidden;
+          display: grid;
+          place-items: center;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.07);
+          font-size: 15px;
+        }
+
+        .ombuRecentAvatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .ombuRecentText {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .ombuRecentText strong {
+          font-size: 13px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .ombuRecentText small {
+          font-size: 11px;
+          color: rgba(255,255,255,0.42);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 145px;
         }
 
         .ombuSidebarBottom {
@@ -261,6 +473,10 @@ export default function OmbuSidebar({ actionSlot = null }) {
           }
 
           .ombuSidebarBottom {
+            display: none;
+          }
+
+          .ombuRecent {
             display: none;
           }
         }
