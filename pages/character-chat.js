@@ -4,14 +4,14 @@ import { useRouter } from "next/router";
 import OmbuSidebar from "../components/OmbuSidebar";
 
 const SELECTED_CHARACTER_KEY = "ombu_selected_character";
-const RECENT_CHATS_KEY = "ombu_recent_chats";
+const RECENT_CHARACTER_CHATS_KEY = "ombu_recent_character_chats";
 
 function createChatId() {
   return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function getHistoryKey(chatId) {
-  return `ombu_chat_history_${chatId}`;
+  return `ombu_character_chat_history_${chatId}`;
 }
 
 function buildOpeningMessage(character) {
@@ -77,7 +77,7 @@ function saveRecentChat({ chatId, character, messages }) {
   if (typeof window === "undefined" || !chatId || !character) return;
 
   try {
-    const raw = localStorage.getItem(RECENT_CHATS_KEY);
+    const raw = localStorage.getItem(RECENT_CHARACTER_CHATS_KEY);
     const existing = raw ? JSON.parse(raw) : [];
     const current = Array.isArray(existing) ? existing : [];
 
@@ -93,7 +93,8 @@ function saveRecentChat({ chatId, character, messages }) {
       ...current.filter((item) => item.chatId !== chatId)
     ].slice(0, 12);
 
-    localStorage.setItem(RECENT_CHATS_KEY, JSON.stringify(next));
+    localStorage.setItem(RECENT_CHARACTER_CHATS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event("ombu_recent_character_chats_updated"));
     window.dispatchEvent(new Event("ombu_recent_chats_updated"));
   } catch (error) {
     console.error("Failed to save recent chat:", error);
@@ -150,7 +151,9 @@ export default function CharacterChatPage() {
       setChatId(selectedChatId);
 
       const historyKey = getHistoryKey(selectedChatId);
-      const savedRaw = localStorage.getItem(historyKey);
+      const savedRaw =
+        localStorage.getItem(historyKey) ||
+        localStorage.getItem(`ombu_chat_history_${selectedChatId}`);
 
       if (mode === "resume" && savedRaw) {
         const savedMessages = JSON.parse(savedRaw);
