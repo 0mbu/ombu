@@ -52,10 +52,7 @@ function saveRecentStory({ chatId, messages }) {
       updatedAt: new Date().toISOString()
     };
 
-    const next = [
-      entry,
-      ...current.filter((item) => item.chatId !== chatId)
-    ].slice(0, 12);
+    const next = [entry, ...current.filter((item) => item.chatId !== chatId)].slice(0, 12);
 
     localStorage.setItem(RECENT_STORY_CHATS_KEY, JSON.stringify(next));
     window.dispatchEvent(new Event("ombu_recent_story_chats_updated"));
@@ -136,6 +133,7 @@ export default function StoryPage() {
     if (!text || loading) return;
 
     const nextChatId = options.forceNewChat || !chatId ? createChatId() : chatId;
+
     if (!chatId || options.forceNewChat) {
       setChatId(nextChatId);
     }
@@ -197,6 +195,7 @@ export default function StoryPage() {
 
   const handleReset = () => {
     if (loading) return;
+
     setChatId(null);
     setMessages([]);
     setInput("");
@@ -222,165 +221,210 @@ export default function StoryPage() {
   };
 
   return (
-    <div style={styles.page}>
-      <OmbuSidebar
-        actionSlot={
-          <button
-            onClick={handleReset}
-            className="ombuSidebarAction"
-            disabled={loading}
-          >
-            + New Story
-          </button>
-        }
-      />
-
-      <main style={styles.main}>
-        <div style={styles.topBar}>
-          <div>
-            <div style={styles.topBarTitle}>Story Engine</div>
-            <div style={styles.topBarSub}>
-              Build scenes, redirect the plot, and keep momentum.
-            </div>
-          </div>
-
-          {hasStarted && !loading && (
-            <button onClick={handleReset} style={styles.topResetButton}>
-              New Story
+    <>
+      <div style={styles.page}>
+        <OmbuSidebar
+          actionSlot={
+            <button
+              onClick={handleReset}
+              className="ombuSidebarAction"
+              disabled={loading}
+            >
+              + New Story
             </button>
-          )}
-        </div>
+          }
+        />
 
-        <div style={styles.workspace}>
-          <div ref={chatRef} style={styles.chatArea}>
-            {!hasStarted && (
-              <div style={styles.centerWrap}>
-                <div style={styles.heroEyebrow}>Narrative workspace</div>
-                <div style={styles.heroTitle}>Create something worth getting lost in.</div>
-
-                <div style={styles.centerInputShell}>
-                  <textarea
-                    placeholder="Start a story, scene, character idea, or vibe..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleInputKeyDown}
-                    style={styles.centerInput}
-                  />
-
-                  <button
-                    onClick={() => sendMessage()}
-                    style={styles.centerSendButton}
-                    disabled={loading}
-                    aria-label="Send"
-                    title="Send"
-                  >
-                    <SendIcon />
-                  </button>
-                </div>
-
-                <div style={styles.helperText}>
-                  Start a story, ask for a scene, continue one, or redirect it however you want.
-                </div>
+        <main style={styles.main}>
+          <div style={styles.topBar}>
+            <div>
+              <div style={styles.topBarTitle}>Story Engine</div>
+              <div style={styles.topBarSub}>
+                Build scenes, redirect the plot, and keep momentum.
               </div>
-            )}
-
-            {hasStarted && (
-              <div style={styles.messagesWrap}>
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      ...styles.messageRow,
-                      justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
-                    }}
-                  >
-                    <div
-                      style={{
-                        ...styles.messageBubble,
-                        ...(msg.role === "user" ? styles.userBubble : styles.assistantBubble)
-                      }}
-                    >
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-
-                {loading && (
-                  <div style={styles.messageRow}>
-                    <div style={styles.loadingBubble}>
-                      <span style={styles.dot}></span>
-                      <span style={styles.dot}></span>
-                      <span style={styles.dot}></span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              ...styles.bottomComposerWrap,
-              ...(hasStarted ? styles.bottomComposerWrapActive : {})
-            }}
-          >
-            <div style={styles.bottomComposerShell}>
-              <textarea
-                placeholder={
-                  hasStarted
-                    ? "Continue, redirect, revise, or ask a question about the story..."
-                    : "Start a story, scene, or idea..."
-                }
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleInputKeyDown}
-                style={styles.bottomComposerInput}
-              />
-
-              <button
-                onClick={() => sendMessage()}
-                style={styles.bottomSendButton}
-                disabled={loading}
-                aria-label="Send"
-                title="Send"
-              >
-                <SendIcon />
-              </button>
             </div>
 
             {hasStarted && !loading && (
-              <div style={styles.afterResponseControls}>
-                <button onClick={handleContinue} style={styles.controlButton}>
-                  <SparkIcon />
-                  <span>Continue Story</span>
-                </button>
-
-                <div style={styles.directionWrap}>
-                  <textarea
-                    placeholder="Change direction..."
-                    value={direction}
-                    onChange={(e) => setDirection(e.target.value)}
-                    onKeyDown={handleDirectionKeyDown}
-                    style={styles.directionInput}
-                  />
-                  <button onClick={handleDirectionSubmit} style={styles.directionButton}>
-                    Apply
-                  </button>
-                </div>
-              </div>
+              <button onClick={handleReset} style={styles.topResetButton}>
+                New Story
+              </button>
             )}
           </div>
-        </div>
-      </main>
-    </div>
+
+          <div style={styles.workspace}>
+            <div ref={chatRef} style={styles.chatArea}>
+              {!hasStarted && (
+                <div style={styles.centerWrap}>
+                  <div style={styles.heroEyebrow}>Narrative workspace</div>
+                  <div style={styles.heroTitle}>Create something worth getting lost in.</div>
+
+                  <div style={styles.centerInputShell}>
+                    <textarea
+                      placeholder="Start a story, scene, character idea, or vibe..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleInputKeyDown}
+                      style={styles.centerInput}
+                    />
+
+                    <button
+                      onClick={() => sendMessage()}
+                      style={styles.centerSendButton}
+                      disabled={loading}
+                      aria-label="Send"
+                      title="Send"
+                    >
+                      <SendIcon />
+                    </button>
+                  </div>
+
+                  <div style={styles.helperText}>
+                    Start a story, ask for a scene, continue one, or redirect it however you want.
+                  </div>
+                </div>
+              )}
+
+              {hasStarted && (
+                <div style={styles.messagesWrap}>
+                  {messages.map((msg, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        ...styles.messageRow,
+                        justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
+                      }}
+                    >
+                      <div
+                        style={{
+                          ...styles.messageBubble,
+                          ...(msg.role === "user" ? styles.userBubble : styles.assistantBubble)
+                        }}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+
+                  {loading && (
+                    <div style={styles.messageRow}>
+                      <div style={styles.loadingBubble}>
+                        <span style={styles.dot}></span>
+                        <span style={styles.dot}></span>
+                        <span style={styles.dot}></span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                ...styles.bottomComposerWrap,
+                ...(hasStarted ? styles.bottomComposerWrapActive : {})
+              }}
+            >
+              <div style={styles.bottomComposerShell}>
+                <textarea
+                  placeholder={
+                    hasStarted
+                      ? "Continue, redirect, revise, or ask a question about the story..."
+                      : "Start a story, scene, or idea..."
+                  }
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  style={styles.bottomComposerInput}
+                />
+
+                <button
+                  onClick={() => sendMessage()}
+                  style={styles.bottomSendButton}
+                  disabled={loading}
+                  aria-label="Send"
+                  title="Send"
+                >
+                  <SendIcon />
+                </button>
+              </div>
+
+              {hasStarted && !loading && (
+                <div style={styles.afterResponseControls}>
+                  <button onClick={handleContinue} style={styles.controlButton}>
+                    <SparkIcon />
+                    <span>Continue Story</span>
+                  </button>
+
+                  <div style={styles.directionWrap}>
+                    <textarea
+                      placeholder="Change direction..."
+                      value={direction}
+                      onChange={(e) => setDirection(e.target.value)}
+                      onKeyDown={handleDirectionKeyDown}
+                      style={styles.directionInput}
+                    />
+                    <button onClick={handleDirectionSubmit} style={styles.directionButton}>
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <style jsx global>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        html,
+        body,
+        #__next {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          min-height: 100%;
+          background: #05070d;
+        }
+
+        body {
+          overflow: hidden;
+        }
+
+        textarea,
+        button {
+          font-family: inherit;
+        }
+
+        @media (max-width: 900px) {
+          body {
+            overflow: auto;
+          }
+        }
+      `}</style>
+    </>
   );
 }
 
 function SendIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M21 3L10 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M21 3L10 14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 3L14 21L10 14L3 10L21 3Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -400,7 +444,9 @@ function SparkIcon() {
 
 const styles = {
   page: {
-    minHeight: "100vh",
+    height: "100vh",
+    width: "100vw",
+    overflow: "hidden",
     display: "flex",
     background:
       "radial-gradient(circle at 22% 8%, rgba(92, 112, 255, 0.18), transparent 32%), radial-gradient(circle at 80% 70%, rgba(126, 84, 255, 0.12), transparent 30%), #05070d",
@@ -412,17 +458,20 @@ const styles = {
   main: {
     flex: 1,
     minWidth: 0,
+    height: "100vh",
+    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
     padding: "22px 26px 18px"
   },
 
   topBar: {
+    flexShrink: 0,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     gap: 16,
-    paddingBottom: 18
+    paddingBottom: 14
   },
 
   topBarTitle: {
@@ -451,23 +500,25 @@ const styles = {
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
-    position: "relative"
+    position: "relative",
+    overflow: "hidden"
   },
 
   chatArea: {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
+    overflowX: "hidden",
     paddingRight: 4
   },
 
   centerWrap: {
-    minHeight: "calc(100vh - 170px)",
+    minHeight: "100%",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: "0 20px 120px"
+    padding: "0 20px 70px"
   },
 
   heroEyebrow: {
