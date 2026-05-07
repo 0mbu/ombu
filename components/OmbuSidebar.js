@@ -1,13 +1,24 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const SELECTED_CHARACTER_KEY = "ombu_selected_character";
-const RECENT_CHATS_KEY = "ombu_recent_chats";
+const SELECTED_STORY_KEY = "ombu_selected_story";
+const RECENT_CHARACTER_CHATS_KEY = "ombu_recent_character_chats";
+const RECENT_STORY_CHATS_KEY = "ombu_recent_story_chats";
+
+function getStoryHistoryKey(chatId) {
+  return `ombu_story_chat_history_${chatId}`;
+}
+
+function getCharacterHistoryKey(chatId) {
+  return `ombu_character_chat_history_${chatId}`;
+}
 
 export default function OmbuSidebar({ actionSlot = null }) {
   const router = useRouter();
-  const [recentChats, setRecentChats] = useState([]);
+  const [storyChats, setStoryChats] = useState([]);
+  const [characterChats, setCharacterChats] = useState([]);
 
   const navItems = [
     { label: "Discover", href: "/", icon: <DiscoverIcon /> },
@@ -21,16 +32,58 @@ export default function OmbuSidebar({ actionSlot = null }) {
     return router.pathname.startsWith(href);
   };
 
+  const recentMode = useMemo(() => {
+    if (router.pathname.startsWith("/story")) return "story";
+    if (
+      router.pathname.startsWith("/characters") ||
+      router.pathname.startsWith("/character-chat")
+    ) {
+      return "character";
+    }
+    return null;
+  }, [router.pathname]);
+
+  const recentConfig = useMemo(() => {
+    if (recentMode === "story") {
+      return {
+        label: "Recent Stories",
+        empty: "No recent stories",
+        deleteLabel: "Delete",
+        chats: storyChats
+      };
+    }
+
+    if (recentMode === "character") {
+      return {
+        label: "Character Threads",
+        empty: "No character chats",
+        deleteLabel: "Delete",
+        chats: characterChats
+      };
+    }
+
+    return null;
+  }, [recentMode, storyChats, characterChats]);
+
   const loadRecentChats = () => {
     if (typeof window === "undefined") return;
 
     try {
-      const raw = localStorage.getItem(RECENT_CHATS_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      setRecentChats(Array.isArray(parsed) ? parsed : []);
+      const rawStories = localStorage.getItem(RECENT_STORY_CHATS_KEY);
+      const parsedStories = rawStories ? JSON.parse(rawStories) : [];
+      setStoryChats(Array.isArray(parsedStories) ? parsedStories : []);
     } catch (error) {
-      console.error("Failed to load recent chats:", error);
-      setRecentChats([]);
+      console.error("Failed to load recent stories:", error);
+      setStoryChats([]);
+    }
+
+    try {
+      const rawCharacters = localStorage.getItem(RECENT_CHARACTER_CHATS_KEY);
+      const parsedCharacters = rawCharacters ? JSON.parse(rawCharacters) : [];
+      setCharacterChats(Array.isArray(parsedCharacters) ? parsedCharacters : []);
+    } catch (error) {
+      console.error("Failed to load character threads:", error);
+      setCharacterChats([]);
     }
   };
 
@@ -39,20 +92,42 @@ export default function OmbuSidebar({ actionSlot = null }) {
 
     const handleRecentUpdate = () => loadRecentChats();
     const handleStorageUpdate = (event) => {
-      if (event.key === RECENT_CHATS_KEY) loadRecentChats();
+      if (
+        event.key === RECENT_STORY_CHATS_KEY ||
+        event.key === RECENT_CHARACTER_CHATS_KEY
+      ) {
+        loadRecentChats();
+      }
     };
 
     window.addEventListener("ombu_recent_chats_updated", handleRecentUpdate);
+    window.addEventListener("ombu_recent_story_chats_updated", handleRecentUpdate);
+    window.addEventListener("ombu_recent_character_chats_updated", handleRecentUpdate);
     window.addEventListener("storage", handleStorageUpdate);
 
     return () => {
       window.removeEventListener("ombu_recent_chats_updated", handleRecentUpdate);
+      window.removeEventListener("ombu_recent_story_chats_updated", handleRecentUpdate);
+      window.removeEventListener("ombu_recent_character_chats_updated", handleRecentUpdate);
       window.removeEventListener("storage", handleStorageUpdate);
     };
   }, [router.pathname]);
 
   const openRecentChat = (chat) => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !recentMode) return;
+
+    if (recentMode === "story") {
+      sessionStorage.setItem(
+        SELECTED_STORY_KEY,
+        JSON.stringify({
+          chatId: chat.chatId,
+          mode: "resume"
+        })
+      );
+
+      router.push("/story");
+      return;
+    }
 
     sessionStorage.setItem(
       SELECTED_CHARACTER_KEY,
@@ -67,22 +142,40 @@ export default function OmbuSidebar({ actionSlot = null }) {
   };
 
   const deleteRecentChats = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !recentMode) return;
 
     try {
-      recentChats.forEach((chat) => {
+      if (recentMode === "story") {
+        storyChats.forEach((chat) => {
+          if (chat.chatId) {
+            localStorage.removeItem(getStoryHistoryKey(chat.chatId));
+          }
+        });
+
+        localStorage.removeItem(RECENT_STORY_CHATS_KEY);
+        setStoryChats([]);
+        window.dispatchEvent(new Event("ombu_recent_story_chats_updated"));
+        window.dispatchEvent(new Event("ombu_recent_chats_updated"));
+        return;
+      }
+
+      characterChats.forEach((chat) => {
         if (chat.chatId) {
+          localStorage.removeItem(getCharacterHistoryKey(chat.chatId));
           localStorage.removeItem(`ombu_chat_history_${chat.chatId}`);
         }
       });
 
-      localStorage.removeItem(RECENT_CHATS_KEY);
-      setRecentChats([]);
+      localStorage.removeItem(RECENT_CHARACTER_CHATS_KEY);
+      setCharacterChats([]);
+      window.dispatchEvent(new Event("ombu_recent_character_chats_updated"));
       window.dispatchEvent(new Event("ombu_recent_chats_updated"));
     } catch (error) {
       console.error("Failed to delete recent chats:", error);
     }
   };
+
+  const recentChats = recentConfig?.chats || [];
 
   return (
     <>
@@ -106,48 +199,54 @@ export default function OmbuSidebar({ actionSlot = null }) {
             ))}
           </nav>
 
-          <section className="ombuRecent">
-            <div className="ombuRecentHeader">
-              <span>Recent Chats</span>
-              {recentChats.length > 0 && (
-                <button onClick={deleteRecentChats}>Delete</button>
-              )}
-            </div>
-
-            {recentChats.length === 0 ? (
-              <div className="ombuNoRecent">No recent chats</div>
-            ) : (
-              <div className="ombuRecentList">
-                {recentChats.slice(0, 6).map((chat) => (
-                  <button
-                    key={chat.chatId}
-                    className="ombuRecentItem"
-                    onClick={() => openRecentChat(chat)}
-                  >
-                    <span className="ombuRecentAvatar">
-                      {chat.character?.coverImage ? (
-                        <img
-                          src={chat.character.coverImage}
-                          alt={chat.character?.name || "Character"}
-                        />
-                      ) : (
-                        <span>
-                          {chat.character?.avatar ||
-                            chat.character?.symbol ||
-                            "✦"}
-                        </span>
-                      )}
-                    </span>
-
-                    <span className="ombuRecentText">
-                      <strong>{chat.character?.name || "Unknown"}</strong>
-                      <small>{chat.lastMessage || "Continue chat"}</small>
-                    </span>
-                  </button>
-                ))}
+          {recentConfig && (
+            <section className="ombuRecent">
+              <div className="ombuRecentHeader">
+                <span>{recentConfig.label}</span>
+                {recentChats.length > 0 && (
+                  <button onClick={deleteRecentChats}>{recentConfig.deleteLabel}</button>
+                )}
               </div>
-            )}
-          </section>
+
+              {recentChats.length === 0 ? (
+                <div className="ombuNoRecent">{recentConfig.empty}</div>
+              ) : (
+                <div className="ombuRecentList">
+                  {recentChats.slice(0, 6).map((chat) => (
+                    <button
+                      key={chat.chatId}
+                      className="ombuRecentItem"
+                      onClick={() => openRecentChat(chat)}
+                    >
+                      <span className="ombuRecentAvatar">
+                        {recentMode === "character" && chat.character?.coverImage ? (
+                          <img
+                            src={chat.character.coverImage}
+                            alt={chat.character?.name || "Character"}
+                          />
+                        ) : (
+                          <span>
+                            {recentMode === "story"
+                              ? "✦"
+                              : chat.character?.avatar || chat.character?.symbol || "✦"}
+                          </span>
+                        )}
+                      </span>
+
+                      <span className="ombuRecentText">
+                        <strong>
+                          {recentMode === "story"
+                            ? chat.title || "Untitled Story"
+                            : chat.character?.name || "Unknown"}
+                        </strong>
+                        <small>{chat.lastMessage || "Continue"}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
 
         <div className="ombuSidebarBottom">
