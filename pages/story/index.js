@@ -3,8 +3,70 @@ import { useEffect, useRef, useState } from "react";
 
 const STARTER_KEY = "ombu_starter_prompt";
 const TRANSITION_KEY = "ombu_route_transition";
+const SELECTED_STORY_KEY = "ombu_selected_story";
+const RECENT_STORY_CHATS_KEY = "ombu_recent_story_chats";
+
+function createChatId() {
+  return `story_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getStoryHistoryKey(chatId) {
+  return `ombu_story_chat_history_${chatId}`;
+}
+
+function getLastReadableMessage(messages) {
+  const last = [...messages].reverse().find((msg) => msg?.content);
+  if (!last) return "Continue story";
+
+  return String(last.content)
+    .replace(/\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 64);
+}
+
+function getStoryTitle(messages) {
+  const firstUserMessage = messages.find((msg) => msg?.role === "user" && msg?.content);
+  if (!firstUserMessage) return "Untitled Story";
+
+  const clean = String(firstUserMessage.content)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "Untitled Story";
+  return clean.length > 38 ? `${clean.slice(0, 38)}...` : clean;
+}
+
+function saveRecentStory({ chatId, messages }) {
+  if (typeof window === "undefined" || !chatId || !Array.isArray(messages)) return;
+
+  try {
+    const raw = localStorage.getItem(RECENT_STORY_CHATS_KEY);
+    const existing = raw ? JSON.parse(raw) : [];
+    const current = Array.isArray(existing) ? existing : [];
+
+    const entry = {
+      chatId,
+      title: getStoryTitle(messages),
+      lastMessage: getLastReadableMessage(messages),
+      updatedAt: new Date().toISOString()
+    };
+
+    const next = [
+      entry,
+      ...current.filter((item) => item.chatId !== chatId)
+    ].slice(0, 12);
+
+    localStorage.setItem(RECENT_STORY_CHATS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event("ombu_recent_story_chats_updated"));
+    window.dispatchEvent(new Event("ombu_recent_chats_updated"));
+  } catch (error) {
+    console.error("Failed to save recent story:", error);
+  }
+}
 
 export default function StoryPage() {
+  const [chatId, setChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [direction, setDirection] = useState("");
@@ -24,12 +86,37 @@ export default function StoryPage() {
     if (bootstrapped) return;
 
     if (typeof window !== "undefined") {
+      const selectedRaw = sessionStorage.getItem(SELECTED_STORY_KEY);
+
+      if (selectedRaw) {
+        sessionStorage.removeItem(SELECTED_STORY_KEY);
+
+        try {
+          const selected = JSON.parse(selectedRaw);
+          const selectedChatId = selected?.chatId;
+
+          if (selected?.mode === "resume" && selectedChatId) {
+            const savedRaw = localStorage.getItem(getStoryHistoryKey(selectedChatId));
+            const savedMessages = savedRaw ? JSON.parse(savedRaw) : [];
+
+            if (Array.isArray(savedMessages) && savedMessages.length > 0) {
+              setChatId(selectedChatId);
+              setMessages(savedMessages);
+              setBootstrapped(true);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Failed to resume selected story:", error);
+        }
+      }
+
       const starterPrompt = sessionStorage.getItem(STARTER_KEY);
       if (starterPrompt) {
         sessionStorage.removeItem(STARTER_KEY);
         sessionStorage.removeItem(TRANSITION_KEY);
         setBootstrapped(true);
-        sendMessage(starterPrompt);
+        sendMessage(starterPrompt, { forceNewChat: true });
         return;
       }
     }
@@ -37,11 +124,24 @@ export default function StoryPage() {
     setBootstrapped(true);
   }, [bootstrapped]);
 
-  const sendMessage = async (customInput) => {
+  useEffect(() => {
+    if (!chatId || typeof window === "undefined" || messages.length === 0) return;
+
+    localStorage.setItem(getStoryHistoryKey(chatId), JSON.stringify(messages));
+    saveRecentStory({ chatId, messages });
+  }, [chatId, messages]);
+
+  const sendMessage = async (customInput, options = {}) => {
     const text = (customInput || input).trim();
     if (!text || loading) return;
 
-    const updatedMessages = [...messages, { role: "user", content: text }];
+    const nextChatId = options.forceNewChat || !chatId ? createChatId() : chatId;
+    if (!chatId || options.forceNewChat) {
+      setChatId(nextChatId);
+    }
+
+    const baseMessages = options.forceNewChat ? [] : messages;
+    const updatedMessages = [...baseMessages, { role: "user", content: text }];
 
     setMessages(updatedMessages);
     setInput("");
@@ -97,9 +197,14 @@ export default function StoryPage() {
 
   const handleReset = () => {
     if (loading) return;
+    setChatId(null);
     setMessages([]);
     setInput("");
     setDirection("");
+
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(SELECTED_STORY_KEY);
+    }
   };
 
   const handleInputKeyDown = (e) => {
