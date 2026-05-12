@@ -115,13 +115,7 @@ function renderMessageContent(content) {
 }
 
 function getCreatorName(character) {
-  return (
-    character?.creator ||
-    character?.author ||
-    character?.createdBy ||
-    character?.username ||
-    "Ombu"
-  );
+  return character?.creator || character?.author || "Ombu";
 }
 
 export default function CharacterChatPage() {
@@ -133,7 +127,7 @@ export default function CharacterChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [feedback, setFeedback] = useState({});
+  const [reactionEffects, setReactionEffects] = useState({});
 
   const chatRef = useRef(null);
 
@@ -213,7 +207,7 @@ export default function CharacterChatPage() {
     }
   }, [messages, loading]);
 
-  const requestAssistantReply = async (conversation) => {
+  const requestReply = async (nextMessages) => {
     const res = await fetch("/api/character-chat", {
       method: "POST",
       headers: {
@@ -221,7 +215,7 @@ export default function CharacterChatPage() {
       },
       body: JSON.stringify({
         character,
-        messages: conversation
+        messages: nextMessages
       })
     });
 
@@ -251,7 +245,7 @@ export default function CharacterChatPage() {
     setLoading(true);
 
     try {
-      const reply = await requestAssistantReply(updatedMessages);
+      const reply = await requestReply(updatedMessages);
 
       setMessages((prev) => [
         ...prev,
@@ -274,44 +268,29 @@ export default function CharacterChatPage() {
   };
 
   const regenerateLastReply = async () => {
-    if (loading || !character) return;
+    if (loading || !character || messages.length === 0) return;
 
     const lastAssistantIndex = [...messages]
-      .map((message, index) => ({ message, index }))
+      .map((message, index) => ({ ...message, index }))
       .reverse()
-      .find((item) => item.message.role === "assistant")?.index;
+      .find((message) => message.role === "assistant")?.index;
 
-    if (lastAssistantIndex === undefined) return;
+    if (typeof lastAssistantIndex !== "number") return;
 
-    const messagesBeforeReply = messages.slice(0, lastAssistantIndex);
-    const hasUserPrompt = messagesBeforeReply.some((message) => message.role === "user");
+    const messagesForRequest = messages.slice(0, lastAssistantIndex);
+    const lastUserMessage = [...messagesForRequest]
+      .reverse()
+      .find((message) => message.role === "user");
 
-    if (!hasUserPrompt) {
-      const opening = [
-        {
-          role: "assistant",
-          content: buildOpeningMessage(character)
-        }
-      ];
+    if (!lastUserMessage) return;
 
-      setMessages(opening);
-      setFeedback({});
-      return;
-    }
-
-    setMessages(messagesBeforeReply);
+    setMessages(messagesForRequest);
     setLoading(true);
 
     try {
-      const reply = await requestAssistantReply(messagesBeforeReply);
-      setFeedback((prev) => {
-        const next = { ...prev };
-        delete next[lastAssistantIndex];
-        return next;
-      });
-
+      const reply = await requestReply(messagesForRequest);
       setMessages([
-        ...messagesBeforeReply,
+        ...messagesForRequest,
         {
           role: "assistant",
           content: reply
@@ -319,7 +298,7 @@ export default function CharacterChatPage() {
       ]);
     } catch (error) {
       setMessages([
-        ...messagesBeforeReply,
+        ...messagesForRequest,
         {
           role: "assistant",
           content: error.message || "Something went wrong."
@@ -330,11 +309,23 @@ export default function CharacterChatPage() {
     }
   };
 
-  const rateMessage = (index, value) => {
-    setFeedback((prev) => ({
+  const triggerReaction = (index, type) => {
+    const effectKey = `${type}-${Date.now()}`;
+
+    setReactionEffects((prev) => ({
       ...prev,
-      [index]: prev[index] === value ? null : value
+      [index]: effectKey
     }));
+
+    window.setTimeout(() => {
+      setReactionEffects((prev) => {
+        const next = { ...prev };
+        if (next[index] === effectKey) {
+          delete next[index];
+        }
+        return next;
+      });
+    }, 700);
   };
 
   const handleNewChat = () => {
@@ -350,7 +341,6 @@ export default function CharacterChatPage() {
 
     setChatId(newChatId);
     setMessages(opening);
-    setFeedback({});
 
     if (typeof window !== "undefined") {
       sessionStorage.setItem(
@@ -412,28 +402,22 @@ export default function CharacterChatPage() {
           ) : (
             <>
               <header className="profileHeader">
-                <button className="collapseButton" aria-label="Collapse character header">
-                  ⌃
+                <button className="backPill" onClick={handleBackToDiscover}>
+                  ↑
                 </button>
 
-                <CharacterPortrait character={character} variant="hero" />
+                <CharacterPortrait character={character} size="large" />
 
-                <h1>{character?.name || "Loading..."}</h1>
-                <p>
-                  By <span>@{getCreatorName(character)}</span>
-                </p>
-
-                <div className="profileActions">
-                  <button className="ghostButton" onClick={handleBackToDiscover}>
-                    Discover
-                  </button>
-                  <button
-                    className="ghostButton"
-                    onClick={handleNewChat}
-                    disabled={loading || !character}
-                  >
-                    New Chat
-                  </button>
+                <div className="profileCopy">
+                  <h1>{character?.name || "Loading..."}</h1>
+                  <p>
+                    By <span>@{getCreatorName(character)}</span>
+                  </p>
+                  {(character?.role || character?.tagline) && (
+                    <div className="profileHook">
+                      {character?.role || character?.tagline}
+                    </div>
+                  )}
                 </div>
               </header>
 
@@ -442,33 +426,33 @@ export default function CharacterChatPage() {
                   {messages.map((message, index) => (
                     <MessageBlock
                       key={`${message.role}-${index}`}
+                      character={character}
                       message={message}
                       index={index}
-                      character={character}
-                      feedback={feedback[index]}
+                      effect={reactionEffects[index]}
+                      onRegenerate={regenerateLastReply}
+                      onReact={triggerReaction}
+                      loading={loading}
                       isLastAssistant={
                         message.role === "assistant" &&
                         index ===
                           messages
-                            .map((item, itemIndex) => ({ item, itemIndex }))
-                            .filter(({ item }) => item.role === "assistant")
-                            .pop()?.itemIndex
+                            .map((item, itemIndex) => ({ ...item, itemIndex }))
+                            .filter((item) => item.role === "assistant")
+                            .at(-1)?.itemIndex
                       }
-                      loading={loading}
-                      onRegenerate={regenerateLastReply}
-                      onRate={rateMessage}
                     />
                   ))}
 
                   {loading && (
-                    <div className="messageBlock assistantBlock loadingBlock">
-                      <CharacterPortrait character={character} variant="message" />
-                      <div className="messageBody">
+                    <div className="assistantLine">
+                      <CharacterPortrait character={character} size="small" />
+                      <div className="assistantStack">
                         <div className="messageMeta">
-                          <span>{character?.name || "Character"}</span>
-                          <small>thinking</small>
+                          <strong>{character?.name || "Character"}</strong>
+                          <span>thinking</span>
                         </div>
-                        <div className="typingBubble">
+                        <div className="typingCard">
                           <span />
                           <span />
                           <span />
@@ -491,7 +475,12 @@ export default function CharacterChatPage() {
                         : "Message character..."
                     }
                   />
-                  <button onClick={sendMessage} disabled={loading || !input.trim()}>
+                  <button
+                    className="sendButton"
+                    onClick={sendMessage}
+                    disabled={loading || !input.trim()}
+                    aria-label="Send message"
+                  >
                     ➤
                   </button>
                 </div>
@@ -508,7 +497,7 @@ export default function CharacterChatPage() {
 
         body {
           margin: 0;
-          background: #121318;
+          background: #05070d;
         }
 
         .chatPage {
@@ -516,9 +505,9 @@ export default function CharacterChatPage() {
           display: flex;
           color: white;
           background:
-            radial-gradient(circle at 35% -12%, rgba(96, 111, 255, 0.13), transparent 34%),
-            radial-gradient(circle at 84% 24%, rgba(132, 94, 255, 0.08), transparent 28%),
-            #121318;
+            radial-gradient(circle at 20% 0%, rgba(102, 115, 255, 0.12), transparent 30%),
+            radial-gradient(circle at 82% 68%, rgba(140, 88, 255, 0.12), transparent 34%),
+            linear-gradient(180deg, #111219 0%, #090a10 48%, #06070c 100%);
           font-family:
             Inter,
             ui-sans-serif,
@@ -536,333 +525,307 @@ export default function CharacterChatPage() {
           display: flex;
           flex-direction: column;
           position: relative;
-          overflow: hidden;
         }
 
         .profileHeader {
-          flex: 0 0 auto;
-          min-height: 172px;
+          flex-shrink: 0;
+          text-align: center;
+          padding: 18px 24px 10px;
           display: flex;
-          align-items: center;
-          justify-content: center;
           flex-direction: column;
-          gap: 7px;
-          padding: 16px 24px 12px;
-          position: relative;
+          align-items: center;
+          gap: 9px;
         }
 
-        .collapseButton {
+        .backPill {
           width: 56px;
           height: 28px;
-          display: grid;
-          place-items: center;
           border: none;
-          border-radius: 0 0 8px 8px;
-          background: rgba(255, 255, 255, 0.95);
-          color: #202126;
-          cursor: default;
-          font-size: 23px;
+          border-radius: 0 0 12px 12px;
+          background: rgba(255, 255, 255, 0.94);
+          color: #161820;
+          font-size: 18px;
           line-height: 1;
-          margin-top: -16px;
-          margin-bottom: 7px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+          cursor: pointer;
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+          transition: transform 160ms ease, opacity 160ms ease;
         }
 
-        .heroPortrait {
-          width: 72px;
-          height: 72px;
+        .backPill:hover {
+          transform: translateY(-1px);
+          opacity: 0.88;
+        }
+
+        .profileCopy h1 {
+          margin: 2px 0 0;
+          font-size: 18px;
+          letter-spacing: -0.03em;
+          font-weight: 850;
+        }
+
+        .profileCopy p {
+          margin: 8px 0 0;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.56);
+        }
+
+        .profileCopy p span {
+          color: rgba(255, 255, 255, 0.78);
+        }
+
+        .profileHook {
+          max-width: 520px;
+          margin: 10px auto 0;
+          padding: 8px 13px;
+          border: 1px solid rgba(255, 255, 255, 0.075);
           border-radius: 999px;
+          background: rgba(255, 255, 255, 0.035);
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 12px;
+          line-height: 1.35;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .portrait {
           overflow: hidden;
           display: grid;
           place-items: center;
           background:
-            radial-gradient(circle at 50% 28%, rgba(113, 126, 255, 0.34), transparent 42%),
-            rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          box-shadow: 0 16px 44px rgba(0, 0, 0, 0.34);
+            radial-gradient(circle at 50% 32%, rgba(116, 132, 255, 0.28), transparent 48%),
+            rgba(255, 255, 255, 0.065);
+          border: 1px solid rgba(255, 255, 255, 0.11);
+          box-shadow: 0 15px 44px rgba(0, 0, 0, 0.28);
+          flex-shrink: 0;
         }
 
-        .heroPortrait img,
-        .messagePortrait img {
+        .portrait.large {
+          width: 78px;
+          height: 78px;
+          border-radius: 999px;
+        }
+
+        .portrait.small {
+          width: 28px;
+          height: 28px;
+          border-radius: 999px;
+          box-shadow: none;
+        }
+
+        .portrait.userPortrait {
+          background:
+            linear-gradient(135deg, rgba(101, 116, 255, 0.42), rgba(151, 117, 255, 0.22)),
+            rgba(255, 255, 255, 0.08);
+        }
+
+        .portrait img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .heroSymbol {
-          font-size: 31px;
+        .portraitSymbol {
+          font-size: 28px;
+          line-height: 1;
         }
 
-        .profileHeader h1 {
-          margin: 2px 0 0;
-          max-width: 600px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: 17px;
-          line-height: 1.2;
-          font-weight: 850;
-          letter-spacing: -0.02em;
-        }
-
-        .profileHeader p {
-          margin: 0;
-          color: rgba(255, 255, 255, 0.56);
-          font-size: 12px;
-        }
-
-        .profileHeader p span {
-          color: rgba(255, 255, 255, 0.76);
-        }
-
-        .profileActions {
-          position: absolute;
-          top: 18px;
-          right: 24px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .ghostButton {
-          min-height: 36px;
-          padding: 0 12px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: rgba(255, 255, 255, 0.045);
-          color: rgba(255, 255, 255, 0.82);
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 800;
-          transition: 180ms ease;
-        }
-
-        .ghostButton:hover {
-          background: rgba(255, 255, 255, 0.075);
-          color: white;
-          transform: translateY(-1px);
-        }
-
-        .ghostButton:disabled {
-          opacity: 0.45;
-          cursor: not-allowed;
-          transform: none;
+        .portrait.small .portraitSymbol {
+          font-size: 14px;
         }
 
         .chatWindow {
           flex: 1;
           overflow-y: auto;
-          padding: 4px 28px 132px;
-          scroll-behavior: smooth;
-        }
-
-        .chatWindow::-webkit-scrollbar {
-          width: 10px;
-        }
-
-        .chatWindow::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .chatWindow::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 999px;
+          padding: 14px 28px 118px;
         }
 
         .messages {
-          width: min(780px, 100%);
+          width: min(760px, 100%);
           margin: 0 auto;
-          padding-top: 2px;
         }
 
-        .messageBlock {
+        .assistantLine,
+        .userLine {
           display: flex;
-          align-items: flex-start;
           gap: 10px;
-          margin-bottom: 18px;
+          margin: 20px 0;
           animation: messageIn 180ms ease both;
         }
 
-        .messageBlock.userBlock {
+        .userLine {
           justify-content: flex-end;
         }
 
-        .messagePortrait {
-          width: 28px;
-          height: 28px;
-          border-radius: 999px;
-          overflow: hidden;
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          background:
-            radial-gradient(circle at 50% 30%, rgba(107, 122, 255, 0.28), transparent 42%),
-            rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.13);
-        }
-
-        .messageSymbol {
-          font-size: 13px;
-        }
-
-        .messageBody {
+        .assistantStack,
+        .userStack {
           min-width: 0;
-          max-width: 82%;
         }
 
-        .userBlock .messageBody {
+        .assistantStack {
+          width: min(620px, calc(100vw - 370px));
+        }
+
+        .userStack {
           display: flex;
-          justify-content: flex-end;
+          flex-direction: column;
+          align-items: flex-end;
         }
 
         .messageMeta {
           display: flex;
           align-items: center;
           gap: 8px;
-          min-height: 20px;
-          margin: 0 0 6px 7px;
-          color: rgba(255, 255, 255, 0.9);
+          min-height: 28px;
+          margin-bottom: 2px;
+        }
+
+        .messageMeta strong {
           font-size: 13px;
           font-weight: 850;
+          color: rgba(255, 255, 255, 0.88);
         }
 
-        .messageMeta small {
-          min-height: 18px;
-          display: inline-flex;
-          align-items: center;
-          padding: 0 7px;
+        .messageMeta span {
+          padding: 2px 7px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.08);
-          color: rgba(255, 255, 255, 0.62);
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: -0.01em;
-        }
-
-        .messageBubble {
-          width: fit-content;
-          max-width: 100%;
-          padding: 14px 16px;
-          border-radius: 15px;
-          line-height: 1.55;
-          white-space: pre-wrap;
-          font-size: 16px;
-          letter-spacing: -0.01em;
-        }
-
-        .assistantBlock .messageBubble {
           background: rgba(255, 255, 255, 0.065);
-          border: 1px solid rgba(255, 255, 255, 0.055);
-          color: rgba(255, 255, 255, 0.8);
-          box-shadow: 0 18px 52px rgba(0, 0, 0, 0.16);
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 11px;
+          font-weight: 750;
         }
 
-        .userBlock .messageBubble {
-          max-width: 620px;
-          background: linear-gradient(
-            135deg,
-            rgba(101, 116, 255, 0.27),
-            rgba(146, 125, 255, 0.15)
-          );
-          border: 1px solid rgba(145, 155, 255, 0.16);
-          color: rgba(255, 255, 255, 0.92);
-          box-shadow: 0 14px 36px rgba(78, 93, 230, 0.11);
+        .assistantCard {
+          position: relative;
+          padding: 16px 17px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.065);
+          border: 1px solid rgba(255, 255, 255, 0.075);
+          box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+          line-height: 1.55;
+          font-size: 16px;
+          color: rgba(255, 255, 255, 0.84);
+          white-space: pre-wrap;
         }
 
-        .messageBubble em {
+        .assistantCard em,
+        .userBubble em {
+          display: inline;
           font-style: italic;
-          color: rgba(255, 255, 255, 0.72);
+          color: rgba(255, 255, 255, 0.66);
         }
 
         .messageMenu {
-          margin-left: auto;
-          border: none;
-          background: transparent;
-          color: rgba(255, 255, 255, 0.7);
-          cursor: pointer;
+          position: absolute;
+          top: 10px;
+          right: 12px;
+          color: rgba(255, 255, 255, 0.6);
           font-size: 18px;
-          line-height: 1;
-          padding: 0 2px;
+          letter-spacing: 0.08em;
+          user-select: none;
+        }
+
+        .userBubble {
+          max-width: min(520px, 70vw);
+          padding: 12px 15px;
+          border-radius: 18px;
+          background: linear-gradient(135deg, rgba(101, 116, 255, 0.32), rgba(145, 112, 255, 0.18));
+          border: 1px solid rgba(155, 165, 255, 0.18);
+          color: rgba(255, 255, 255, 0.9);
+          line-height: 1.5;
+          font-size: 15px;
+          white-space: pre-wrap;
+          box-shadow: 0 16px 36px rgba(95, 113, 255, 0.1);
         }
 
         .messageTools {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin: 7px 0 0 8px;
+          gap: 6px;
+          min-height: 30px;
+          margin-top: 6px;
+          padding-left: 4px;
         }
 
         .toolButton {
-          width: 25px;
-          height: 25px;
+          width: 27px;
+          height: 27px;
+          position: relative;
           display: grid;
           place-items: center;
-          border-radius: 999px;
           border: none;
+          border-radius: 999px;
           background: transparent;
           color: rgba(255, 255, 255, 0.66);
           cursor: pointer;
-          font-size: 14px;
-          line-height: 1;
-          transition: 160ms ease;
+          font-size: 15px;
+          transition: transform 150ms ease, background 150ms ease, color 150ms ease;
         }
 
         .toolButton:hover {
+          transform: translateY(-1px);
           background: rgba(255, 255, 255, 0.075);
           color: white;
-          transform: translateY(-1px);
-        }
-
-        .toolButton.active {
-          background: rgba(101, 116, 255, 0.22);
-          color: white;
-        }
-
-        .toolButton.regen {
-          background: rgba(101, 116, 255, 0.22);
-          color: white;
-          box-shadow: 0 8px 22px rgba(76, 92, 218, 0.16);
         }
 
         .toolButton:disabled {
-          opacity: 0.45;
+          opacity: 0.4;
           cursor: not-allowed;
           transform: none;
         }
 
-        .typingBubble {
-          width: fit-content;
-          display: flex;
-          gap: 7px;
-          padding: 15px 16px;
-          border-radius: 15px;
-          background: rgba(255, 255, 255, 0.065);
-          border: 1px solid rgba(255, 255, 255, 0.055);
+        .reactionBurst {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 16px;
+          height: 16px;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          font-size: 14px;
+          line-height: 1;
         }
 
-        .typingBubble span {
+        .reactionBurst.confetti {
+          animation: tinyConfetti 650ms ease-out forwards;
+        }
+
+        .reactionBurst.fire {
+          animation: tinyFire 650ms ease-out forwards;
+        }
+
+        .typingCard {
+          width: 86px;
+          display: flex;
+          gap: 7px;
+          padding: 14px 16px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.065);
+          border: 1px solid rgba(255, 255, 255, 0.075);
+        }
+
+        .typingCard span {
           width: 7px;
           height: 7px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.65);
+          background: rgba(255, 255, 255, 0.72);
           animation: pulse 900ms infinite ease-in-out;
         }
 
-        .typingBubble span:nth-child(2) {
+        .typingCard span:nth-child(2) {
           animation-delay: 120ms;
         }
 
-        .typingBubble span:nth-child(3) {
+        .typingCard span:nth-child(3) {
           animation-delay: 240ms;
         }
 
         .composerWrap {
           position: fixed;
           left: calc(250px + (100vw - 250px) / 2);
-          bottom: 22px;
-          width: min(780px, calc(100vw - 330px));
+          bottom: 20px;
+          width: min(760px, calc(100vw - 330px));
           transform: translateX(-50%);
-          z-index: 20;
         }
 
         .composer {
@@ -870,16 +833,16 @@ export default function CharacterChatPage() {
           align-items: flex-end;
           gap: 10px;
           padding: 10px;
-          border-radius: 19px;
-          background: rgba(26, 27, 34, 0.96);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 22px;
+          background: rgba(18, 20, 30, 0.94);
+          border: 1px solid rgba(255, 255, 255, 0.085);
           backdrop-filter: blur(18px);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+          box-shadow: 0 20px 55px rgba(0, 0, 0, 0.36);
         }
 
         .composer textarea {
           flex: 1;
-          min-height: 48px;
+          min-height: 50px;
           max-height: 150px;
           resize: none;
           border: none;
@@ -887,36 +850,35 @@ export default function CharacterChatPage() {
           background: transparent;
           color: white;
           font-size: 15px;
-          line-height: 1.5;
-          padding: 12px 12px;
+          line-height: 1.55;
+          padding: 12px 13px;
         }
 
         .composer textarea::placeholder {
-          color: rgba(255, 255, 255, 0.4);
+          color: rgba(255, 255, 255, 0.38);
         }
 
-        .composer button {
+        .sendButton {
           width: 48px;
           height: 48px;
+          flex: 0 0 auto;
           border: none;
-          border-radius: 15px;
+          border-radius: 16px;
           color: white;
           cursor: pointer;
-          font-size: 18px;
           font-weight: 900;
-          background: linear-gradient(135deg, #6574ff, #927dff);
-          box-shadow: 0 14px 34px rgba(101, 116, 255, 0.22);
-          transition: 180ms ease;
+          background: linear-gradient(135deg, #6875ff, #9a7dff);
+          box-shadow: 0 14px 34px rgba(101, 116, 255, 0.2);
+          transition: transform 150ms ease, opacity 150ms ease;
         }
 
-        .composer button:hover {
+        .sendButton:hover:not(:disabled) {
           transform: translateY(-1px);
         }
 
-        .composer button:disabled {
-          opacity: 0.45;
+        .sendButton:disabled {
+          opacity: 0.42;
           cursor: not-allowed;
-          transform: none;
         }
 
         .missingState {
@@ -963,6 +925,17 @@ export default function CharacterChatPage() {
           background: linear-gradient(135deg, #6574ff, #927dff);
         }
 
+        @keyframes messageIn {
+          from {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
         @keyframes pulse {
           0%,
           100% {
@@ -975,14 +948,33 @@ export default function CharacterChatPage() {
           }
         }
 
-        @keyframes messageIn {
-          from {
+        @keyframes tinyConfetti {
+          0% {
             opacity: 0;
-            transform: translateY(7px);
+            transform: translate(-50%, -50%) scale(0.55) rotate(0deg);
           }
-          to {
+          25% {
             opacity: 1;
-            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -145%) scale(1.15) rotate(20deg);
+          }
+        }
+
+        @keyframes tinyFire {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -40%) scale(0.45);
+            filter: blur(0);
+          }
+          20% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -135%) scale(1.08);
+            filter: blur(0.2px);
           }
         }
 
@@ -992,62 +984,29 @@ export default function CharacterChatPage() {
           }
 
           .chatMain {
-            height: calc(100vh - 72px);
+            height: auto;
+            min-height: 100vh;
           }
 
           .profileHeader {
-            min-height: 152px;
-            padding-inline: 16px;
-          }
-
-          .profileActions {
-            position: static;
-            margin-top: 6px;
+            padding-top: 12px;
           }
 
           .chatWindow {
-            padding: 6px 16px 126px;
+            padding: 12px 16px 118px;
           }
 
-          .messages {
-            width: 100%;
+          .assistantStack {
+            width: calc(100vw - 80px);
           }
 
-          .messageBody {
-            max-width: calc(100% - 38px);
-          }
-
-          .messageBubble {
-            font-size: 15px;
+          .userBubble {
+            max-width: calc(100vw - 72px);
           }
 
           .composerWrap {
             left: 50%;
             width: calc(100vw - 32px);
-          }
-        }
-
-        @media (max-width: 540px) {
-          .heroPortrait {
-            width: 60px;
-            height: 60px;
-          }
-
-          .profileHeader h1 {
-            max-width: 92vw;
-          }
-
-          .messageBlock {
-            gap: 8px;
-          }
-
-          .messageBody {
-            max-width: calc(100% - 34px);
-          }
-
-          .assistantBlock .messageBubble,
-          .userBlock .messageBubble {
-            max-width: 100%;
           }
         }
       `}</style>
@@ -1056,65 +1015,74 @@ export default function CharacterChatPage() {
 }
 
 function MessageBlock({
+  character,
   message,
   index,
-  character,
-  feedback,
-  isLastAssistant,
-  loading,
+  effect,
   onRegenerate,
-  onRate
+  onReact,
+  loading,
+  isLastAssistant
 }) {
   if (message.role === "user") {
     return (
-      <div className="messageBlock userBlock">
-        <div className="messageBody">
-          <div className="messageBubble">{renderMessageContent(message.content)}</div>
+      <div className="userLine">
+        <div className="userStack">
+          <div className="userBubble">{renderMessageContent(message.content)}</div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="messageBlock assistantBlock">
-      <CharacterPortrait character={character} variant="message" />
+  const effectType = effect?.startsWith("up")
+    ? "confetti"
+    : effect?.startsWith("down")
+      ? "fire"
+      : "";
 
-      <div className="messageBody">
+  return (
+    <div className="assistantLine">
+      <CharacterPortrait character={character} size="small" />
+      <div className="assistantStack">
         <div className="messageMeta">
-          <span>{character?.name || "Character"}</span>
-          <small>c.ai</small>
-          <button className="messageMenu" aria-label="More message options">
-            ...
-          </button>
+          <strong>{character?.name || "Character"}</strong>
+          <span>Ombu roleplay</span>
         </div>
 
-        <div className="messageBubble">{renderMessageContent(message.content)}</div>
+        <div className="assistantCard">
+          <div className="messageMenu">•••</div>
+          {renderMessageContent(message.content)}
+        </div>
 
         <div className="messageTools">
           <button
-            className={`toolButton regen ${isLastAssistant ? "" : "quiet"}`}
-            onClick={onRegenerate}
-            disabled={!isLastAssistant || loading}
-            title="Regenerate response"
-            aria-label="Regenerate response"
+            className="toolButton"
+            onClick={() => onRegenerate()}
+            disabled={loading || !isLastAssistant}
+            title="Regenerate latest reply"
+            aria-label="Regenerate latest reply"
           >
             ↻
           </button>
           <button
-            className={`toolButton ${feedback === "up" ? "active" : ""}`}
-            onClick={() => onRate(index, "up")}
-            title="Good response"
-            aria-label="Good response"
+            className="toolButton"
+            onClick={() => onReact(index, "up")}
+            title="Good reply"
+            aria-label="Thumbs up"
           >
-            👍
+            ♡
+            {effectType === "confetti" && (
+              <span className="reactionBurst confetti">🎉</span>
+            )}
           </button>
           <button
-            className={`toolButton ${feedback === "down" ? "active" : ""}`}
-            onClick={() => onRate(index, "down")}
-            title="Bad response"
-            aria-label="Bad response"
+            className="toolButton"
+            onClick={() => onReact(index, "down")}
+            title="Bad reply"
+            aria-label="Thumbs down"
           >
-            👎
+            ⊘
+            {effectType === "fire" && <span className="reactionBurst fire">🔥</span>}
           </button>
         </div>
       </div>
@@ -1122,21 +1090,18 @@ function MessageBlock({
   );
 }
 
-function CharacterPortrait({ character, variant = "message" }) {
-  const className = variant === "hero" ? "heroPortrait" : "messagePortrait";
-  const symbolClassName = variant === "hero" ? "heroSymbol" : "messageSymbol";
-
+function CharacterPortrait({ character, size = "small" }) {
   if (character?.coverImage) {
     return (
-      <div className={className}>
+      <div className={`portrait ${size}`}>
         <img src={character.coverImage} alt={character.name || "Character"} />
       </div>
     );
   }
 
   return (
-    <div className={className}>
-      <span className={symbolClassName}>
+    <div className={`portrait ${size}`}>
+      <span className="portraitSymbol">
         {character?.symbol || character?.avatar || "✦"}
       </span>
     </div>
