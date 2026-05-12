@@ -33,12 +33,15 @@ export default function OmbuSidebar({ actionSlot = null }) {
 
   const recentMode = useMemo(() => {
     if (router.pathname.startsWith("/story")) return "story";
+
     if (
+      router.pathname === "/" ||
       router.pathname.startsWith("/characters") ||
       router.pathname.startsWith("/character-chat")
     ) {
       return "character";
     }
+
     return null;
   }, [router.pathname]);
 
@@ -54,9 +57,9 @@ export default function OmbuSidebar({ actionSlot = null }) {
 
     if (recentMode === "character") {
       return {
-        label: "Character Threads",
-        empty: "No character chats",
-        deleteLabel: "Delete",
+        label: "Chats",
+        empty: "No character chats yet",
+        deleteLabel: "Clear",
         chats: characterChats
       };
     }
@@ -176,6 +179,43 @@ export default function OmbuSidebar({ actionSlot = null }) {
 
   const recentChats = recentConfig?.chats || [];
 
+  const groupedRecentChats = useMemo(() => {
+    const source = recentChats.slice(0, 12);
+
+    if (recentMode !== "character") {
+      return [
+        {
+          label: recentConfig?.label || "Recent",
+          chats: source
+        }
+      ].filter((group) => group.chats.length > 0);
+    }
+
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+
+    const groups = [
+      { label: "Recent", chats: [] },
+      { label: "Earlier", chats: [] },
+      { label: "Archive", chats: [] }
+    ];
+
+    source.forEach((chat, index) => {
+      const updated = chat.updatedAt ? new Date(chat.updatedAt).getTime() : 0;
+      const age = Number.isFinite(updated) && updated > 0 ? now - updated : Infinity;
+
+      if (index < 3 || age <= day) {
+        groups[0].chats.push(chat);
+      } else if (age <= day * 30) {
+        groups[1].chats.push(chat);
+      } else {
+        groups[2].chats.push(chat);
+      }
+    });
+
+    return groups.filter((group) => group.chats.length > 0);
+  }, [recentChats, recentMode, recentConfig]);
+
   return (
     <>
       <aside className="ombuSidebar">
@@ -199,7 +239,7 @@ export default function OmbuSidebar({ actionSlot = null }) {
           </nav>
 
           {recentConfig && (
-            <section className="ombuRecent">
+            <section className={`ombuRecent ${recentMode === "character" ? "characterShelf" : ""}`}>
               <div className="ombuRecentHeader">
                 <span>{recentConfig.label}</span>
                 {recentChats.length > 0 && (
@@ -210,37 +250,47 @@ export default function OmbuSidebar({ actionSlot = null }) {
               {recentChats.length === 0 ? (
                 <div className="ombuNoRecent">{recentConfig.empty}</div>
               ) : (
-                <div className="ombuRecentList">
-                  {recentChats.slice(0, 6).map((chat) => (
-                    <button
-                      key={chat.chatId}
-                      className="ombuRecentItem"
-                      onClick={() => openRecentChat(chat)}
-                    >
-                      <span className="ombuRecentAvatar">
-                        {recentMode === "character" && chat.character?.coverImage ? (
-                          <img
-                            src={chat.character.coverImage}
-                            alt={chat.character?.name || "Character"}
-                          />
-                        ) : (
-                          <span>
-                            {recentMode === "story"
-                              ? "✦"
-                              : chat.character?.avatar || chat.character?.symbol || "✦"}
-                          </span>
-                        )}
-                      </span>
+                <div className="ombuRecentGroups">
+                  {groupedRecentChats.map((group) => (
+                    <div key={group.label} className="ombuRecentGroup">
+                      <div className="ombuRecentGroupLabel">{group.label}</div>
 
-                      <span className="ombuRecentText">
-                        <strong>
-                          {recentMode === "story"
-                            ? chat.title || "Untitled Story"
-                            : chat.character?.name || "Unknown"}
-                        </strong>
-                        <small>{chat.lastMessage || "Continue"}</small>
-                      </span>
-                    </button>
+                      <div className="ombuRecentList">
+                        {group.chats.map((chat) => (
+                          <button
+                            key={chat.chatId}
+                            className="ombuRecentItem"
+                            onClick={() => openRecentChat(chat)}
+                          >
+                            <span className="ombuRecentAvatar">
+                              {recentMode === "character" && chat.character?.coverImage ? (
+                                <img
+                                  src={chat.character.coverImage}
+                                  alt={chat.character?.name || "Character"}
+                                />
+                              ) : (
+                                <span>
+                                  {recentMode === "story"
+                                    ? "✦"
+                                    : chat.character?.avatar || chat.character?.symbol || "✦"}
+                                </span>
+                              )}
+                            </span>
+
+                            <span className="ombuRecentText">
+                              <strong>
+                                {recentMode === "story"
+                                  ? chat.title || "Untitled Story"
+                                  : chat.character?.name || "Unknown"}
+                              </strong>
+                              {recentMode === "story" && (
+                                <small>{chat.lastMessage || "Continue"}</small>
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -404,15 +454,25 @@ export default function OmbuSidebar({ actionSlot = null }) {
           border-top: 1px solid rgba(255,255,255,0.07);
         }
 
+        .ombuRecent.characterShelf {
+          margin-top: 28px;
+          padding-top: 0;
+          border-top: none;
+        }
+
         .ombuRecentHeader {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 10px;
+          margin-bottom: 13px;
           font-size: 11px;
           letter-spacing: 0.13em;
           text-transform: uppercase;
           color: rgba(255,255,255,0.38);
+        }
+
+        .characterShelf .ombuRecentHeader {
+          display: none;
         }
 
         .ombuRecentHeader button {
@@ -432,6 +492,30 @@ export default function OmbuSidebar({ actionSlot = null }) {
           font-size: 13px;
           color: rgba(255,255,255,0.38);
           padding: 10px 2px;
+        }
+
+        .ombuRecentGroups {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .ombuRecentGroup {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+        }
+
+        .ombuRecentGroupLabel {
+          font-size: 12px;
+          font-weight: 750;
+          letter-spacing: 0.02em;
+          color: rgba(207, 214, 255, 0.64);
+        }
+
+        .characterShelf .ombuRecentGroupLabel {
+          padding-left: 2px;
+          color: rgba(191, 199, 235, 0.76);
         }
 
         .ombuRecentList {
@@ -455,10 +539,26 @@ export default function OmbuSidebar({ actionSlot = null }) {
           transition: 200ms ease;
         }
 
+        .characterShelf .ombuRecentItem {
+          min-height: 48px;
+          border: 1px solid transparent;
+          background: transparent;
+          border-radius: 15px;
+          padding: 6px 7px;
+        }
+
         .ombuRecentItem:hover {
           background: rgba(255,255,255,0.055);
           transform: translateX(2px);
           border-color: rgba(145,155,255,0.18);
+        }
+
+        .characterShelf .ombuRecentItem:hover {
+          background:
+            radial-gradient(circle at 0% 50%, rgba(122,139,255,0.16), transparent 48%),
+            rgba(255,255,255,0.045);
+          border-color: rgba(145,155,255,0.14);
+          transform: translateX(3px);
         }
 
         .ombuRecentAvatar {
@@ -472,6 +572,13 @@ export default function OmbuSidebar({ actionSlot = null }) {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.07);
           font-size: 15px;
+        }
+
+        .characterShelf .ombuRecentAvatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 999px;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.22);
         }
 
         .ombuRecentAvatar img {
@@ -492,6 +599,12 @@ export default function OmbuSidebar({ actionSlot = null }) {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .characterShelf .ombuRecentText strong {
+          font-size: 14px;
+          font-weight: 800;
+          color: rgba(255,255,255,0.96);
         }
 
         .ombuRecentText small {
