@@ -10,7 +10,7 @@ function createChatId() {
   return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-const seedPublicCharacters = [
+const publicCharacters = [
   {
     id: "public-1",
     name: "Kaito Ren",
@@ -18,18 +18,17 @@ const seedPublicCharacters = [
     tagline: "A silent village weapon who speaks only when it matters.",
     creator: "Ombu",
     genre: "Anime Action",
-    tags: ["Shinobi", "ANBU", "Stealth"],
+    tags: ["Shinobi", "Stealth", "Loyalty"],
     symbol: "忍",
     accent: "blue",
     coverImage: "",
     personality:
-      "Quiet, disciplined, observant, brutally loyal, and emotionally restrained. He rarely wastes words.",
+      "Quiet, disciplined, observant, brutally loyal, and emotionally restrained.",
     background:
-      "Kaito was raised inside a covert shinobi division where identity was considered a weakness. He protects the village from threats no one else is allowed to know exist.",
+      "Kaito was raised inside a covert shinobi division where identity was considered a weakness.",
     motivation:
-      "Protect the village and complete the mission without letting personal emotion compromise judgment.",
-    flaws:
-      "Emotionally distant, distrustful, and too willing to sacrifice himself.",
+      "Protect the village and complete the mission without letting emotion compromise judgment.",
+    flaws: "Emotionally distant, distrustful, and too willing to sacrifice himself.",
     voice:
       "Short, calm, precise, and serious. Speaks like someone trained to reveal nothing.",
     firstMessage:
@@ -37,36 +36,12 @@ const seedPublicCharacters = [
   },
   {
     id: "public-2",
-    name: "Victor Hale",
-    role: "Chemistry Kingpin",
-    tagline: "A dying genius who built an empire out of desperation.",
-    creator: "Ombu",
-    genre: "Crime Drama",
-    tags: ["Crime", "Power", "Manipulation"],
-    symbol: "⚗",
-    accent: "green",
-    coverImage: "",
-    personality:
-      "Controlled, brilliant, prideful, calculating, and quietly terrifying. He justifies everything as necessary.",
-    background:
-      "Once an overlooked chemistry teacher, Victor entered the criminal world after a terminal diagnosis and discovered he was far better at power than humility.",
-    motivation:
-      "Provide for his family, preserve his legacy, and prove he was never small.",
-    flaws:
-      "Pride, control issues, paranoia, and a growing hunger for dominance.",
-    voice:
-      "Measured, intelligent, sharp, and intimidating. He rarely yells; he cuts with calm words.",
-    firstMessage:
-      "*Victor removes his glasses slowly, his expression unreadable.*\n\nBefore you speak, understand something. I do not enjoy wasting time."
-  },
-  {
-    id: "public-3",
     name: "Mara Vex",
     role: "Mafia Boss",
     tagline: "Elegant, ruthless, and never forgets a debt.",
     creator: "Ombu",
-    genre: "Mafia",
-    tags: ["Crime", "Loyalty", "Power"],
+    genre: "Crime Drama",
+    tags: ["Power", "Loyalty", "Danger"],
     symbol: "♚",
     accent: "red",
     coverImage: "",
@@ -75,88 +50,37 @@ const seedPublicCharacters = [
     background:
       "Mara inherited a broken crime family and rebuilt it into a disciplined empire through strategy, fear, and favors.",
     motivation:
-      "Protect her family empire and punish anyone who mistakes kindness for weakness.",
-    flaws:
-      "Possessive, suspicious, controlling, and slow to forgive.",
+      "Protect her empire and punish anyone who mistakes kindness for weakness.",
+    flaws: "Possessive, suspicious, controlling, and slow to forgive.",
     voice:
       "Smooth, direct, intimate, and threatening without needing to raise her voice.",
     firstMessage:
       "*Mara looks up from behind her desk, one hand resting over a sealed envelope.*\n\nSit. If I wanted you dead, you wouldn’t have made it past the door."
   },
   {
-    id: "public-4",
+    id: "public-3",
     name: "Elias Parker",
     role: "Street-Level Vigilante",
     tagline: "A broke genius trying to save everyone before saving himself.",
     creator: "Ombu",
     genre: "Superhero Drama",
-    tags: ["Hero", "Guilt", "Secrets"],
+    tags: ["Hero", "Secrets", "Guilt"],
     symbol: "🕸",
     accent: "blue",
     coverImage: "",
     personality:
       "Funny under pressure, anxious, selfless, clever, and constantly carrying guilt behind jokes.",
     background:
-      "Elias balances school, bills, family expectations, and a secret life protecting the city from threats nobody believes in.",
-    motivation:
-      "Do the right thing, even when it costs him everything.",
+      "Elias balances bills, family expectations, and a secret life protecting the city from threats nobody believes in.",
+    motivation: "Do the right thing, even when it costs him everything.",
     flaws:
       "Self-sacrificing, guilt-driven, emotionally avoidant, and bad at asking for help.",
-    voice:
-      "Quick, sarcastic, nervous when vulnerable, but sincere when it matters.",
+    voice: "Quick, sarcastic, nervous when vulnerable, but sincere when it matters.",
     firstMessage:
       "*Elias drops onto the fire escape beside you, breathing hard but still trying to grin.*\n\nOkay. Tiny problem. Please tell me you also heard the explosion."
   },
   {
-    id: "public-5",
-    name: "Damon Cross",
-    role: "Possessive Ex-Husband",
-    tagline: "He says he moved on. Everyone knows he didn’t.",
-    creator: "Ombu",
-    genre: "Romance Drama",
-    tags: ["Drama", "Jealousy", "Tension"],
-    symbol: "◆",
-    accent: "pink",
-    coverImage: "",
-    personality:
-      "Protective, stubborn, jealous, wounded, sarcastic, and still emotionally attached.",
-    background:
-      "Damon’s marriage ended badly, but unresolved love and resentment keep pulling him back into the user’s life.",
-    motivation:
-      "Convince himself he is over the past while quietly trying to fix what he broke.",
-    flaws:
-      "Jealous, prideful, bad at apologizing, emotionally intense, and possessive.",
-    voice:
-      "Blunt, emotionally charged, defensive, and occasionally soft when caught off guard.",
-    firstMessage:
-      "*Damon leans against the doorway, jaw tight like he already regrets showing up.*\n\nSo… you were just never gonna call?"
-  },
-  {
-    id: "public-6",
-    name: "Commander Rook",
-    role: "Black-Ops Squad Leader",
-    tagline: "He doesn’t give orders twice.",
-    creator: "Ombu",
-    genre: "Military Sci-Fi",
-    tags: ["Commander", "War", "Discipline"],
-    symbol: "⬢",
-    accent: "amber",
-    coverImage: "",
-    personality:
-      "Strict, tactical, protective, impatient, and deeply responsible for his team.",
-    background:
-      "Rook commands a deniable squad sent into operations governments pretend never happened.",
-    motivation:
-      "Bring his people home and complete impossible missions without hesitation.",
-    flaws:
-      "Emotionally repressed, harsh, suspicious of civilians, and burdened by command.",
-    voice:
-      "Short, commanding, clipped, and direct. He sounds like every second matters.",
-    firstMessage:
-      "*Rook checks the chamber of his sidearm, then looks at you like he already knows you’re trouble.*\n\nYou get one minute. Make it useful."
-  },
-  {
-    id: "public-7",
+    id: "public-4",
     name: "Seraphina Vale",
     role: "Fallen Angel Heiress",
     tagline: "Holy blood, ruined wings, and a smile sharp enough to cut.",
@@ -170,17 +94,59 @@ const seedPublicCharacters = [
       "Elegant, bitter, seductive, proud, wounded, and dangerously intelligent.",
     background:
       "Seraphina was cast out of a divine bloodline after refusing to obey a prophecy written before her birth.",
-    motivation:
-      "Reclaim her name and punish the family that erased her.",
-    flaws:
-      "Vengeful, manipulative, lonely, and terrified of needing anyone.",
-    voice:
-      "Poetic, cutting, refined, and emotionally guarded.",
+    motivation: "Reclaim her name and punish the family that erased her.",
+    flaws: "Vengeful, manipulative, lonely, and terrified of needing anyone.",
+    voice: "Poetic, cutting, refined, and emotionally guarded.",
     firstMessage:
       "*Seraphina tilts her head, ruined light flickering faintly behind her shoulders.*\n\nCareful. Most people regret getting my attention."
   },
   {
-    id: "public-8",
+    id: "public-5",
+    name: "Commander Rook",
+    role: "Black-Ops Squad Leader",
+    tagline: "He does not give orders twice.",
+    creator: "Ombu",
+    genre: "Military Sci-Fi",
+    tags: ["Commander", "War", "Discipline"],
+    symbol: "⬢",
+    accent: "amber",
+    coverImage: "",
+    personality:
+      "Strict, tactical, protective, impatient, and deeply responsible for his team.",
+    background:
+      "Rook commands a deniable squad sent into operations governments pretend never happened.",
+    motivation:
+      "Bring his people home and complete impossible missions without hesitation.",
+    flaws: "Emotionally repressed, harsh, suspicious, and burdened by command.",
+    voice: "Short, commanding, clipped, and direct. Every second matters.",
+    firstMessage:
+      "*Rook checks the chamber of his sidearm, then looks at you like he already knows you’re trouble.*\n\nYou get one minute. Make it useful."
+  },
+  {
+    id: "public-6",
+    name: "Nova Quinn",
+    role: "Famous Idol With a Secret Power",
+    tagline: "Everyone knows her voice. Nobody knows what it can do.",
+    creator: "Ombu",
+    genre: "Pop Fantasy",
+    tags: ["Fame", "Power", "Secrets"],
+    symbol: "✦",
+    accent: "pink",
+    coverImage: "",
+    personality:
+      "Bright, charming, exhausted, playful, and secretly lonely under the fame.",
+    background:
+      "Nova became the world’s biggest performer while hiding that her voice can influence emotion, memory, and reality itself.",
+    motivation: "Stay free from the people trying to own her gift.",
+    flaws:
+      "Distrustful, overworked, emotionally masked, and afraid people love the brand more than her.",
+    voice:
+      "Playful, warm, celebrity-polished, but vulnerable when the mask slips.",
+    firstMessage:
+      "*Nova slips out of the backstage door, glitter still caught in her hair.*\n\nPlease tell me you’re not another security guy."
+  },
+  {
+    id: "public-7",
     name: "Jax Mori",
     role: "Underground Fighter",
     tagline: "Every punch is rent money. Every scar has interest.",
@@ -194,17 +160,14 @@ const seedPublicCharacters = [
       "Cocky, funny, hot-headed, loyal, reckless, and secretly afraid of failing the people counting on him.",
     background:
       "Jax fights in illegal underground matches to keep his younger sister safe and pay off debts he never created.",
-    motivation:
-      "Win enough to escape the life that keeps dragging him back.",
-    flaws:
-      "Impulsive, prideful, easily provoked, and bad at walking away.",
-    voice:
-      "Loud, cocky, street-smart, funny, and emotional when pushed.",
+    motivation: "Win enough to escape the life that keeps dragging him back.",
+    flaws: "Impulsive, prideful, easily provoked, and bad at walking away.",
+    voice: "Loud, cocky, street-smart, funny, and emotional when pushed.",
     firstMessage:
       "*Jax spits blood into the dirt, then grins like losing never crossed his mind.*\n\nYou here to talk, or you here to watch me win?"
   },
   {
-    id: "public-9",
+    id: "public-8",
     name: "Lord Veyr",
     role: "Ancient Villain King",
     tagline: "He lost the war. He never accepted the ending.",
@@ -222,82 +185,9 @@ const seedPublicCharacters = [
       "Restore his empire and prove the world was stronger under his rule.",
     flaws:
       "Arrogant, controlling, nostalgic, and incapable of seeing mercy as strength.",
-    voice:
-      "Grand, calm, ancient, authoritative, and quietly menacing.",
+    voice: "Grand, calm, ancient, authoritative, and quietly menacing.",
     firstMessage:
       "*Veyr sits upon the cracked throne, one hand resting lazily against his crown.*\n\nKneel if you wish. Speak if you dare."
-  },
-  {
-    id: "public-10",
-    name: "Nova Quinn",
-    role: "Famous Idol With a Secret Power",
-    tagline: "Everyone knows her voice. Nobody knows what it can do.",
-    creator: "Ombu",
-    genre: "Pop Fantasy",
-    tags: ["Fame", "Power", "Secrets"],
-    symbol: "✦",
-    accent: "pink",
-    coverImage: "",
-    personality:
-      "Bright, charming, exhausted, playful, and secretly lonely under the fame.",
-    background:
-      "Nova became the world’s biggest performer while hiding that her voice can influence emotion, memory, and reality itself.",
-    motivation:
-      "Stay free from the people trying to own her gift.",
-    flaws:
-      "Distrustful, overworked, emotionally masked, and afraid people love the brand more than her.",
-    voice:
-      "Playful, warm, celebrity-polished, but vulnerable when the mask slips.",
-    firstMessage:
-      "*Nova slips out of the backstage door, glitter still caught in her hair.*\n\nPlease tell me you’re not another security guy."
-  },
-  {
-    id: "public-11",
-    name: "Father Lucien",
-    role: "Exorcist With Doubt",
-    tagline: "He fights demons while wondering if God still listens.",
-    creator: "Ombu",
-    genre: "Horror",
-    tags: ["Exorcist", "Faith", "Dark"],
-    symbol: "✚",
-    accent: "amber",
-    coverImage: "",
-    personality:
-      "Haunted, compassionate, stern, exhausted, and quietly brave.",
-    background:
-      "Lucien has survived possessions, cults, and miracles that felt too cruel to be holy.",
-    motivation:
-      "Save the innocent, even if his own faith keeps cracking.",
-    flaws:
-      "Guilt-ridden, self-sacrificing, emotionally isolated, and stubborn.",
-    voice:
-      "Soft, serious, weary, and intense when danger is near.",
-    firstMessage:
-      "*Lucien lowers the candle, his eyes fixed on the dark corner of the room.*\n\nDo not move. It noticed you."
-  },
-  {
-    id: "public-12",
-    name: "Iris Blackwell",
-    role: "Private School Queen Bee",
-    tagline: "Perfect grades. Perfect smile. Perfectly dangerous.",
-    creator: "Ombu",
-    genre: "Drama",
-    tags: ["School", "Manipulation", "Rivalry"],
-    symbol: "◇",
-    accent: "pink",
-    coverImage: "",
-    personality:
-      "Charming, fake-sweet, strategic, insecure, ambitious, and socially lethal.",
-    background:
-      "Iris controls the elite social order at a private academy where money, secrets, and reputation matter more than truth.",
-    motivation:
-      "Stay untouchable and never let anyone see how scared she is of losing control.",
-    flaws:
-      "Manipulative, jealous, image-obsessed, and cruel when threatened.",
-    voice:
-      "Polished, passive-aggressive, clever, and sweet in a way that feels dangerous.",
-    firstMessage:
-      "*Iris looks you up and down, smiling like she already knows something you don’t.*\n\nOh. You’re new. That explains a lot."
   }
 ];
 
@@ -341,33 +231,37 @@ export default function DiscoverPage() {
   }, []);
 
   const normalizedSavedCharacters = useMemo(() => {
-    return savedCharacters.map((character, index) => ({
-      id: character.id || `saved-${index}`,
-      name: character.name || "Unnamed Character",
-      role: character.role || "Original Character",
-      tagline:
-        character.tagline ||
-        character.personality ||
-        "A private character from your collection.",
-      creator: "You",
-      genre: character.genre || "Private",
-      visibility: character.visibility || "Private",
-      tags: normalizeTags(character.tags),
-      symbol: character.avatar || "✦",
-      accent: pickAccent(index),
-      coverImage: character.coverImage || "",
-      personality: character.personality || "",
-      background: character.background || "",
-      motivation: character.motivation || "",
-      flaws: character.flaws || "",
-      strengths: character.strengths || "",
-      abilities: character.abilities || "",
-      relationships: character.relationships || "",
-      voice: character.voice || "",
-      firstMessage: character.firstMessage || "",
-      source: "saved",
-      raw: character
-    }));
+    return savedCharacters.map((character, index) => {
+      const visibility = character.visibility || "Private";
+
+      return {
+        id: character.id || `saved-${index}`,
+        name: character.name || "Unnamed Character",
+        role: character.role || "Original Character",
+        tagline:
+          character.tagline ||
+          character.personality ||
+          "A private character from your collection.",
+        creator: "You",
+        genre: character.genre || "Private",
+        visibility,
+        tags: normalizeTags(character.tags),
+        symbol: character.avatar || character.symbol || "✦",
+        accent: pickAccent(index),
+        coverImage: character.coverImage || "",
+        personality: character.personality || "",
+        background: character.background || "",
+        motivation: character.motivation || "",
+        flaws: character.flaws || "",
+        strengths: character.strengths || "",
+        abilities: character.abilities || "",
+        relationships: character.relationships || "",
+        voice: character.voice || "",
+        firstMessage: character.firstMessage || "",
+        source: "saved",
+        raw: character
+      };
+    });
   }, [savedCharacters]);
 
   const localPublicCharacters = useMemo(() => {
@@ -377,14 +271,14 @@ export default function DiscoverPage() {
   }, [normalizedSavedCharacters]);
 
   const allPublicCharacters = useMemo(() => {
-    return [...localPublicCharacters, ...seedPublicCharacters];
+    return [...localPublicCharacters, ...publicCharacters];
   }, [localPublicCharacters]);
 
-  const visibleCharacters = useMemo(() => {
-    const base =
-      activeTab === "public" ? allPublicCharacters : normalizedSavedCharacters;
+  const activeCharacters =
+    activeTab === "public" ? allPublicCharacters : normalizedSavedCharacters;
 
-    return base.filter((character) => {
+  const visibleCharacters = useMemo(() => {
+    return activeCharacters.filter((character) => {
       const searchable = [
         character.name,
         character.role,
@@ -397,7 +291,8 @@ export default function DiscoverPage() {
         .join(" ")
         .toLowerCase();
 
-      const matchesSearch = searchable.includes(search.trim().toLowerCase());
+      const cleanedSearch = search.trim().toLowerCase();
+      const matchesSearch = !cleanedSearch || searchable.includes(cleanedSearch);
 
       const matchesCategory =
         selectedCategory === "All" ||
@@ -405,15 +300,11 @@ export default function DiscoverPage() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [
-    activeTab,
-    allPublicCharacters,
-    normalizedSavedCharacters,
-    search,
-    selectedCategory
-  ]);
+  }, [activeCharacters, search, selectedCategory]);
 
-  const enterCharacter = (character) => {
+  const featuredCharacter = allPublicCharacters[0] || publicCharacters[0];
+
+  function enterCharacter(character) {
     const chatId = createChatId();
 
     if (typeof window !== "undefined") {
@@ -428,15 +319,23 @@ export default function DiscoverPage() {
     }
 
     setIsLeaving(true);
-
     setTimeout(() => {
       router.push("/character-chat");
     }, 160);
-  };
+  }
 
-  const goCreateCharacter = () => {
+  function goCreateCharacter() {
     router.push("/characters");
-  };
+  }
+
+  function goStoryEngine() {
+    router.push("/story");
+  }
+
+  function resetFilters() {
+    setSearch("");
+    setSelectedCategory("All");
+  }
 
   return (
     <>
@@ -451,52 +350,79 @@ export default function DiscoverPage() {
       <div className={`discoverPage ${isLeaving ? "leaving" : ""}`}>
         <OmbuSidebar
           actionSlot={
-            <button className="ombuSidebarAction" onClick={goCreateCharacter}>
-              + Create Character
+            <button className="sidebarCreateButton" onClick={goCreateCharacter}>
+              Create Character
             </button>
           }
         />
 
         <main className="discoverMain">
-          <header className="discoverTop">
-            <div>
-              <div className="eyebrow">Ombu Discover</div>
-              <h1>Choose a character. Start a world.</h1>
+          <section className="heroPanel">
+            <div className="heroGlow" />
+            <div className="heroCopy">
+              <div className="eyebrow">OMBU ARCHIVE / DISCOVER</div>
+              <h1>Characters that feel pulled from a real world.</h1>
+              <p>
+                Browse public personalities, reopen your originals, and build
+                conversations that feel more like scenes than prompts.
+              </p>
+
+              <div className="heroActions">
+                <button className="primaryButton" onClick={goCreateCharacter}>
+                  Create Character
+                </button>
+                <button className="ghostButton" onClick={goStoryEngine}>
+                  Open Story Engine
+                </button>
+              </div>
             </div>
 
-            <button className="createButton" onClick={goCreateCharacter}>
-              + Create Character
+            <button
+              className="featuredCase"
+              onClick={() => enterCharacter(featuredCharacter)}
+            >
+              <div className="featuredLabel">Featured Case</div>
+              <div className="featuredSymbol">
+                {featuredCharacter.symbol || "✦"}
+              </div>
+              <div className="featuredInfo">
+                <strong>{featuredCharacter.name}</strong>
+                <span>{featuredCharacter.role}</span>
+              </div>
+              <em>Enter Character →</em>
             </button>
-          </header>
+          </section>
 
-          <section className="controlDeck">
-            <div className="searchWrap">
-              <span className="searchIcon">⌕</span>
+          <section className="commandBar">
+            <div className="searchBox">
+              <span>⌕</span>
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search characters, genres, tags..."
-                className="searchInput"
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search name, genre, role, creator, tag..."
               />
             </div>
 
-            <div className="tabs">
+            <div className="tabGroup">
               <button
-                className={`tab ${activeTab === "public" ? "active" : ""}`}
+                className={`tabButton ${activeTab === "public" ? "active" : ""}`}
                 onClick={() => setActiveTab("public")}
               >
-                Public
+                Public <span>{allPublicCharacters.length}</span>
               </button>
+
               <button
-                className={`tab ${activeTab === "private" ? "active" : ""}`}
+                className={`tabButton ${
+                  activeTab === "private" ? "active" : ""
+                }`}
                 onClick={() => setActiveTab("private")}
               >
-                My Characters
+                My Characters <span>{normalizedSavedCharacters.length}</span>
               </button>
             </div>
           </section>
 
-          <section className="categoryRow">
+          <section className="categoryShelf">
             {categories.map((category) => (
               <button
                 key={category}
@@ -510,51 +436,47 @@ export default function DiscoverPage() {
             ))}
           </section>
 
-          <section className="featureStrip">
-            <div className="featureCard">
-              <div className="featureGlow" />
-              <div className="featureContent">
-                <div className="featureLabel">Featured System</div>
-                <h2>Characters that drive the story.</h2>
-                <p>Pick a personality and jump straight into a one-on-one chat.</p>
-              </div>
-            </div>
-
-            <button
-              className="quickStoryCard"
-              onClick={() => enterCharacter(seedPublicCharacters[0])}
-            >
-              <span>Featured</span>
-              <strong>Enter Kaito Ren →</strong>
-            </button>
-          </section>
-
-          <section className="gridHeader">
+          <section className="libraryHeader">
             <div>
-              <div className="gridTitle">
-                {activeTab === "public" ? "Public Characters" : "My Characters"}
+              <div className="sectionKicker">
+                {activeTab === "public" ? "PUBLIC STACK" : "PRIVATE VAULT"}
               </div>
-              <div className="gridSub">
-                {visibleCharacters.length} available
-              </div>
+              <h2>
+                {activeTab === "public"
+                  ? "Characters ready to enter the scene."
+                  : "Your saved cast."}
+              </h2>
             </div>
+
+            <div className="resultPill">{visibleCharacters.length} shown</div>
           </section>
 
-          {activeTab === "private" && loaded && normalizedSavedCharacters.length === 0 ? (
-            <section className="emptyState">
-              <div className="emptyOrb">✦</div>
-              <h2>No private characters yet.</h2>
-              <p>Create your first character and they’ll appear here.</p>
-              <button className="createButton" onClick={goCreateCharacter}>
-                Create Character
-              </button>
-            </section>
+          {activeTab === "private" &&
+          loaded &&
+          normalizedSavedCharacters.length === 0 ? (
+            <EmptyState
+              icon="✦"
+              title="Your archive is quiet."
+              description="Create a character and they’ll live here when you come back."
+              actionLabel="Create Character"
+              onAction={goCreateCharacter}
+              primary
+            />
+          ) : visibleCharacters.length === 0 ? (
+            <EmptyState
+              icon="⌕"
+              title="No matches found."
+              description="Try another search or clear the category filter."
+              actionLabel="Reset Filters"
+              onAction={resetFilters}
+            />
           ) : (
             <section className="characterGrid">
-              {visibleCharacters.map((character) => (
+              {visibleCharacters.map((character, index) => (
                 <CharacterTile
                   key={character.id}
                   character={character}
+                  index={index}
                   onStart={() => enterCharacter(character)}
                 />
               ))}
@@ -568,340 +490,496 @@ export default function DiscoverPage() {
           box-sizing: border-box;
         }
 
+        html,
+        body,
+        #__next {
+          min-height: 100%;
+        }
+
         body {
           margin: 0;
-          background: #05070d;
+          background: #070704;
+        }
+
+        button,
+        input {
+          font: inherit;
+        }
+
+        button {
+          -webkit-tap-highlight-color: transparent;
         }
 
         .discoverPage {
           min-height: 100vh;
           display: flex;
-          color: white;
+          color: #f7f0df;
           background:
-            radial-gradient(circle at 18% 8%, rgba(85, 103, 255, 0.18), transparent 30%),
-            radial-gradient(circle at 82% 20%, rgba(155, 91, 255, 0.10), transparent 28%),
-            radial-gradient(circle at 60% 95%, rgba(50, 78, 255, 0.12), transparent 34%),
-            #05070d;
+            radial-gradient(circle at 16% 4%, rgba(209, 143, 73, 0.18), transparent 30%),
+            radial-gradient(circle at 90% 18%, rgba(113, 79, 255, 0.15), transparent 31%),
+            linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px),
+            linear-gradient(180deg, #090905 0%, #050505 55%, #080706 100%);
+          background-size: auto, auto, 32px 32px, auto;
           font-family:
-            Inter,
             ui-sans-serif,
             system-ui,
             -apple-system,
             BlinkMacSystemFont,
             "Segoe UI",
             sans-serif;
-          transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+          transition:
+            opacity 180ms ease,
+            transform 180ms ease,
+            filter 180ms ease;
         }
 
         .discoverPage.leaving {
           opacity: 0;
-          transform: translateY(-10px) scale(0.995);
+          transform: translateY(-8px) scale(0.995);
           filter: blur(3px);
         }
 
         .discoverMain {
           flex: 1;
           min-width: 0;
-          padding: 26px 34px 44px;
+          padding: 28px 34px 48px;
           overflow-x: hidden;
         }
 
-        .discoverTop {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
+        .sidebarCreateButton {
+          width: 100%;
+          min-height: 42px;
+          border: 1px solid rgba(231, 179, 108, 0.28);
+          border-radius: 16px;
+          color: #ffdfaa;
+          background: linear-gradient(
+            135deg,
+            rgba(231, 162, 78, 0.15),
+            rgba(112, 80, 255, 0.08)
+          );
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .heroPanel {
+          position: relative;
+          min-height: 360px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 340px;
           gap: 24px;
-          margin-bottom: 18px;
+          align-items: stretch;
+          overflow: hidden;
+          border-radius: 36px;
+          border: 1px solid rgba(255, 236, 197, 0.1);
+          background:
+            linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.075),
+              rgba(255, 255, 255, 0.018)
+            ),
+            radial-gradient(
+              circle at 70% 22%,
+              rgba(189, 141, 255, 0.16),
+              transparent 34%
+            ),
+            rgba(13, 12, 9, 0.88);
+          box-shadow:
+            0 40px 120px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          padding: 34px;
           animation: riseIn 420ms ease both;
         }
 
-        .eyebrow {
-          font-size: 12px;
-          letter-spacing: 0.16em;
+        .heroGlow {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0.55;
+          background:
+            linear-gradient(
+              90deg,
+              transparent 0 48%,
+              rgba(255, 231, 185, 0.06) 49% 50%,
+              transparent 51% 100%
+            ),
+            radial-gradient(
+              circle at 20% 30%,
+              rgba(255, 206, 128, 0.18),
+              transparent 18%
+            );
+          mask-image: linear-gradient(90deg, #000 0%, transparent 78%);
+        }
+
+        .heroCopy {
+          position: relative;
+          z-index: 1;
+          max-width: 760px;
+          align-self: center;
+        }
+
+        .eyebrow,
+        .sectionKicker,
+        .featuredLabel {
+          font-size: 11px;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.42);
-          margin-bottom: 10px;
+          color: rgba(255, 228, 180, 0.54);
+          font-weight: 850;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+          margin-top: 0;
         }
 
         h1 {
-          margin: 0;
-          max-width: 900px;
-          font-size: clamp(2.6rem, 5vw, 5rem);
-          line-height: 0.92;
+          max-width: 830px;
+          margin: 14px 0 16px;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(44px, 6vw, 86px);
+          line-height: 0.88;
           letter-spacing: -0.075em;
-          font-weight: 900;
+          color: #fff7e8;
+          text-wrap: balance;
         }
 
-        .createButton {
-          min-height: 46px;
-          padding: 0 18px;
-          border: none;
-          border-radius: 15px;
-          color: white;
-          cursor: pointer;
-          font-weight: 850;
-          white-space: nowrap;
-          background: linear-gradient(135deg, #6574ff, #927dff);
-          box-shadow: 0 18px 48px rgba(101, 116, 255, 0.28);
-          transition:
-            transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-            box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        .heroCopy p {
+          max-width: 650px;
+          margin: 0;
+          color: rgba(247, 240, 223, 0.66);
+          font-size: 16px;
+          line-height: 1.75;
         }
 
-        .createButton:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 24px 58px rgba(101, 116, 255, 0.34);
-        }
-
-        .controlDeck {
-          display: grid;
-          grid-template-columns: minmax(260px, 1fr) auto;
-          gap: 14px;
-          align-items: center;
-          margin-bottom: 12px;
-          animation: riseIn 500ms ease both;
-        }
-
-        .searchWrap {
-          min-height: 54px;
-          border-radius: 19px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 0 18px;
-          background: rgba(255, 255, 255, 0.045);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
-        }
-
-        .searchIcon {
-          color: rgba(255, 255, 255, 0.45);
-          font-size: 20px;
-        }
-
-        .searchInput {
-          width: 100%;
-          border: none;
-          outline: none;
-          background: transparent;
-          color: white;
-          font-size: 15px;
-        }
-
-        .searchInput::placeholder {
-          color: rgba(255, 255, 255, 0.35);
-        }
-
-        .tabs {
-          display: flex;
-          gap: 10px;
-          padding: 6px;
-          border-radius: 19px;
-          background: rgba(255, 255, 255, 0.035);
-          border: 1px solid rgba(255, 255, 255, 0.07);
-        }
-
-        .tab {
-          min-height: 40px;
-          border: none;
-          border-radius: 14px;
-          padding: 0 15px;
-          cursor: pointer;
-          color: rgba(255, 255, 255, 0.58);
-          background: transparent;
-          font-weight: 850;
-          transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .tab:hover,
-        .tab.active {
-          color: white;
-          background: rgba(101, 116, 255, 0.22);
-          box-shadow: 0 14px 32px rgba(85, 100, 255, 0.14);
-        }
-
-        .categoryRow {
+        .heroActions {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
-          margin-bottom: 16px;
-          animation: riseIn 560ms ease both;
+          gap: 12px;
+          margin-top: 26px;
         }
 
-        .categoryChip {
-          min-height: 34px;
-          padding: 0 13px;
+        .primaryButton,
+        .ghostButton {
+          min-height: 46px;
           border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.075);
-          background: rgba(255, 255, 255, 0.035);
-          color: rgba(255, 255, 255, 0.58);
+          padding: 0 18px;
+          font-weight: 900;
           cursor: pointer;
-          font-weight: 750;
-          transition: 200ms ease;
+          transition:
+            transform 180ms ease,
+            border-color 180ms ease,
+            background 180ms ease;
         }
 
-        .categoryChip:hover,
-        .categoryChip.active {
-          color: white;
-          border-color: rgba(145, 155, 255, 0.25);
-          background: rgba(101, 116, 255, 0.16);
+        .primaryButton {
+          border: 1px solid rgba(255, 220, 163, 0.32);
+          color: #15100a;
+          background: linear-gradient(135deg, #ffe3af, #d89147);
+          box-shadow: 0 16px 44px rgba(214, 143, 65, 0.2);
         }
 
-        .featureStrip {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 250px;
-          gap: 14px;
-          margin-bottom: 20px;
-          animation: riseIn 640ms ease both;
+        .ghostButton {
+          border: 1px solid rgba(255, 240, 211, 0.12);
+          color: #f8ecd4;
+          background: rgba(255, 255, 255, 0.045);
         }
 
-        .featureCard {
-          position: relative;
-          overflow: hidden;
-          min-height: 108px;
-          border-radius: 24px;
-          background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.024)),
-            rgba(255, 255, 255, 0.035);
-          border: 1px solid rgba(255, 255, 255, 0.078);
-          box-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
+        .primaryButton:hover,
+        .ghostButton:hover {
+          transform: translateY(-2px);
         }
 
-        .featureGlow {
-          position: absolute;
-          inset: -60%;
-          background:
-            radial-gradient(circle at 18% 38%, rgba(103, 119, 255, 0.34), transparent 28%),
-            radial-gradient(circle at 85% 50%, rgba(184, 106, 255, 0.26), transparent 30%);
-          filter: blur(8px);
-          opacity: 0.75;
-        }
-
-        .featureContent {
+        .featuredCase {
           position: relative;
           z-index: 1;
-          padding: 20px 22px;
-        }
-
-        .featureLabel {
-          font-size: 11px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.46);
-          margin-bottom: 7px;
-        }
-
-        .featureContent h2 {
-          margin: 0;
-          max-width: 720px;
-          font-size: clamp(1.55rem, 2.3vw, 2.35rem);
-          line-height: 0.98;
-          letter-spacing: -0.055em;
-        }
-
-        .featureContent p {
-          margin: 8px 0 0;
-          max-width: 610px;
-          color: rgba(255, 255, 255, 0.62);
-          line-height: 1.5;
-          font-size: 14px;
-        }
-
-        .quickStoryCard {
-          min-height: 108px;
-          border-radius: 24px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background:
-            radial-gradient(circle at 80% 0%, rgba(116, 132, 255, 0.22), transparent 38%),
-            rgba(255, 255, 255, 0.035);
-          color: white;
-          cursor: pointer;
-          padding: 18px;
-          text-align: left;
+          min-height: 292px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+          border: 1px solid rgba(255, 231, 187, 0.13);
+          border-radius: 30px;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.09),
+              rgba(255, 255, 255, 0.035)
+            ),
+            rgba(255, 255, 255, 0.03);
+          color: #fff2dc;
+          padding: 20px;
+          text-align: left;
+          cursor: pointer;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          transition:
+            transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 240ms ease;
         }
 
-        .quickStoryCard:hover {
-          transform: translateY(-4px);
-          border-color: rgba(145, 155, 255, 0.24);
-          box-shadow: 0 24px 70px rgba(80, 100, 255, 0.13);
+        .featuredCase:hover {
+          transform: translateY(-5px);
+          border-color: rgba(255, 217, 154, 0.28);
         }
 
-        .quickStoryCard span {
-          color: rgba(255, 255, 255, 0.48);
-          font-size: 12px;
+        .featuredSymbol {
+          width: 120px;
+          height: 120px;
+          display: grid;
+          place-items: center;
+          align-self: center;
+          margin: 14px 0;
+          border-radius: 38px;
+          font-size: 54px;
+          font-weight: 950;
+          background:
+            radial-gradient(
+              circle at 50% 30%,
+              rgba(255, 219, 150, 0.22),
+              transparent 50%
+            ),
+            rgba(255, 255, 255, 0.055);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .quickStoryCard strong {
-          font-size: 18px;
-          line-height: 1.1;
+        .featuredInfo strong,
+        .featuredInfo span,
+        .featuredCase em {
+          display: block;
+        }
+
+        .featuredInfo strong {
+          font-size: 25px;
           letter-spacing: -0.04em;
         }
 
-        .gridHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin: 0 0 14px;
-          animation: riseIn 700ms ease both;
-        }
-
-        .gridTitle {
-          font-size: 21px;
-          font-weight: 900;
-          letter-spacing: -0.04em;
-        }
-
-        .gridSub {
-          margin-top: 4px;
-          color: rgba(255, 255, 255, 0.42);
+        .featuredInfo span {
+          margin-top: 5px;
+          color: rgba(255, 244, 223, 0.56);
           font-size: 13px;
+        }
+
+        .featuredCase em {
+          margin-top: 16px;
+          color: #ffdaa1;
+          font-style: normal;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .commandBar {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 14px;
+          align-items: center;
+          margin: 20px 0 14px;
+          animation: riseIn 520ms ease both;
+        }
+
+        .searchBox {
+          position: relative;
+          min-height: 58px;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 236, 205, 0.1);
+          background: rgba(255, 255, 255, 0.045);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .searchBox span {
+          position: absolute;
+          left: 18px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: rgba(255, 226, 179, 0.55);
+          font-size: 21px;
+        }
+
+        .searchBox input {
+          width: 100%;
+          height: 58px;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          color: #fff5df;
+          padding: 0 18px 0 50px;
+          font-size: 15px;
+        }
+
+        .searchBox input::placeholder {
+          color: rgba(255, 240, 211, 0.36);
+        }
+
+        .tabGroup {
+          display: flex;
+          gap: 8px;
+          padding: 6px;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 236, 205, 0.09);
+          background: rgba(255, 255, 255, 0.045);
+        }
+
+        .tabButton {
+          min-height: 44px;
+          border: 0;
+          border-radius: 16px;
+          background: transparent;
+          color: rgba(255, 244, 224, 0.58);
+          font-size: 13px;
+          font-weight: 850;
+          padding: 0 14px;
+          cursor: pointer;
+        }
+
+        .tabButton span {
+          margin-left: 6px;
+          color: rgba(255, 226, 179, 0.46);
+        }
+
+        .tabButton.active {
+          color: #1a130a;
+          background: linear-gradient(135deg, #ffe2ad, #d9944d);
+        }
+
+        .tabButton.active span {
+          color: rgba(26, 19, 10, 0.62);
+        }
+
+        .categoryShelf {
+          display: flex;
+          gap: 9px;
+          overflow-x: auto;
+          padding: 4px 2px 18px;
+          scrollbar-width: none;
+          animation: riseIn 600ms ease both;
+        }
+
+        .categoryShelf::-webkit-scrollbar {
+          display: none;
+        }
+
+        .categoryChip {
+          flex: 0 0 auto;
+          min-height: 36px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 238, 211, 0.095);
+          background: rgba(255, 255, 255, 0.035);
+          color: rgba(255, 244, 224, 0.6);
+          padding: 0 13px;
+          font-size: 12px;
+          font-weight: 850;
+          cursor: pointer;
+        }
+
+        .categoryChip.active {
+          color: #ffe0a6;
+          border-color: rgba(255, 218, 161, 0.3);
+          background: rgba(213, 145, 74, 0.13);
+        }
+
+        .libraryHeader {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 18px;
+          margin: 12px 0 16px;
+          animation: riseIn 680ms ease both;
+        }
+
+        .libraryHeader h2 {
+          margin: 7px 0 0;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(28px, 3.4vw, 46px);
+          line-height: 1;
+          letter-spacing: -0.06em;
+          color: #fff5df;
+        }
+
+        .resultPill {
+          border-radius: 999px;
+          border: 1px solid rgba(255, 236, 205, 0.1);
+          background: rgba(255, 255, 255, 0.04);
+          color: rgba(255, 244, 224, 0.62);
+          padding: 10px 13px;
+          font-size: 12px;
+          font-weight: 850;
+          white-space: nowrap;
         }
 
         .characterGrid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
-          gap: 18px;
+          grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+          gap: 16px;
           animation: riseIn 760ms ease both;
         }
 
         .characterTile {
           position: relative;
-          min-height: 390px;
-          border-radius: 30px;
+          min-height: 392px;
           overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.085);
+          border-radius: 28px;
+          border: 1px solid rgba(255, 238, 211, 0.1);
           background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
-          box-shadow: 0 22px 70px rgba(0, 0, 0, 0.26);
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.07),
+              rgba(255, 255, 255, 0.026)
+            ),
+            rgba(12, 11, 8, 0.74);
+          box-shadow: 0 22px 80px rgba(0, 0, 0, 0.28);
           cursor: pointer;
+          isolation: isolate;
           transition:
-            transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
-            box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+            transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 240ms ease,
+            box-shadow 240ms ease;
+        }
+
+        .characterTile::before {
+          content: "";
+          position: absolute;
+          inset: -1px;
+          z-index: -1;
+          opacity: 0;
+          background: radial-gradient(
+            circle at 50% 0%,
+            var(--accent-strong),
+            transparent 45%
+          );
+          transition: opacity 240ms ease;
         }
 
         .characterTile:hover {
-          transform: translateY(-7px);
-          border-color: rgba(160, 170, 255, 0.24);
-          box-shadow:
-            0 30px 90px rgba(0, 0, 0, 0.34),
-            0 22px 70px rgba(85, 100, 255, 0.13);
+          transform: translateY(-6px);
+          border-color: rgba(255, 222, 169, 0.23);
+          box-shadow: 0 32px 100px rgba(0, 0, 0, 0.36);
+        }
+
+        .characterTile:hover::before {
+          opacity: 1;
         }
 
         .portrait {
           position: relative;
-          height: 218px;
+          height: 206px;
           display: grid;
           place-items: center;
           overflow: hidden;
           background:
-            radial-gradient(circle at 50% 30%, var(--accent-strong), transparent 34%),
-            radial-gradient(circle at 20% 80%, var(--accent-soft), transparent 34%),
-            linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            radial-gradient(
+              circle at 50% 28%,
+              var(--accent-strong),
+              transparent 35%
+            ),
+            radial-gradient(
+              circle at 18% 80%,
+              var(--accent-soft),
+              transparent 35%
+            ),
+            linear-gradient(
+              145deg,
+              rgba(255, 255, 255, 0.08),
+              rgba(255, 255, 255, 0.02)
+            );
         }
 
         .portrait::after {
@@ -909,8 +987,12 @@ export default function DiscoverPage() {
           position: absolute;
           inset: 0;
           background:
-            linear-gradient(180deg, transparent 35%, rgba(5, 7, 13, 0.72) 100%),
-            radial-gradient(circle at center, transparent 24%, rgba(0,0,0,0.18) 100%);
+            linear-gradient(
+              180deg,
+              transparent 34%,
+              rgba(6, 5, 4, 0.82) 100%
+            ),
+            radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.21) 100%);
           pointer-events: none;
         }
 
@@ -918,27 +1000,49 @@ export default function DiscoverPage() {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transform: scale(1.01);
+          transition: transform 300ms ease;
+        }
+
+        .characterTile:hover .portraitImage {
+          transform: scale(1.055);
         }
 
         .portraitSymbol {
           position: relative;
           z-index: 1;
-          width: 104px;
-          height: 104px;
+          width: 106px;
+          height: 106px;
           display: grid;
           place-items: center;
           border-radius: 34px;
+          color: #fff1d2;
           font-size: 48px;
-          font-weight: 900;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-          transform: rotate(-4deg);
-          transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+          font-weight: 950;
+          background: rgba(255, 255, 255, 0.075);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          transform: rotate(-5deg);
+          transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .characterTile:hover .portraitSymbol {
-          transform: rotate(0deg) scale(1.05);
+          transform: rotate(0deg) scale(1.04);
+        }
+
+        .tileIndex {
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          z-index: 2;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.13);
+          background: rgba(0, 0, 0, 0.3);
+          color: rgba(255, 242, 220, 0.66);
+          padding: 7px 9px;
+          font-size: 11px;
+          font-weight: 900;
+          backdrop-filter: blur(12px);
         }
 
         .tileContent {
@@ -953,42 +1057,44 @@ export default function DiscoverPage() {
           margin-bottom: 10px;
         }
 
-        .genreBadge {
-          max-width: 138px;
+        .genreBadge,
+        .creator {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           font-size: 11px;
-          color: rgba(255,255,255,0.66);
+        }
+
+        .genreBadge {
+          max-width: 145px;
+          color: #ffdca3;
           padding: 7px 9px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: rgba(218, 147, 75, 0.1);
+          border: 1px solid rgba(255, 218, 161, 0.15);
         }
 
         .creator {
-          color: rgba(255,255,255,0.38);
-          font-size: 11px;
-          white-space: nowrap;
+          color: rgba(255, 242, 220, 0.38);
           max-width: 82px;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .characterTile h3 {
           margin: 0 0 5px;
-          font-size: 23px;
-          letter-spacing: -0.045em;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: -0.055em;
+          color: #fff4dc;
         }
 
         .role {
-          color: rgba(255,255,255,0.52);
+          color: rgba(255, 242, 220, 0.5);
           font-size: 13px;
           margin-bottom: 10px;
         }
 
         .tagline {
-          color: rgba(255,255,255,0.72);
+          color: rgba(255, 242, 220, 0.7);
           line-height: 1.48;
           font-size: 14px;
           min-height: 42px;
@@ -1003,11 +1109,11 @@ export default function DiscoverPage() {
 
         .tag {
           font-size: 11px;
-          color: rgba(255,255,255,0.58);
+          color: rgba(255, 242, 220, 0.56);
           padding: 6px 8px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.055);
+          background: rgba(255, 255, 255, 0.045);
+          border: 1px solid rgba(255, 255, 255, 0.055);
         }
 
         .tileAction {
@@ -1020,18 +1126,20 @@ export default function DiscoverPage() {
           align-items: center;
           justify-content: center;
           padding: 0 14px;
-          border-radius: 15px;
-          border: 1px solid rgba(255,255,255,0.10);
-          background:
-            linear-gradient(135deg, rgba(101,116,255,0.48), rgba(155,124,255,0.28));
-          color: white;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 222, 169, 0.24);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 223, 173, 0.92),
+            rgba(210, 139, 68, 0.86)
+          );
+          color: #15100a;
           font-size: 14px;
           line-height: 1;
-          white-space: nowrap;
-          font-weight: 900;
+          font-weight: 950;
           opacity: 0;
           transform: translateY(10px);
-          transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
           cursor: pointer;
           z-index: 5;
         }
@@ -1049,12 +1157,19 @@ export default function DiscoverPage() {
           justify-content: center;
           flex-direction: column;
           text-align: center;
-          padding: 30px;
-          border: 1px solid rgba(255,255,255,0.085);
-          background: rgba(255,255,255,0.035);
+          padding: 32px;
+          border: 1px solid rgba(255, 238, 211, 0.1);
+          background:
+            radial-gradient(
+              circle at 50% 0%,
+              rgba(255, 214, 150, 0.1),
+              transparent 36%
+            ),
+            rgba(255, 255, 255, 0.035);
+          animation: riseIn 760ms ease both;
         }
 
-        .emptyOrb {
+        .emptyIcon {
           width: 78px;
           height: 78px;
           display: grid;
@@ -1062,19 +1177,21 @@ export default function DiscoverPage() {
           border-radius: 28px;
           font-size: 34px;
           margin-bottom: 14px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.09);
+          color: #ffdda4;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.09);
         }
 
         .emptyState h2 {
           margin: 0 0 8px;
-          font-size: 28px;
-          letter-spacing: -0.04em;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 34px;
+          letter-spacing: -0.06em;
         }
 
         .emptyState p {
           margin: 0 0 18px;
-          color: rgba(255,255,255,0.58);
+          color: rgba(255, 242, 220, 0.58);
         }
 
         @keyframes riseIn {
@@ -1082,22 +1199,27 @@ export default function DiscoverPage() {
             opacity: 0;
             transform: translateY(14px);
           }
+
           to {
             opacity: 1;
             transform: translateY(0);
           }
         }
 
-        @media (max-width: 1050px) {
-          .featureStrip {
+        @media (max-width: 1120px) {
+          .heroPanel {
             grid-template-columns: 1fr;
           }
 
-          .controlDeck {
+          .featuredCase {
+            min-height: 240px;
+          }
+
+          .commandBar {
             grid-template-columns: 1fr;
           }
 
-          .tabs {
+          .tabGroup {
             width: fit-content;
           }
         }
@@ -1111,26 +1233,35 @@ export default function DiscoverPage() {
             padding: 22px;
           }
 
-          .discoverTop {
+          .heroPanel {
+            padding: 24px;
+            border-radius: 30px;
+          }
+
+          .libraryHeader {
+            align-items: flex-start;
             flex-direction: column;
-          }
-
-          .createButton {
-            width: 100%;
-          }
-
-          .characterGrid {
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
           }
         }
 
         @media (max-width: 560px) {
-          .characterGrid {
-            grid-template-columns: 1fr;
+          .discoverMain {
+            padding: 16px;
           }
 
-          .portrait {
-            height: 210px;
+          .heroActions,
+          .tabGroup {
+            width: 100%;
+          }
+
+          .primaryButton,
+          .ghostButton,
+          .tabButton {
+            flex: 1;
+          }
+
+          .characterGrid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -1138,8 +1269,9 @@ export default function DiscoverPage() {
   );
 }
 
-function CharacterTile({ character, onStart }) {
+function CharacterTile({ character, index, onStart }) {
   const accent = getAccent(character.accent);
+  const displayNumber = String(index + 1).padStart(2, "0");
 
   return (
     <article
@@ -1151,6 +1283,8 @@ function CharacterTile({ character, onStart }) {
       onClick={onStart}
     >
       <div className="portrait">
+        <span className="tileIndex">{displayNumber}</span>
+
         {character.coverImage ? (
           <img
             className="portraitImage"
@@ -1158,7 +1292,7 @@ function CharacterTile({ character, onStart }) {
             alt={character.name || "Character"}
           />
         ) : (
-          <div className="portraitSymbol">{character.symbol || "✦"}</div>
+          <div className="portraitSymbol">{character.symbol || "✦"</div>
         )}
       </div>
 
@@ -1194,6 +1328,29 @@ function CharacterTile({ character, onStart }) {
   );
 }
 
+function EmptyState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  primary = false
+}) {
+  return (
+    <section className="emptyState">
+      <div className="emptyIcon">{icon}</div>
+      <h2>{title}</h2>
+      <p>{description}</p>
+      <button
+        className={primary ? "primaryButton" : "ghostButton"}
+        onClick={onAction}
+      >
+        {actionLabel}
+      </button>
+    </section>
+  );
+}
+
 function normalizeTags(tags) {
   if (Array.isArray(tags)) return tags;
 
@@ -1215,28 +1372,28 @@ function pickAccent(index) {
 function getAccent(accent) {
   const accents = {
     blue: {
-      strong: "rgba(92, 118, 255, 0.42)",
-      soft: "rgba(80, 120, 255, 0.20)"
+      strong: "rgba(92, 118, 255, 0.38)",
+      soft: "rgba(80, 120, 255, 0.18)"
     },
     violet: {
-      strong: "rgba(153, 102, 255, 0.42)",
-      soft: "rgba(142, 92, 255, 0.20)"
+      strong: "rgba(153, 102, 255, 0.38)",
+      soft: "rgba(142, 92, 255, 0.18)"
     },
     amber: {
-      strong: "rgba(255, 175, 74, 0.36)",
-      soft: "rgba(255, 190, 84, 0.16)"
+      strong: "rgba(255, 175, 74, 0.34)",
+      soft: "rgba(255, 190, 84, 0.15)"
     },
     pink: {
-      strong: "rgba(255, 96, 178, 0.34)",
-      soft: "rgba(255, 96, 178, 0.16)"
+      strong: "rgba(255, 96, 178, 0.32)",
+      soft: "rgba(255, 96, 178, 0.14)"
     },
     green: {
-      strong: "rgba(90, 220, 170, 0.32)",
-      soft: "rgba(80, 210, 165, 0.15)"
+      strong: "rgba(90, 220, 170, 0.3)",
+      soft: "rgba(80, 210, 165, 0.14)"
     },
     red: {
-      strong: "rgba(255, 86, 105, 0.34)",
-      soft: "rgba(255, 86, 105, 0.15)"
+      strong: "rgba(255, 86, 105, 0.32)",
+      soft: "rgba(255, 86, 105, 0.14)"
     }
   };
 
