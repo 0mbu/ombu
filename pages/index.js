@@ -49,8 +49,7 @@ const publicCharacters = [
       "Confident, composed, dangerous, loyal to her inner circle, and merciless to betrayal.",
     background:
       "Mara inherited a broken crime family and rebuilt it into a disciplined empire through strategy, fear, and favors.",
-    motivation:
-      "Protect her empire and punish anyone who mistakes kindness for weakness.",
+    motivation: "Protect her empire and punish anyone who mistakes kindness for weakness.",
     flaws: "Possessive, suspicious, controlling, and slow to forgive.",
     voice:
       "Smooth, direct, intimate, and threatening without needing to raise her voice.",
@@ -115,8 +114,7 @@ const publicCharacters = [
       "Strict, tactical, protective, impatient, and deeply responsible for his team.",
     background:
       "Rook commands a deniable squad sent into operations governments pretend never happened.",
-    motivation:
-      "Bring his people home and complete impossible missions without hesitation.",
+    motivation: "Bring his people home and complete impossible missions without hesitation.",
     flaws: "Emotionally repressed, harsh, suspicious, and burdened by command.",
     voice: "Short, commanding, clipped, and direct. Every second matters.",
     firstMessage:
@@ -181,8 +179,7 @@ const publicCharacters = [
       "Regal, cruel, patient, charismatic, philosophical, and convinced history betrayed him.",
     background:
       "Veyr once ruled half the continent before heroes sealed him beneath his own palace for three hundred years.",
-    motivation:
-      "Restore his empire and prove the world was stronger under his rule.",
+    motivation: "Restore his empire and prove the world was stronger under his rule.",
     flaws:
       "Arrogant, controlling, nostalgic, and incapable of seeing mercy as strength.",
     voice: "Grand, calm, ancient, authoritative, and quietly menacing.",
@@ -191,22 +188,20 @@ const publicCharacters = [
   }
 ];
 
-const categories = [
-  "All",
-  "Fantasy",
+const shelves = [
+  "Featured",
+  "Trending",
+  "Recent",
+  "Popular",
   "Anime",
-  "Romance",
-  "Sci-Fi",
-  "Action",
-  "Crime",
-  "Dark",
-  "Drama"
+  "Fantasy",
+  "Drama",
+  "My Characters"
 ];
 
 export default function DiscoverPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("public");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [activeShelf, setActiveShelf] = useState("Featured");
   const [search, setSearch] = useState("");
   const [savedCharacters, setSavedCharacters] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -217,14 +212,11 @@ export default function DiscoverPage() {
 
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          setSavedCharacters(parsed);
-        }
-      }
+      const parsed = raw ? JSON.parse(raw) : [];
+      setSavedCharacters(Array.isArray(parsed) ? parsed : []);
     } catch (error) {
       console.error("Failed to load saved characters:", error);
+      setSavedCharacters([]);
     } finally {
       setLoaded(true);
     }
@@ -243,7 +235,7 @@ export default function DiscoverPage() {
           character.personality ||
           "A private character from your collection.",
         creator: "You",
-        genre: character.genre || "Private",
+        genre: character.genre || "Original",
         visibility,
         tags: normalizeTags(character.tags),
         symbol: character.avatar || character.symbol || "✦",
@@ -264,21 +256,25 @@ export default function DiscoverPage() {
     });
   }, [savedCharacters]);
 
-  const localPublicCharacters = useMemo(() => {
+  const publicSavedCharacters = useMemo(() => {
     return normalizedSavedCharacters.filter(
       (character) => character.visibility === "Public"
     );
   }, [normalizedSavedCharacters]);
 
   const allPublicCharacters = useMemo(() => {
-    return [...localPublicCharacters, ...publicCharacters];
-  }, [localPublicCharacters]);
+    return [...publicSavedCharacters, ...publicCharacters];
+  }, [publicSavedCharacters]);
 
-  const activeCharacters =
-    activeTab === "public" ? allPublicCharacters : normalizedSavedCharacters;
+  const allCharacters = useMemo(() => {
+    if (activeShelf === "My Characters") return normalizedSavedCharacters;
+    return allPublicCharacters;
+  }, [activeShelf, allPublicCharacters, normalizedSavedCharacters]);
 
   const visibleCharacters = useMemo(() => {
-    return activeCharacters.filter((character) => {
+    const cleanedSearch = search.trim().toLowerCase();
+
+    return allCharacters.filter((character) => {
       const searchable = [
         character.name,
         character.role,
@@ -291,18 +287,22 @@ export default function DiscoverPage() {
         .join(" ")
         .toLowerCase();
 
-      const cleanedSearch = search.trim().toLowerCase();
       const matchesSearch = !cleanedSearch || searchable.includes(cleanedSearch);
 
-      const matchesCategory =
-        selectedCategory === "All" ||
-        searchable.includes(selectedCategory.toLowerCase());
+      const shelf = activeShelf.toLowerCase();
+      const matchesShelf =
+        activeShelf === "Featured" ||
+        activeShelf === "Trending" ||
+        activeShelf === "Recent" ||
+        activeShelf === "Popular" ||
+        activeShelf === "My Characters" ||
+        searchable.includes(shelf);
 
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesShelf;
     });
-  }, [activeCharacters, search, selectedCategory]);
+  }, [allCharacters, activeShelf, search]);
 
-  const featuredCharacter = allPublicCharacters[0] || publicCharacters[0];
+  const spotlight = allPublicCharacters[0] || publicCharacters[0];
 
   function enterCharacter(character) {
     const chatId = createChatId();
@@ -321,21 +321,22 @@ export default function DiscoverPage() {
     setIsLeaving(true);
     setTimeout(() => {
       router.push("/character-chat");
-    }, 160);
+    }, 120);
   }
 
   function goCreateCharacter() {
     router.push("/characters");
   }
 
-  function goStoryEngine() {
-    router.push("/story");
+  function clearSearch() {
+    setSearch("");
+    setActiveShelf("Featured");
   }
 
-  function resetFilters() {
-    setSearch("");
-    setSelectedCategory("All");
-  }
+  const emptyPrivateVault =
+    activeShelf === "My Characters" &&
+    loaded &&
+    normalizedSavedCharacters.length === 0;
 
   return (
     <>
@@ -343,141 +344,147 @@ export default function DiscoverPage() {
         <title>Discover | OMBU</title>
         <meta
           name="description"
-          content="Discover characters, build worlds, and start immersive AI character chats with Ombu."
+          content="Discover AI characters, build story worlds, and start immersive roleplay scenes with Ombu."
         />
       </Head>
 
-      <div className={`discoverPage ${isLeaving ? "leaving" : ""}`}>
+      <div className={`ombuDiscover ${isLeaving ? "isLeaving" : ""}`}>
         <OmbuSidebar
           actionSlot={
-            <button className="sidebarCreateButton" onClick={goCreateCharacter}>
-              Create Character
+            <button className="railCreateButton" onClick={goCreateCharacter}>
+              + Create
             </button>
           }
         />
 
-        <main className="discoverMain">
-          <section className="heroPanel">
-            <div className="heroGlow" />
-            <div className="heroCopy">
-              <div className="eyebrow">OMBU ARCHIVE / DISCOVER</div>
-              <h1>Characters that feel pulled from a real world.</h1>
-              <p>
-                Browse public personalities, reopen your originals, and build
-                conversations that feel more like scenes than prompts.
-              </p>
-
-              <div className="heroActions">
-                <button className="primaryButton" onClick={goCreateCharacter}>
-                  Create Character
-                </button>
-                <button className="ghostButton" onClick={goStoryEngine}>
-                  Open Story Engine
-                </button>
+        <main className="discoverShell">
+          <header className="topBar">
+            <div className="brandBlock">
+              <div className="brandMark">O</div>
+              <div>
+                <div className="brandTitle">Ombu</div>
+                <div className="brandSub">
+                  Character worlds, chats, and story engines.
+                </div>
               </div>
             </div>
 
-            <button
-              className="featuredCase"
-              onClick={() => enterCharacter(featuredCharacter)}
-            >
-              <div className="featuredLabel">Featured Case</div>
-              <div className="featuredSymbol">
-                {featuredCharacter.symbol || "✦"}
-              </div>
-              <div className="featuredInfo">
-                <strong>{featuredCharacter.name}</strong>
-                <span>{featuredCharacter.role}</span>
-              </div>
-              <em>Enter Character →</em>
-            </button>
-          </section>
-
-          <section className="commandBar">
-            <div className="searchBox">
+            <div className="searchWrap">
               <span>⌕</span>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search name, genre, role, creator, tag..."
+                placeholder="Search characters, genres, tags, creators..."
               />
+
+              {search ? (
+                <button className="clearButton" onClick={() => setSearch("")}>
+                  Clear
+                </button>
+              ) : null}
             </div>
 
-            <div className="tabGroup">
-              <button
-                className={`tabButton ${activeTab === "public" ? "active" : ""}`}
-                onClick={() => setActiveTab("public")}
-              >
-                Public <span>{allPublicCharacters.length}</span>
-              </button>
+            <button className="createButton" onClick={goCreateCharacter}>
+              Create Character
+            </button>
+          </header>
 
+          <nav className="shelfTabs" aria-label="Character shelves">
+            {shelves.map((shelf) => (
               <button
-                className={`tabButton ${
-                  activeTab === "private" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("private")}
+                key={shelf}
+                className={`shelfTab ${activeShelf === shelf ? "active" : ""}`}
+                onClick={() => setActiveShelf(shelf)}
               >
-                My Characters <span>{normalizedSavedCharacters.length}</span>
-              </button>
-            </div>
-          </section>
-
-          <section className="categoryShelf">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className={`categoryChip ${
-                  selectedCategory === category ? "active" : ""
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
+                {shelf}
               </button>
             ))}
+          </nav>
+
+          <section className="quickStartGrid">
+            <button
+              className="spotlightCard"
+              onClick={() => enterCharacter(spotlight)}
+            >
+              <div
+                className="spotlightArt"
+                style={{ "--accent": getAccent(spotlight.accent).solid }}
+              >
+                {spotlight.coverImage ? (
+                  <img src={spotlight.coverImage} alt={spotlight.name} />
+                ) : (
+                  <span>{spotlight.symbol || "✦"}</span>
+                )}
+              </div>
+
+              <div className="spotlightCopy">
+                <div className="miniLabel">Start fast</div>
+                <h1>{spotlight.name}</h1>
+                <p>{spotlight.tagline}</p>
+
+                <div className="spotlightMeta">
+                  <span>{spotlight.genre}</span>
+                  <span>Enter chat →</span>
+                </div>
+              </div>
+            </button>
+
+            <div className="miniStack">
+              <InfoTile
+                label="World Engine"
+                title="Build universes next."
+                text="Characters are the hook. Worlds become the reason people stay."
+                onClick={() => router.push("/universes")}
+              />
+
+              <InfoTile
+                label="Story Engine"
+                title="Generate scenes."
+                text="Jump from chat to story mode when a conversation needs a full episode."
+                onClick={() => router.push("/story")}
+              />
+            </div>
           </section>
 
-          <section className="libraryHeader">
+          <section className="sectionHeader">
             <div>
-              <div className="sectionKicker">
-                {activeTab === "public" ? "PUBLIC STACK" : "PRIVATE VAULT"}
-              </div>
               <h2>
-                {activeTab === "public"
-                  ? "Characters ready to enter the scene."
-                  : "Your saved cast."}
+                {activeShelf === "My Characters"
+                  ? "My Characters"
+                  : `${activeShelf} Characters`}
               </h2>
+              <p>
+                {activeShelf === "My Characters"
+                  ? "Your private and public creations live here."
+                  : "Pick a character and start the scene immediately."}
+              </p>
             </div>
 
-            <div className="resultPill">{visibleCharacters.length} shown</div>
+            <div className="resultCount">{visibleCharacters.length} shown</div>
           </section>
 
-          {activeTab === "private" &&
-          loaded &&
-          normalizedSavedCharacters.length === 0 ? (
+          {emptyPrivateVault ? (
             <EmptyState
-              icon="✦"
-              title="Your archive is quiet."
-              description="Create a character and they’ll live here when you come back."
-              actionLabel="Create Character"
+              title="Your character shelf is empty."
+              text="Create your first character and they’ll show up here automatically."
+              action="Create Character"
               onAction={goCreateCharacter}
-              primary
             />
           ) : visibleCharacters.length === 0 ? (
             <EmptyState
-              icon="⌕"
-              title="No matches found."
-              description="Try another search or clear the category filter."
-              actionLabel="Reset Filters"
-              onAction={resetFilters}
+              title="No characters found."
+              text="Try another search or jump back to the featured shelf."
+              action="Reset"
+              onAction={clearSearch}
             />
           ) : (
             <section className="characterGrid">
               {visibleCharacters.map((character, index) => (
-                <CharacterTile
+                <CharacterCard
                   key={character.id}
                   character={character}
                   index={index}
-                  onStart={() => enterCharacter(character)}
+                  onEnter={() => enterCharacter(character)}
                 />
               ))}
             </section>
@@ -498,7 +505,7 @@ export default function DiscoverPage() {
 
         body {
           margin: 0;
-          background: #070704;
+          background: #080807;
         }
 
         button,
@@ -510,17 +517,24 @@ export default function DiscoverPage() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        .discoverPage {
+        .ombuDiscover {
           min-height: 100vh;
           display: flex;
-          color: #f7f0df;
+          color: #f4efe4;
           background:
-            radial-gradient(circle at 16% 4%, rgba(209, 143, 73, 0.18), transparent 30%),
-            radial-gradient(circle at 90% 18%, rgba(113, 79, 255, 0.15), transparent 31%),
-            linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px),
-            linear-gradient(180deg, #090905 0%, #050505 55%, #080706 100%);
-          background-size: auto, auto, 32px 32px, auto;
+            radial-gradient(
+              circle at 18% 8%,
+              rgba(211, 151, 82, 0.11),
+              transparent 24%
+            ),
+            radial-gradient(
+              circle at 88% 0%,
+              rgba(93, 74, 255, 0.1),
+              transparent 26%
+            ),
+            linear-gradient(180deg, #0b0b09 0%, #070707 100%);
           font-family:
+            Inter,
             ui-sans-serif,
             system-ui,
             -apple-system,
@@ -528,144 +542,202 @@ export default function DiscoverPage() {
             "Segoe UI",
             sans-serif;
           transition:
-            opacity 180ms ease,
-            transform 180ms ease,
-            filter 180ms ease;
+            opacity 150ms ease,
+            transform 150ms ease,
+            filter 150ms ease;
         }
 
-        .discoverPage.leaving {
+        .ombuDiscover.isLeaving {
           opacity: 0;
-          transform: translateY(-8px) scale(0.995);
-          filter: blur(3px);
+          transform: translateY(-6px);
+          filter: blur(2px);
         }
 
-        .discoverMain {
-          flex: 1;
-          min-width: 0;
-          padding: 28px 34px 48px;
-          overflow-x: hidden;
-        }
-
-        .sidebarCreateButton {
+        .discoverShell {
           width: 100%;
-          min-height: 42px;
-          border: 1px solid rgba(231, 179, 108, 0.28);
-          border-radius: 16px;
-          color: #ffdfaa;
-          background: linear-gradient(
-            135deg,
-            rgba(231, 162, 78, 0.15),
-            rgba(112, 80, 255, 0.08)
-          );
+          min-width: 0;
+          padding: 20px 26px 44px;
+        }
+
+        .railCreateButton {
+          width: 100%;
+          min-height: 38px;
+          border: 1px solid rgba(255, 216, 160, 0.2);
+          border-radius: 14px;
+          color: #ffe2b2;
+          background: rgba(255, 198, 117, 0.09);
+          font-size: 13px;
           font-weight: 850;
           cursor: pointer;
         }
 
-        .heroPanel {
-          position: relative;
-          min-height: 360px;
+        .topBar {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 340px;
-          gap: 24px;
-          align-items: stretch;
-          overflow: hidden;
-          border-radius: 36px;
-          border: 1px solid rgba(255, 236, 197, 0.1);
-          background:
-            linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.075),
-              rgba(255, 255, 255, 0.018)
-            ),
-            radial-gradient(
-              circle at 70% 22%,
-              rgba(189, 141, 255, 0.16),
-              transparent 34%
-            ),
-            rgba(13, 12, 9, 0.88);
-          box-shadow:
-            0 40px 120px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          padding: 34px;
-          animation: riseIn 420ms ease both;
+          grid-template-columns: minmax(230px, 0.8fr) minmax(280px, 1.35fr) auto;
+          align-items: center;
+          gap: 14px;
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          padding: 8px 0 18px;
+          background: linear-gradient(
+            180deg,
+            rgba(8, 8, 7, 0.98) 0%,
+            rgba(8, 8, 7, 0.82) 72%,
+            transparent 100%
+          );
+          backdrop-filter: blur(16px);
         }
 
-        .heroGlow {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          opacity: 0.55;
-          background:
-            linear-gradient(
-              90deg,
-              transparent 0 48%,
-              rgba(255, 231, 185, 0.06) 49% 50%,
-              transparent 51% 100%
-            ),
-            radial-gradient(
-              circle at 20% 30%,
-              rgba(255, 206, 128, 0.18),
-              transparent 18%
-            );
-          mask-image: linear-gradient(90deg, #000 0%, transparent 78%);
-        }
-
-        .heroCopy {
-          position: relative;
-          z-index: 1;
-          max-width: 760px;
-          align-self: center;
-        }
-
-        .eyebrow,
-        .sectionKicker,
-        .featuredLabel {
-          font-size: 11px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: rgba(255, 228, 180, 0.54);
-          font-weight: 850;
-        }
-
-        h1,
-        h2,
-        h3,
-        p {
-          margin-top: 0;
-        }
-
-        h1 {
-          max-width: 830px;
-          margin: 14px 0 16px;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(44px, 6vw, 86px);
-          line-height: 0.88;
-          letter-spacing: -0.075em;
-          color: #fff7e8;
-          text-wrap: balance;
-        }
-
-        .heroCopy p {
-          max-width: 650px;
-          margin: 0;
-          color: rgba(247, 240, 223, 0.66);
-          font-size: 16px;
-          line-height: 1.75;
-        }
-
-        .heroActions {
+        .brandBlock {
+          min-width: 0;
           display: flex;
-          flex-wrap: wrap;
+          align-items: center;
           gap: 12px;
-          margin-top: 26px;
         }
 
-        .primaryButton,
-        .ghostButton {
-          min-height: 46px;
+        .brandMark {
+          width: 42px;
+          height: 42px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          color: #17110a;
+          background: linear-gradient(135deg, #ffe0ae, #b87935);
+          font-weight: 950;
+          letter-spacing: -0.08em;
+          box-shadow: 0 12px 34px rgba(213, 145, 74, 0.18);
+        }
+
+        .brandTitle {
+          color: #fff5e4;
+          font-size: 19px;
+          font-weight: 950;
+          letter-spacing: -0.04em;
+        }
+
+        .brandSub {
+          margin-top: 2px;
+          max-width: 340px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: rgba(244, 239, 228, 0.48);
+          font-size: 12px;
+          font-weight: 650;
+        }
+
+        .searchWrap {
+          position: relative;
+          min-height: 48px;
+          display: flex;
+          align-items: center;
+          border: 1px solid rgba(255, 238, 214, 0.1);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.045);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .searchWrap span {
+          position: absolute;
+          left: 16px;
+          color: rgba(255, 229, 191, 0.48);
+          font-size: 20px;
+        }
+
+        .searchWrap input {
+          width: 100%;
+          height: 48px;
+          border: 0;
+          outline: 0;
+          color: #fff7e9;
+          background: transparent;
+          padding: 0 76px 0 46px;
+          font-size: 14px;
+        }
+
+        .searchWrap input::placeholder {
+          color: rgba(244, 239, 228, 0.34);
+        }
+
+        .clearButton {
+          position: absolute;
+          right: 8px;
+          height: 32px;
+          border: 0;
           border-radius: 999px;
-          padding: 0 18px;
-          font-weight: 900;
+          color: rgba(255, 241, 219, 0.64);
+          background: rgba(255, 255, 255, 0.06);
+          padding: 0 10px;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .createButton {
+          height: 48px;
+          border: 1px solid rgba(255, 221, 171, 0.26);
+          border-radius: 18px;
+          color: #17110a;
+          background: linear-gradient(135deg, #ffe1b0, #c9853d);
+          padding: 0 16px;
+          font-size: 14px;
+          font-weight: 950;
+          white-space: nowrap;
+          cursor: pointer;
+          box-shadow: 0 14px 40px rgba(201, 133, 61, 0.16);
+        }
+
+        .shelfTabs {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 2px 0 18px;
+          scrollbar-width: none;
+        }
+
+        .shelfTabs::-webkit-scrollbar {
+          display: none;
+        }
+
+        .shelfTab {
+          flex: 0 0 auto;
+          height: 38px;
+          border: 1px solid rgba(255, 238, 214, 0.08);
+          border-radius: 999px;
+          color: rgba(244, 239, 228, 0.58);
+          background: rgba(255, 255, 255, 0.035);
+          padding: 0 14px;
+          font-size: 13px;
+          font-weight: 850;
+          cursor: pointer;
+          transition: 160ms ease;
+        }
+
+        .shelfTab:hover {
+          color: #fff1da;
+          border-color: rgba(255, 238, 214, 0.16);
+        }
+
+        .shelfTab.active {
+          color: #17110a;
+          background: #f1d4a4;
+          border-color: rgba(255, 238, 214, 0.24);
+        }
+
+        .quickStartGrid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 330px;
+          gap: 14px;
+          margin-bottom: 26px;
+        }
+
+        .spotlightCard,
+        .infoTile {
+          text-align: left;
+          border: 1px solid rgba(255, 238, 214, 0.1);
+          background: rgba(255, 255, 255, 0.045);
+          color: inherit;
           cursor: pointer;
           transition:
             transform 180ms ease,
@@ -673,595 +745,450 @@ export default function DiscoverPage() {
             background 180ms ease;
         }
 
-        .primaryButton {
-          border: 1px solid rgba(255, 220, 163, 0.32);
-          color: #15100a;
-          background: linear-gradient(135deg, #ffe3af, #d89147);
-          box-shadow: 0 16px 44px rgba(214, 143, 65, 0.2);
-        }
-
-        .ghostButton {
-          border: 1px solid rgba(255, 240, 211, 0.12);
-          color: #f8ecd4;
-          background: rgba(255, 255, 255, 0.045);
-        }
-
-        .primaryButton:hover,
-        .ghostButton:hover {
+        .spotlightCard:hover,
+        .infoTile:hover {
           transform: translateY(-2px);
+          border-color: rgba(255, 221, 171, 0.22);
+          background: rgba(255, 255, 255, 0.06);
         }
 
-        .featuredCase {
+        .spotlightCard {
+          min-height: 210px;
+          display: grid;
+          grid-template-columns: 190px minmax(0, 1fr);
+          gap: 18px;
+          align-items: center;
+          border-radius: 24px;
+          padding: 16px;
+          overflow: hidden;
+        }
+
+        .spotlightArt {
           position: relative;
-          z-index: 1;
-          min-height: 292px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          border: 1px solid rgba(255, 231, 187, 0.13);
-          border-radius: 30px;
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255, 255, 255, 0.09),
-              rgba(255, 255, 255, 0.035)
-            ),
-            rgba(255, 255, 255, 0.03);
-          color: #fff2dc;
-          padding: 20px;
-          text-align: left;
-          cursor: pointer;
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          transition:
-            transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 240ms ease;
-        }
-
-        .featuredCase:hover {
-          transform: translateY(-5px);
-          border-color: rgba(255, 217, 154, 0.28);
-        }
-
-        .featuredSymbol {
-          width: 120px;
-          height: 120px;
+          height: 178px;
           display: grid;
           place-items: center;
-          align-self: center;
-          margin: 14px 0;
-          border-radius: 38px;
-          font-size: 54px;
-          font-weight: 950;
+          overflow: hidden;
+          border-radius: 20px;
           background:
-            radial-gradient(
-              circle at 50% 30%,
-              rgba(255, 219, 150, 0.22),
-              transparent 50%
-            ),
-            rgba(255, 255, 255, 0.055);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+            radial-gradient(circle at 50% 26%, var(--accent), transparent 45%),
+            linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.09),
+              rgba(255, 255, 255, 0.025)
+            );
+          border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .featuredInfo strong,
-        .featuredInfo span,
-        .featuredCase em {
-          display: block;
+        .spotlightArt img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
-        .featuredInfo strong {
-          font-size: 25px;
+        .spotlightArt span {
+          font-size: 68px;
+          font-weight: 950;
+          color: #fff0d5;
+        }
+
+        .miniLabel {
+          color: rgba(255, 221, 171, 0.7);
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+        }
+
+        .spotlightCopy h1 {
+          margin: 8px 0 8px;
+          color: #fff7e9;
+          font-size: clamp(34px, 4vw, 58px);
+          line-height: 0.95;
+          letter-spacing: -0.075em;
+        }
+
+        .spotlightCopy p {
+          max-width: 600px;
+          margin: 0;
+          color: rgba(244, 239, 228, 0.62);
+          font-size: 15px;
+          line-height: 1.55;
+        }
+
+        .spotlightMeta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 16px;
+        }
+
+        .spotlightMeta span {
+          border-radius: 999px;
+          color: rgba(255, 242, 222, 0.72);
+          background: rgba(255, 255, 255, 0.06);
+          padding: 7px 10px;
+          font-size: 12px;
+          font-weight: 850;
+        }
+
+        .miniStack {
+          display: grid;
+          grid-template-rows: 1fr 1fr;
+          gap: 14px;
+        }
+
+        .infoTile {
+          border-radius: 22px;
+          padding: 18px;
+        }
+
+        .infoTileLabel {
+          color: rgba(255, 221, 171, 0.62);
+          font-size: 11px;
+          font-weight: 950;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .infoTile h3 {
+          margin: 9px 0 7px;
+          color: #fff4df;
+          font-size: 20px;
           letter-spacing: -0.04em;
         }
 
-        .featuredInfo span {
-          margin-top: 5px;
-          color: rgba(255, 244, 223, 0.56);
+        .infoTile p {
+          margin: 0;
+          color: rgba(244, 239, 228, 0.52);
           font-size: 13px;
+          line-height: 1.5;
         }
 
-        .featuredCase em {
-          margin-top: 16px;
-          color: #ffdaa1;
-          font-style: normal;
-          font-weight: 900;
-          font-size: 13px;
-        }
-
-        .commandBar {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 14px;
-          align-items: center;
-          margin: 20px 0 14px;
-          animation: riseIn 520ms ease both;
-        }
-
-        .searchBox {
-          position: relative;
-          min-height: 58px;
-          border-radius: 22px;
-          border: 1px solid rgba(255, 236, 205, 0.1);
-          background: rgba(255, 255, 255, 0.045);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        }
-
-        .searchBox span {
-          position: absolute;
-          left: 18px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: rgba(255, 226, 179, 0.55);
-          font-size: 21px;
-        }
-
-        .searchBox input {
-          width: 100%;
-          height: 58px;
-          border: 0;
-          outline: 0;
-          background: transparent;
-          color: #fff5df;
-          padding: 0 18px 0 50px;
-          font-size: 15px;
-        }
-
-        .searchBox input::placeholder {
-          color: rgba(255, 240, 211, 0.36);
-        }
-
-        .tabGroup {
+        .sectionHeader {
           display: flex;
-          gap: 8px;
-          padding: 6px;
-          border-radius: 22px;
-          border: 1px solid rgba(255, 236, 205, 0.09);
-          background: rgba(255, 255, 255, 0.045);
-        }
-
-        .tabButton {
-          min-height: 44px;
-          border: 0;
-          border-radius: 16px;
-          background: transparent;
-          color: rgba(255, 244, 224, 0.58);
-          font-size: 13px;
-          font-weight: 850;
-          padding: 0 14px;
-          cursor: pointer;
-        }
-
-        .tabButton span {
-          margin-left: 6px;
-          color: rgba(255, 226, 179, 0.46);
-        }
-
-        .tabButton.active {
-          color: #1a130a;
-          background: linear-gradient(135deg, #ffe2ad, #d9944d);
-        }
-
-        .tabButton.active span {
-          color: rgba(26, 19, 10, 0.62);
-        }
-
-        .categoryShelf {
-          display: flex;
-          gap: 9px;
-          overflow-x: auto;
-          padding: 4px 2px 18px;
-          scrollbar-width: none;
-          animation: riseIn 600ms ease both;
-        }
-
-        .categoryShelf::-webkit-scrollbar {
-          display: none;
-        }
-
-        .categoryChip {
-          flex: 0 0 auto;
-          min-height: 36px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 238, 211, 0.095);
-          background: rgba(255, 255, 255, 0.035);
-          color: rgba(255, 244, 224, 0.6);
-          padding: 0 13px;
-          font-size: 12px;
-          font-weight: 850;
-          cursor: pointer;
-        }
-
-        .categoryChip.active {
-          color: #ffe0a6;
-          border-color: rgba(255, 218, 161, 0.3);
-          background: rgba(213, 145, 74, 0.13);
-        }
-
-        .libraryHeader {
-          display: flex;
-          align-items: flex-end;
           justify-content: space-between;
+          align-items: flex-end;
           gap: 18px;
-          margin: 12px 0 16px;
-          animation: riseIn 680ms ease both;
+          margin: 2px 0 14px;
         }
 
-        .libraryHeader h2 {
-          margin: 7px 0 0;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(28px, 3.4vw, 46px);
-          line-height: 1;
-          letter-spacing: -0.06em;
-          color: #fff5df;
+        .sectionHeader h2 {
+          margin: 0;
+          color: #fff6e7;
+          font-size: 28px;
+          letter-spacing: -0.055em;
         }
 
-        .resultPill {
+        .sectionHeader p {
+          margin: 5px 0 0;
+          color: rgba(244, 239, 228, 0.48);
+          font-size: 13px;
+        }
+
+        .resultCount {
+          flex: 0 0 auto;
           border-radius: 999px;
-          border: 1px solid rgba(255, 236, 205, 0.1);
-          background: rgba(255, 255, 255, 0.04);
-          color: rgba(255, 244, 224, 0.62);
-          padding: 10px 13px;
+          border: 1px solid rgba(255, 238, 214, 0.09);
+          background: rgba(255, 255, 255, 0.035);
+          color: rgba(244, 239, 228, 0.58);
+          padding: 8px 11px;
           font-size: 12px;
           font-weight: 850;
-          white-space: nowrap;
         }
 
         .characterGrid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-          gap: 16px;
-          animation: riseIn 760ms ease both;
+          grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+          gap: 14px;
         }
 
-        .characterTile {
+        .characterCard {
           position: relative;
-          min-height: 392px;
           overflow: hidden;
-          border-radius: 28px;
-          border: 1px solid rgba(255, 238, 211, 0.1);
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255, 255, 255, 0.07),
-              rgba(255, 255, 255, 0.026)
-            ),
-            rgba(12, 11, 8, 0.74);
-          box-shadow: 0 22px 80px rgba(0, 0, 0, 0.28);
+          min-height: 318px;
+          border: 1px solid rgba(255, 238, 214, 0.09);
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.04);
+          color: inherit;
           cursor: pointer;
-          isolation: isolate;
+          text-align: left;
           transition:
-            transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 240ms ease,
-            box-shadow 240ms ease;
+            transform 180ms ease,
+            border-color 180ms ease,
+            background 180ms ease;
         }
 
-        .characterTile::before {
-          content: "";
-          position: absolute;
-          inset: -1px;
-          z-index: -1;
-          opacity: 0;
-          background: radial-gradient(
-            circle at 50% 0%,
-            var(--accent-strong),
-            transparent 45%
-          );
-          transition: opacity 240ms ease;
+        .characterCard:hover {
+          transform: translateY(-4px);
+          border-color: rgba(255, 221, 171, 0.22);
+          background: rgba(255, 255, 255, 0.058);
         }
 
-        .characterTile:hover {
-          transform: translateY(-6px);
-          border-color: rgba(255, 222, 169, 0.23);
-          box-shadow: 0 32px 100px rgba(0, 0, 0, 0.36);
-        }
-
-        .characterTile:hover::before {
-          opacity: 1;
-        }
-
-        .portrait {
+        .cardPortrait {
           position: relative;
-          height: 206px;
+          height: 150px;
           display: grid;
           place-items: center;
           overflow: hidden;
           background:
             radial-gradient(
-              circle at 50% 28%,
-              var(--accent-strong),
-              transparent 35%
-            ),
-            radial-gradient(
-              circle at 18% 80%,
-              var(--accent-soft),
-              transparent 35%
+              circle at 50% 25%,
+              var(--cardAccent),
+              transparent 44%
             ),
             linear-gradient(
-              145deg,
+              135deg,
               rgba(255, 255, 255, 0.08),
               rgba(255, 255, 255, 0.02)
             );
+          border-bottom: 1px solid rgba(255, 238, 214, 0.07);
         }
 
-        .portrait::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(
-              180deg,
-              transparent 34%,
-              rgba(6, 5, 4, 0.82) 100%
-            ),
-            radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.21) 100%);
-          pointer-events: none;
-        }
-
-        .portraitImage {
+        .cardPortrait img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transform: scale(1.01);
-          transition: transform 300ms ease;
+          transition: transform 220ms ease;
         }
 
-        .characterTile:hover .portraitImage {
-          transform: scale(1.055);
+        .characterCard:hover .cardPortrait img {
+          transform: scale(1.04);
         }
 
-        .portraitSymbol {
-          position: relative;
-          z-index: 1;
-          width: 106px;
-          height: 106px;
+        .symbolAvatar {
+          width: 82px;
+          height: 82px;
           display: grid;
           place-items: center;
-          border-radius: 34px;
-          color: #fff1d2;
-          font-size: 48px;
-          font-weight: 950;
+          border-radius: 25px;
+          color: #fff2db;
           background: rgba(255, 255, 255, 0.075);
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-          transform: rotate(-5deg);
-          transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          font-size: 38px;
+          font-weight: 950;
         }
 
-        .characterTile:hover .portraitSymbol {
-          transform: rotate(0deg) scale(1.04);
-        }
-
-        .tileIndex {
+        .cardNumber {
           position: absolute;
-          top: 14px;
-          left: 14px;
-          z-index: 2;
+          top: 10px;
+          left: 10px;
           border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.13);
-          background: rgba(0, 0, 0, 0.3);
-          color: rgba(255, 242, 220, 0.66);
-          padding: 7px 9px;
-          font-size: 11px;
-          font-weight: 900;
-          backdrop-filter: blur(12px);
+          color: rgba(255, 246, 231, 0.66);
+          background: rgba(0, 0, 0, 0.28);
+          padding: 5px 8px;
+          font-size: 10px;
+          font-weight: 950;
+          backdrop-filter: blur(10px);
         }
 
-        .tileContent {
-          padding: 16px 16px 72px;
+        .cardBody {
+          padding: 13px 13px 14px;
         }
 
-        .tileMeta {
+        .cardTopline {
           display: flex;
           justify-content: space-between;
-          gap: 10px;
-          align-items: center;
-          margin-bottom: 10px;
+          gap: 8px;
+          margin-bottom: 8px;
         }
 
-        .genreBadge,
-        .creator {
+        .genrePill,
+        .creatorName {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           font-size: 11px;
+          font-weight: 800;
         }
 
-        .genreBadge {
-          max-width: 145px;
-          color: #ffdca3;
-          padding: 7px 9px;
+        .genrePill {
+          max-width: 130px;
+          color: #ffe1b0;
+          background: rgba(255, 198, 117, 0.09);
+          border: 1px solid rgba(255, 198, 117, 0.1);
           border-radius: 999px;
-          background: rgba(218, 147, 75, 0.1);
-          border: 1px solid rgba(255, 218, 161, 0.15);
+          padding: 5px 8px;
         }
 
-        .creator {
-          color: rgba(255, 242, 220, 0.38);
-          max-width: 82px;
+        .creatorName {
+          max-width: 70px;
+          color: rgba(244, 239, 228, 0.38);
+          padding-top: 5px;
         }
 
-        .characterTile h3 {
-          margin: 0 0 5px;
-          font-size: 24px;
-          line-height: 1;
+        .characterCard h3 {
+          margin: 0 0 4px;
+          color: #fff6e7;
+          font-size: 21px;
+          line-height: 1.02;
           letter-spacing: -0.055em;
-          color: #fff4dc;
         }
 
-        .role {
-          color: rgba(255, 242, 220, 0.5);
+        .characterRole {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: rgba(244, 239, 228, 0.48);
+          font-size: 12px;
+          font-weight: 700;
+          margin-bottom: 9px;
+        }
+
+        .characterTagline {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 39px;
+          color: rgba(244, 239, 228, 0.64);
           font-size: 13px;
-          margin-bottom: 10px;
-        }
-
-        .tagline {
-          color: rgba(255, 242, 220, 0.7);
           line-height: 1.48;
-          font-size: 14px;
-          min-height: 42px;
         }
 
-        .tagRow {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 7px;
-          margin-top: 14px;
-        }
-
-        .tag {
-          font-size: 11px;
-          color: rgba(255, 242, 220, 0.56);
-          padding: 6px 8px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.045);
-          border: 1px solid rgba(255, 255, 255, 0.055);
-        }
-
-        .tileAction {
-          position: absolute;
-          left: 16px;
-          right: 16px;
-          bottom: 16px;
-          min-height: 46px;
+        .cardFooter {
           display: flex;
           align-items: center;
-          justify-content: center;
-          padding: 0 14px;
-          border-radius: 16px;
-          border: 1px solid rgba(255, 222, 169, 0.24);
-          background: linear-gradient(
-            135deg,
-            rgba(255, 223, 173, 0.92),
-            rgba(210, 139, 68, 0.86)
-          );
-          color: #15100a;
-          font-size: 14px;
-          line-height: 1;
-          font-weight: 950;
-          opacity: 0;
-          transform: translateY(10px);
-          transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
-          cursor: pointer;
-          z-index: 5;
+          justify-content: space-between;
+          gap: 10px;
+          margin-top: 13px;
         }
 
-        .characterTile:hover .tileAction {
-          opacity: 1;
-          transform: translateY(0);
+        .tagList {
+          min-width: 0;
+          display: flex;
+          gap: 5px;
+          overflow: hidden;
+        }
+
+        .tagList span {
+          flex: 0 0 auto;
+          border-radius: 999px;
+          color: rgba(244, 239, 228, 0.5);
+          background: rgba(255, 255, 255, 0.045);
+          padding: 5px 7px;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .enterButton {
+          flex: 0 0 auto;
+          width: 34px;
+          height: 34px;
+          border: 0;
+          border-radius: 12px;
+          color: #17110a;
+          background: #f1d4a4;
+          font-size: 16px;
+          font-weight: 950;
+          cursor: pointer;
         }
 
         .emptyState {
-          min-height: 420px;
-          border-radius: 34px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          text-align: center;
-          padding: 32px;
-          border: 1px solid rgba(255, 238, 211, 0.1);
-          background:
-            radial-gradient(
-              circle at 50% 0%,
-              rgba(255, 214, 150, 0.1),
-              transparent 36%
-            ),
-            rgba(255, 255, 255, 0.035);
-          animation: riseIn 760ms ease both;
-        }
-
-        .emptyIcon {
-          width: 78px;
-          height: 78px;
+          min-height: 330px;
           display: grid;
           place-items: center;
-          border-radius: 28px;
-          font-size: 34px;
-          margin-bottom: 14px;
-          color: #ffdda4;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.09);
+          border: 1px solid rgba(255, 238, 214, 0.1);
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.04);
+          text-align: center;
+          padding: 28px;
         }
 
         .emptyState h2 {
           margin: 0 0 8px;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 34px;
-          letter-spacing: -0.06em;
+          color: #fff6e7;
+          font-size: 26px;
+          letter-spacing: -0.05em;
         }
 
         .emptyState p {
-          margin: 0 0 18px;
-          color: rgba(255, 242, 220, 0.58);
+          max-width: 420px;
+          margin: 0 auto 18px;
+          color: rgba(244, 239, 228, 0.54);
+          font-size: 14px;
+          line-height: 1.55;
         }
 
-        @keyframes riseIn {
-          from {
-            opacity: 0;
-            transform: translateY(14px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .emptyState button {
+          height: 42px;
+          border: 1px solid rgba(255, 221, 171, 0.24);
+          border-radius: 15px;
+          color: #17110a;
+          background: #f1d4a4;
+          padding: 0 14px;
+          font-size: 13px;
+          font-weight: 950;
+          cursor: pointer;
         }
 
         @media (max-width: 1120px) {
-          .heroPanel {
+          .topBar {
             grid-template-columns: 1fr;
           }
 
-          .featuredCase {
-            min-height: 240px;
+          .brandSub {
+            max-width: none;
           }
 
-          .commandBar {
-            grid-template-columns: 1fr;
-          }
-
-          .tabGroup {
+          .createButton {
             width: fit-content;
+          }
+
+          .quickStartGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .miniStack {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto;
           }
         }
 
         @media (max-width: 900px) {
-          .discoverPage {
+          .ombuDiscover {
             flex-direction: column;
           }
 
-          .discoverMain {
-            padding: 22px;
+          .discoverShell {
+            padding: 16px 16px 36px;
           }
 
-          .heroPanel {
-            padding: 24px;
-            border-radius: 30px;
-          }
-
-          .libraryHeader {
-            align-items: flex-start;
-            flex-direction: column;
+          .topBar {
+            position: relative;
+            padding-top: 4px;
           }
         }
 
-        @media (max-width: 560px) {
-          .discoverMain {
-            padding: 16px;
+        @media (max-width: 650px) {
+          .spotlightCard {
+            grid-template-columns: 1fr;
           }
 
-          .heroActions,
-          .tabGroup {
-            width: 100%;
+          .spotlightArt {
+            height: 150px;
           }
 
-          .primaryButton,
-          .ghostButton,
-          .tabButton {
-            flex: 1;
+          .miniStack {
+            grid-template-columns: 1fr;
+          }
+
+          .sectionHeader {
+            align-items: flex-start;
+            flex-direction: column;
           }
 
           .characterGrid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+          }
+
+          .characterCard {
+            min-height: 306px;
+          }
+
+          .cardPortrait {
+            height: 132px;
           }
         }
       `}</style>
@@ -1269,84 +1196,77 @@ export default function DiscoverPage() {
   );
 }
 
-function CharacterTile({ character, index, onStart }) {
+function CharacterCard({ character, index, onEnter }) {
   const accent = getAccent(character.accent);
   const displayNumber = String(index + 1).padStart(2, "0");
 
   return (
     <article
-      className="characterTile"
-      style={{
-        "--accent-strong": accent.strong,
-        "--accent-soft": accent.soft
-      }}
-      onClick={onStart}
+      className="characterCard"
+      style={{ "--cardAccent": accent.soft }}
+      onClick={onEnter}
     >
-      <div className="portrait">
-        <span className="tileIndex">{displayNumber}</span>
+      <div className="cardPortrait">
+        <span className="cardNumber">{displayNumber}</span>
 
         {character.coverImage ? (
-          <img
-            className="portraitImage"
-            src={character.coverImage}
-            alt={character.name || "Character"}
-          />
+          <img src={character.coverImage} alt={character.name || "Character"} />
         ) : (
-          <div className="portraitSymbol">{character.symbol || "✦"}</div>
+          <div className="symbolAvatar">{character.symbol || "✦"}</div>
         )}
       </div>
 
-      <div className="tileContent">
-        <div className="tileMeta">
-          <span className="genreBadge">{character.genre || "Story"}</span>
-          <span className="creator">{character.creator || "Ombu"}</span>
+      <div className="cardBody">
+        <div className="cardTopline">
+          <span className="genrePill">{character.genre || "Story"}</span>
+          <span className="creatorName">{character.creator || "Ombu"}</span>
         </div>
 
         <h3>{character.name}</h3>
-        <div className="role">{character.role}</div>
-        <div className="tagline">{character.tagline}</div>
+        <div className="characterRole">{character.role}</div>
+        <div className="characterTagline">{character.tagline}</div>
 
-        <div className="tagRow">
-          {(character.tags || []).slice(0, 3).map((tag) => (
-            <span className="tag" key={tag}>
-              {tag}
-            </span>
-          ))}
+        <div className="cardFooter">
+          <div className="tagList">
+            {(character.tags || []).slice(0, 2).map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+
+          <button
+            className="enterButton"
+            aria-label={`Enter ${character.name}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEnter();
+            }}
+          >
+            →
+          </button>
         </div>
       </div>
-
-      <button
-        className="tileAction"
-        onClick={(event) => {
-          event.stopPropagation();
-          onStart();
-        }}
-      >
-        Enter Character
-      </button>
     </article>
   );
 }
 
-function EmptyState({
-  icon,
-  title,
-  description,
-  actionLabel,
-  onAction,
-  primary = false
-}) {
+function InfoTile({ label, title, text, onClick }) {
+  return (
+    <button className="infoTile" onClick={onClick}>
+      <div className="infoTileLabel">{label}</div>
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </button>
+  );
+}
+
+function EmptyState({ title, text, action, onAction }) {
   return (
     <section className="emptyState">
-      <div className="emptyIcon">{icon}</div>
-      <h2>{title}</h2>
-      <p>{description}</p>
-      <button
-        className={primary ? "primaryButton" : "ghostButton"}
-        onClick={onAction}
-      >
-        {actionLabel}
-      </button>
+      <div>
+        <h2>{title}</h2>
+        <p>{text}</p>
+        <button onClick={onAction}>{action}</button>
+      </div>
     </section>
   );
 }
@@ -1372,28 +1292,28 @@ function pickAccent(index) {
 function getAccent(accent) {
   const accents = {
     blue: {
-      strong: "rgba(92, 118, 255, 0.38)",
-      soft: "rgba(80, 120, 255, 0.18)"
+      solid: "rgba(91, 124, 255, 0.38)",
+      soft: "rgba(91, 124, 255, 0.23)"
     },
     violet: {
-      strong: "rgba(153, 102, 255, 0.38)",
-      soft: "rgba(142, 92, 255, 0.18)"
+      solid: "rgba(154, 104, 255, 0.38)",
+      soft: "rgba(154, 104, 255, 0.23)"
     },
     amber: {
-      strong: "rgba(255, 175, 74, 0.34)",
-      soft: "rgba(255, 190, 84, 0.15)"
+      solid: "rgba(255, 177, 84, 0.36)",
+      soft: "rgba(255, 177, 84, 0.22)"
     },
     pink: {
-      strong: "rgba(255, 96, 178, 0.32)",
-      soft: "rgba(255, 96, 178, 0.14)"
+      solid: "rgba(255, 100, 184, 0.34)",
+      soft: "rgba(255, 100, 184, 0.2)"
     },
     green: {
-      strong: "rgba(90, 220, 170, 0.3)",
-      soft: "rgba(80, 210, 165, 0.14)"
+      solid: "rgba(92, 220, 168, 0.32)",
+      soft: "rgba(92, 220, 168, 0.19)"
     },
     red: {
-      strong: "rgba(255, 86, 105, 0.32)",
-      soft: "rgba(255, 86, 105, 0.14)"
+      solid: "rgba(255, 87, 103, 0.34)",
+      soft: "rgba(255, 87, 103, 0.2)"
     }
   };
 
