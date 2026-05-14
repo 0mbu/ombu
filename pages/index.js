@@ -1292,7 +1292,7 @@ function CharacterTile({ character, index, onStart }) {
             alt={character.name || "Character"}
           />
         ) : (
-          <div className="portraitSymbol">{character.symbol || "✦"</div>
+          <div className="portraitSymbol">{character.symbol || "✦"}</div>
         )}
       </div>
 
